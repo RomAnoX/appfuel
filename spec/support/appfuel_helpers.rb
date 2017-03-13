@@ -94,7 +94,3 @@ module AppfuelHelpers
     class_double(Appfuel::DbModel)
   end
 end
-
-RSpec.configure do |config|
-  config.include AppfuelHelpers
-end

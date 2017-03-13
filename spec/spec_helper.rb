@@ -13,4 +13,5 @@ end
 require_relative 'support/appfuel_helpers'
 require_relative 'support/database_cleaner'
 require_relative 'support/factory_girl'
+require_relative 'support/appfuel'
 
