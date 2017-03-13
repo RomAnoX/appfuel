@@ -1,6 +1,6 @@
 # Appfuel
-Appfuel is a set of conventions and patterns used to separate your business
-code from the API framework in which it lives and provide a consistent interface
+Appfuel is a set of conventions, patterns used to separate your business
+code from the API framework in which it lives, while providing a consistent interface
 in which to interact with that code.
 
 ## Installation
