@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/rsb/appfuel/badges/gpa.svg)](https://codeclimate.com/github/rsb/appfuel)
+
 # Appfuel
 Appfuel is a set of conventions, patterns used to separate your business
 code from the API framework in which it lives, while providing a consistent interface
