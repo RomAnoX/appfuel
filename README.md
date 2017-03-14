@@ -3,9 +3,8 @@
 [![Issue Count](https://codeclimate.com/github/rsb/appfuel/badges/issue_count.svg)](https://codeclimate.com/github/rsb/appfuel)
 
 # Appfuel
-Appfuel is a set of conventions, patterns used to separate your business
-code from the API framework in which it lives, while providing a consistent interface
-in which to interact with that code.
+Appfuel is a library that employs a set of conventions and patterns used to separate your business code from the API framework in which it lives, while providing a consistent interface for your api code to interact with it. The idea is that your business code should live isolated in its own gem making the api boundary, your rails app for example, just another client..
+
 
 ## Installation
 
