@@ -5,7 +5,7 @@ module Appfuel
   # and don't want any incorrect method_missing calls to be confused when
   # collecting mapped values vs when defining them.
   class DbEntityMapDsl
-    attr_reader :children, :entity_name, :entity_key, :map_key, :db_name
+    attr_reader :entity_name, :entity_key, :map_key, :db_name
 
     def initialize(entity_name, db_name, key = nil)
       @entity_name = entity_name.to_s
@@ -20,6 +20,16 @@ module Appfuel
       @map
     end
 
+    #
+    # map has an entity attribute
+    # map has a column name
+    # map belongs to an entity
+    # map belongs to a db_class
+    # map has properties used during building
+    #   skip_to_entity: ignore this entry when building an entity
+    #   skip_to_db: ignore this entry when build db hash
+    #   computed_property: use this closure instead of attribute value
+    #   computed_value: use this closure with the attribute value
     def map(name, entity_method = nil, opts = {})
       entity_method = name if entity_method.nil?
 

@@ -68,7 +68,6 @@ module Appfuel
         result
       end
 
-
       # Ensures inputs are valid or that its ok to use the raw inputs.
       # It will return a failed response object when validation fails
       # and a successful response with the valid inputs inside ok.

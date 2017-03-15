@@ -43,6 +43,7 @@ require "appfuel/repository_dependency"
 # Database entity mapping
 require "appfuel/db_entity_map_dsl"
 require "appfuel/db_entity_map"
+require "appfuel/db_entity_map_entry"
 require "appfuel/db_entity_mapper"
 require "appfuel/repository_mapping"
 require "appfuel/repository"
