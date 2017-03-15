@@ -49,6 +49,18 @@ module Appfuel
       end
     end
 
+    def skip_to_entity?
+      @skip_to_entity
+    end
+
+    def skip_to_db?
+      @skip_to_db
+    end
+
+    def skip_all?
+      @skip_all
+    end
+
     private
     def entity=(value)
       @entity = value.to_s
@@ -77,8 +89,8 @@ module Appfuel
     def skip_all=(value)
       @skip_all = value == true ? true : false
       if @skip_all
-        self.skip_to_entity(true)
-        self.skip_to_db(true)
+        self.skip_to_entity = true
+        self.skip_to_db = true
       end
     end
 

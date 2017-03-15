@@ -49,6 +49,48 @@ module Appfuel
         entry = create_entry(default_map_data)
         expect(entry.db_column).to eq(default_map_data[:db_column])
       end
+
+      it 'skip_to_entity is false by default' do
+        entry = create_entry(default_map_data)
+        expect(entry.skip_to_entity?).to be false
+      end
+
+      it 'enables skip_to_entity' do
+        entry = create_entry(default_map_data.merge(skip_to_entity: true))
+        expect(entry.skip_to_entity?).to be true
+      end
+
+
+      it 'skip_to_db is false by default' do
+        entry = create_entry(default_map_data)
+        expect(entry.skip_to_db?).to be false
+      end
+
+      it 'enables skip_to_entity' do
+        entry = create_entry(default_map_data.merge(skip_to_db: true))
+        expect(entry.skip_to_db?).to be true
+      end
+
+
+      it 'skip_all is false by default' do
+        entry = create_entry(default_map_data)
+        expect(entry.skip_all?).to be false
+      end
+
+      it 'enables skip_all' do
+        entry = create_entry(default_map_data.merge(skip_all: true))
+        expect(entry.skip_all?).to be true
+      end
+
+      it 'enables skip_to_entity when skip_all' do
+        entry = create_entry(default_map_data.merge(skip_all: true))
+        expect(entry.skip_to_entity?).to be true
+      end
+
+      it 'enables skip_to_db when skip_all' do
+        entry = create_entry(default_map_data.merge(skip_all: true))
+        expect(entry.skip_to_db?).to be true
+      end
     end
 
     def default_map_data
