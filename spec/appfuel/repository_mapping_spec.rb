@@ -68,7 +68,7 @@ module Appfuel
       end
     end
 
-    context '.mapping' do
+    xcontext '.mapping' do
       it 'adds a mapper with no mappings' do
         repo_class = setup
         domain     = entity_instance_double

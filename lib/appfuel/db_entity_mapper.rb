@@ -2,30 +2,6 @@ module Appfuel
   class DbEntityMapper
     attr_reader :map_class
 
-    # Creates a new mapper instance with a map added using the dsl. We pass the
-    # dsl in because it is used by the repository when the repo class is first
-    # read into memory. The dsl contains the required information to assign it
-    # into the mappings hash.
-    #
-    #
-    # @param dsl [DbEntityMapDsl] dsl used to define map
-    # @param map_class [DbEntityMap] the class which represents the maps used
-    def initialize(dsl, map_class = nil)
-      unless dsl.is_a?(DbEntityMapDsl)
-        fail ArgumentError, 'dsl must be a Appfuel::DbEntityMapDsl'
-      end
-      @map_class = map_class || DbEntityMap
-      @mappings  = {}
-      add_map(dsl)
-    end
-
-    # Add another map by passing in the dsl
-    #
-    # @param dsl [DbEntityMapDsl]
-    def <<(dsl)
-      add_map(dsl)
-    end
-
     # Determines if an domain entity exists for this key
     #
     # @param key [String, Symbol]

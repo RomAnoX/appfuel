@@ -2,7 +2,7 @@ module Appfuel
   RSpec.describe DbEntityMapDsl do
     context '#initialize' do
       it 'creates an empty map' do
-        expect(create_dsl('foo', 'bar').map_data).to eq({})
+        expect(create_dsl('foo', 'bar').map_data).to eq([])
       end
 
       it 'assigns the entity name as a string' do
@@ -24,67 +24,81 @@ module Appfuel
     context '#map' do
       it 'maps column to attributes as strings' do
         dsl = create_dsl('foo', 'bar')
-        dsl.map 'foo', 'bar'
-        expect(dsl.map_data).to eq({'foo' => 'bar'})
+        data = {
+          entity: 'foo',
+          entity_attr: 'id',
+          db_class: 'bar',
+          db_column: 'bar_id'
+        }
+        expect(DbEntityMapEntry).to receive(:new).with(data)
+        dsl.map 'bar_id', 'id'
       end
 
-      # when mapping exprs the domain.attr is used as a simple identitfier
-      # when creating an entity it is used to grab the value from the
-      # sub domain's attribute
-      it 'maps column to attibute of subdomain' do
-        dsl = create_dsl('foo', 'bar')
-        dsl.map :category_id, 'category.id'
-        expect(dsl.map_data).to eq({'category_id' => 'category.id'})
-      end
-
-      it 'maps column to a value from a proc' do
+      it 'maps a computed property' do
         value = -> {'foo'}
         dsl = create_dsl('foo', 'bar')
-        dsl.map :created_at, value
-        result = {
-          'created_at' => {call: value, name: 'created_at', skip: false}
+        data = {
+          entity: 'foo',
+          entity_attr: 'created_at',
+          db_class: 'bar',
+          db_column: 'created_at',
+          computed_attr: value,
         }
-        expect(dsl.map_data).to eq result
+        expect(DbEntityMapEntry).to receive(:new).with(data)
+        dsl.map 'created_at', 'created_at', computed_attr: value
       end
 
-      it 'maps proc value to entity attribute' do
-        value = -> {'foo'}
+      it 'maps a computed property that expects a value' do
+        value = ->(a) {'foo'}
         dsl = create_dsl('foo', 'bar')
-        dsl.map :created_at, value, as: 'baz'
-        result = {
-          'created_at' => {call: value, name: 'baz', skip: false}
+        data = {
+          entity: 'foo',
+          entity_attr: 'generated_at',
+          db_class: 'bar',
+          db_column: 'created_at',
+          computed_attr_expect_param: value,
         }
-        expect(dsl.map_data).to eq result
+        expect(DbEntityMapEntry).to receive(:new).with(data)
+        dsl.map 'created_at', 'generated_at', computed_attr_expect_param: value
       end
 
-      it 'fails when mapping value is an Int' do
+      it 'maps a column that will skip all' do
         dsl = create_dsl('foo', 'bar')
-        msg = 'attr must be a string, symbol or proc for created_at'
-        expect {
-          dsl.map :created_at, 1234
-        }.to raise_error(ArgumentError, msg)
+        data = {
+          entity: 'foo',
+          entity_attr: 'blah',
+          db_class: 'bar',
+          db_column: 'bar_blah',
+          skip_all: true
+        }
+        expect(DbEntityMapEntry).to receive(:new).with(data)
+        dsl.map 'bar_blah', 'blah', skip_all: true
       end
 
-      it 'fails when mapping is an object' do
+      it 'maps a column that will skip_to_entity' do
         dsl = create_dsl('foo', 'bar')
-        msg = 'attr must be a string, symbol or proc for created_at'
-        expect {
-          dsl.map :created_at, Object.new
-        }.to raise_error(ArgumentError, msg)
+        data = {
+          entity: 'foo',
+          entity_attr: 'blah',
+          db_class: 'bar',
+          db_column: 'bar_blah',
+          skip_to_entity: true
+        }
+        expect(DbEntityMapEntry).to receive(:new).with(data)
+        dsl.map 'bar_blah', 'blah', skip_to_entity: true
       end
 
-      it 'maps the column name when entity_method is nil' do
+      it 'maps a column that will skip_to_db' do
         dsl = create_dsl('foo', 'bar')
-        dsl.map 'category_id'
-        expect(dsl.map_data).to eq({'category_id' => 'category_id'})
-      end
-
-      it 'fails when mapping is an empty string' do
-        dsl = create_dsl('foo', 'bar')
-        msg = 'entity attr is empty for created_at'
-        expect {
-          dsl.map :created_at, ''
-        }.to raise_error(ArgumentError, msg)
+        data = {
+          entity: 'foo',
+          entity_attr: 'blah',
+          db_class: 'bar',
+          db_column: 'bar_blah',
+          skip_to_db: true
+        }
+        expect(DbEntityMapEntry).to receive(:new).with(data)
+        dsl.map 'bar_blah', 'blah', skip_to_db: true
       end
     end
 

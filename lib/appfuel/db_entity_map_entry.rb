@@ -13,7 +13,7 @@ module Appfuel
   #            this happens when you many to many joins
   #
   class DbEntityMapEntry
-    attr_reader :entity, :entity_attr, :db_class, :db_column
+    attr_reader :entity, :entity_attr, :db_class, :db_column, :computed_attr
 
     def initialize(data)
       unless data.respond_to?(:fetch)
@@ -40,12 +40,15 @@ module Appfuel
       self.skip_to_entity = data.fetch(:skip_to_entity) { false }
       self.skip_to_db     = data.fetch(:skip_to_db) { false }
       self.skip_all       = data.fetch(:skip_all) { false }
+
+      @computed_attr_param = false
+
       if data.key?(:computed_attr)
-        self.computed_attr(data[:computed_attr])
+        computed_attr(data[:computed_attr])
       end
 
-      if data.key?(:computed_attr_expect_value)
-        self.computed_attr(data[:computed_attr_expect_value], true)
+      if data.key?(:computed_attr_expect_param)
+        computed_attr(data[:computed_attr_expect_param], true)
       end
     end
 
@@ -59,6 +62,14 @@ module Appfuel
 
     def skip_all?
       @skip_all
+    end
+
+    def computed_attr?
+      !computed_attr.nil?
+    end
+
+    def computed_attr_param?
+      @computed_attr_param
     end
 
     private
@@ -99,9 +110,13 @@ module Appfuel
         fail "computed attributes require a lambda as a value"
       end
 
-      if expect_value && value.arity != 1
-        fail "computed attribute lambda's must accept 1 param"
+      if expect_value
+        if value.arity != 1
+          fail "computed attribute lambda's must accept 1 param"
+        end
+        @computed_param = true
       end
+
 
       @computed_attr_lambda = value
     end
