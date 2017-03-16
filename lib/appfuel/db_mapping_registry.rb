@@ -54,9 +54,7 @@ module Appfuel
       # @param attr [String] name of the attribute
       # @return [Boolean]
       def find(entity, attr)
-        unless entity?(entity)
-          fail "Entity (#{entity}) is not registered"
-        end
+        validate_entity(entity)
 
         unless map[entity].key?(attr)
           fail "Entity (#{entity}) attr (#{attr}) is not registered"
@@ -71,6 +69,8 @@ module Appfuel
       # @param entity [String] name of the entity
       # @return [void]
       def each_entity_attr(entity)
+        validate_entity(entity)
+
         map[entity].each do |attr, entry|
           yield attr, entry
         end
@@ -99,6 +99,13 @@ module Appfuel
       # @return [String]
       def column(entity, attr)
         find(entity, attr).db_column
+      end
+
+      private
+      def validate_entity(entity)
+        unless entity?(entity)
+          fail "Entity (#{entity}) is not registered"
+        end
       end
     end
   end

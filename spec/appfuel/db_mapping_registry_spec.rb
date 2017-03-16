@@ -107,6 +107,28 @@ module Appfuel
         expect(registry.entity_attr?('foo.bar', 'id')).to be true
       end
     end
+
+    context '.column_mapped?' do
+      it 'returns false when the column is not mapped' do
+        entry = create_entry(default_entry_data)
+        registry << entry
+        expect(registry.column_mapped?('foo.bar', 'baz')).to be false
+      end
+
+      it 'returns true when the column is mapped' do
+        entry = create_entry(default_entry_data)
+        registry << entry
+        expect(registry.column_mapped?('foo.bar', 'bar_id')).to be true
+      end
+
+      it 'fails when entity is not mapped' do
+        msg = 'Entity (foo.bar) is not registered'
+        expect {
+          registry.column_mapped?('foo.bar', 'bar_id')
+        }.to raise_error(RuntimeError, msg)
+      end
+    end
+
     def default_entry_data
       {
         entity: 'foo.bar',
