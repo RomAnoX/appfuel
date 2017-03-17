@@ -26,6 +26,19 @@ module Appfuel
         registry.db_class(entity, attr)
       end
 
+      # Converts an entity expression into a hash of db columns with their
+      # mapped values
+      #
+      # @param expr [Domain::Expr]
+      # @param results [Hash]
+      # @return [Hash]
+      def entity_expr(expr, results = {})
+        column = registry.column(expr.domain, expr.original_attr)
+        results[column] = expr_value(expr)
+        results
+      end
+
+
       # Build a where expression from the mapped db class using the criteria.
       #
       # @param criteria [Criteria]
@@ -44,12 +57,6 @@ module Appfuel
                      end
         end
         relation
-      end
-
-      def entity_expr(expr, results = {})
-        column = registry.column(expr.domain, expr.original_attr)
-        results[column] = expr_value(expr)
-        results
       end
 
       # Build an order by expression for the given db relation based on the
@@ -88,18 +95,32 @@ module Appfuel
         send(method, value)
       end
 
+      # Used by #entity_value this is part of a strategry pattern to make
+      # greater than operator work seemlessly with active record.
+      #
+      # @note db library specific code should be moved to an adapter
+      #
+      # @param value [Numeric]
+      # @return [Range]
       def gt_value(value)
         value + 1 ... Float::INFINITY
       end
 
+
+      # @see gt_value
       def gteq_value(value)
         value ... Float::INFINITY
       end
 
+      # We don't have to do the + 1 because for less than active record honors
+      # inclusive ranges
+      #
+      # @see gt_value
       def lt_value(value)
         Float::INFINITY ... value
       end
 
+      # @see gt_value
       def lteq_value(value)
         Float::INFINITY .. value
       end

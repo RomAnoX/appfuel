@@ -23,6 +23,38 @@ module Appfuel::Db
       end
     end
 
+    context '#gt_value' do
+      it 'returns a range with the value + 1 to infinity' do
+        value  = 5
+        mapper = setup_mapper
+        expect(mapper.gt_value(value)).to eq((value + 1) ... Float::INFINITY)
+      end
+    end
+
+    context '#gteq_value' do
+      it 'returns a range with the value + 1 to infinity' do
+        value  = 5
+        mapper = setup_mapper
+        expect(mapper.gteq_value(value)).to eq(value  ... Float::INFINITY)
+      end
+    end
+
+    context '#lt_value' do
+      it 'returns a range with the value + 1 to infinity' do
+        value  = 5
+        mapper = setup_mapper
+        expect(mapper.lt_value(value)).to eq(Float::INFINITY ... value)
+      end
+    end
+
+    context '#lteq_value' do
+      it 'returns a range with the value + 1 to infinity' do
+        value  = 5
+        mapper = setup_mapper
+        expect(mapper.lteq_value(value)).to eq(Float::INFINITY .. value)
+      end
+    end
+
 =begin
     xcontext '#where' do
       it 'builds a db relation using its map ' do
