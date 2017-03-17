@@ -1,7 +1,6 @@
 module Appfuel
   class Repository
     include RootModule
-    include RepositoryMapping
 
     attr_reader :response_handler
 

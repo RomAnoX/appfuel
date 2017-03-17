@@ -1,20 +1,29 @@
-module Appfuel
-  RSpec.describe DbEntityMapper do
-    context '#initialize' do
+module Appfuel::Db
+  RSpec.describe Mapper do
+    context '#registry' do
+      it 'is a reference to the mapping registry' do
+        mapper = setup_mapper
+        expect(mapper.registry).to eq(MappingRegistry)
+      end
     end
 
-    context '#entity_class' do
-    end
-
-    context '#entity_class!' do
-    end
-
-    context '#instance_of_entity?' do
+    context '#entity_mapped?' do
+      it 'delegates to the registry :entity?' do
+        mapper = setup_mapper
+        expect(MappingRegistry).to receive(:entity?).with('foo.bar')
+        mapper.entity_mapped?('foo.bar')
+      end
     end
 
     context '#db_class' do
+      it 'delegates to the registry' do
+        mapper = setup_mapper
+        expect(MappingRegistry).to receive(:db_class).with('foo.bar', 'id')
+        mapper.db_class('foo.bar', 'id')
+      end
     end
 
+=begin
     xcontext '#where' do
       it 'builds a db relation using its map ' do
         _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
@@ -112,8 +121,11 @@ module Appfuel
         }.to raise_error(RuntimeError, msg)
       end
     end
-
-    def create_mapper
+=end
+    def setup_mapper
+      obj = Object.new
+      obj.extend(Mapper)
+      obj
     end
   end
 end

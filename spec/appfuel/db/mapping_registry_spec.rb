@@ -1,12 +1,12 @@
-module Appfuel
-  RSpec.describe DbMappingRegistry do
+module Appfuel::Db
+  RSpec.describe MappingRegistry do
 
     before(:each) do
-      DbMappingRegistry.map = {}
+      registry.map = {}
     end
 
     it 'creates a dry container for a map by default' do
-      expect(DbMappingRegistry.map).to be_an(Hash)
+      expect(registry.map).to be_an(Hash)
     end
 
     context '.<<' do
@@ -18,7 +18,7 @@ module Appfuel
       end
 
       it 'fails when entry is not a DbEntityMapEntry' do
-        msg = "this registry only accepts Appfuel::DbEntityMapEntry objects"
+        msg = "this registry only accepts Appfuel::Db::MappingEntry objects"
         expect {
           registry << 'foo'
         }.to raise_error(RuntimeError, msg)
@@ -139,11 +139,11 @@ module Appfuel
     end
 
     def registry
-      DbMappingRegistry
+      MappingRegistry
     end
 
     def create_entry(data)
-      DbEntityMapEntry.new(data)
+      MappingEntry.new(data)
     end
   end
 end

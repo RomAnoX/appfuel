@@ -1,5 +1,5 @@
-module Appfuel
-  RSpec.describe DbEntityMapEntry do
+module Appfuel::Db
+  RSpec.describe MappingEntry do
     context '#initialize' do
       it 'fails when there is no domain' do
         msg = 'entity is required'
@@ -103,7 +103,7 @@ module Appfuel
     end
 
     def create_entry(data)
-      DbEntityMapEntry.new(data)
+      MappingEntry.new(data)
     end
   end
 end

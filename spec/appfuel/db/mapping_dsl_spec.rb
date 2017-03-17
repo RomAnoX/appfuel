@@ -1,8 +1,8 @@
-module Appfuel
-  RSpec.describe DbEntityMapDsl do
+module Appfuel::Db
+  RSpec.describe MappingDsl do
     context '#initialize' do
       it 'creates an empty map' do
-        expect(create_dsl('foo', 'bar').map_data).to eq([])
+        expect(create_dsl('foo', 'bar').entries).to eq([])
       end
 
       it 'assigns the entity name as a string' do
@@ -30,7 +30,7 @@ module Appfuel
           db_class: 'bar',
           db_column: 'bar_id'
         }
-        expect(DbEntityMapEntry).to receive(:new).with(data)
+        expect_new_mapping_entry(data)
         dsl.map 'bar_id', 'id'
       end
 
@@ -44,7 +44,7 @@ module Appfuel
           db_column: 'created_at',
           computed_attr: value,
         }
-        expect(DbEntityMapEntry).to receive(:new).with(data)
+        expect_new_mapping_entry(data)
         dsl.map 'created_at', 'created_at', computed_attr: value
       end
 
@@ -58,7 +58,7 @@ module Appfuel
           db_column: 'created_at',
           computed_attr_expect_param: value,
         }
-        expect(DbEntityMapEntry).to receive(:new).with(data)
+        expect_new_mapping_entry(data)
         dsl.map 'created_at', 'generated_at', computed_attr_expect_param: value
       end
 
@@ -71,7 +71,7 @@ module Appfuel
           db_column: 'bar_blah',
           skip_all: true
         }
-        expect(DbEntityMapEntry).to receive(:new).with(data)
+        expect_new_mapping_entry(data)
         dsl.map 'bar_blah', 'blah', skip_all: true
       end
 
@@ -84,7 +84,7 @@ module Appfuel
           db_column: 'bar_blah',
           skip_to_entity: true
         }
-        expect(DbEntityMapEntry).to receive(:new).with(data)
+        expect_new_mapping_entry(data)
         dsl.map 'bar_blah', 'blah', skip_to_entity: true
       end
 
@@ -97,13 +97,17 @@ module Appfuel
           db_column: 'bar_blah',
           skip_to_db: true
         }
-        expect(DbEntityMapEntry).to receive(:new).with(data)
+        expect_new_mapping_entry(data)
         dsl.map 'bar_blah', 'blah', skip_to_db: true
       end
     end
 
+    def expect_new_mapping_entry(inputs)
+      expect(MappingEntry).to receive(:new).with(inputs)
+    end
+
     def create_dsl(entity_name, db_name)
-      DbEntityMapDsl.new(entity_name, db_name)
+      MappingDsl.new(entity_name, db_name)
     end
   end
 end
