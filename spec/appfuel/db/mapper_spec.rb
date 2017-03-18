@@ -55,6 +55,49 @@ module Appfuel::Db
       end
     end
 
+    context '#expr_value' do
+      it 'returns the value when there is no strategy for the operator' do
+        value  = 5
+        mapper = setup_mapper
+        expr = create_expr('foo.id', eq: value)
+        expect(mapper.expr_value(expr)).to eq(value)
+      end
+
+      it 'delegates to "gt_value" for the operator gt' do
+        value  = 5
+        mapper = setup_mapper
+        expr   = create_expr('foo.id', gt: value)
+        expect(mapper).to receive(:gt_value).with(5)
+        mapper.expr_value(expr)
+      end
+
+      it 'delegates to "gteq_value" for the operator gteq' do
+        value  = 10
+        mapper = setup_mapper
+        expr   = create_expr('foo.id', gteq: value)
+        expect(mapper).to receive(:gteq_value).with(10)
+        mapper.expr_value(expr)
+      end
+
+      it 'delegates to "lt_value" for the operator lt' do
+        value  = 8
+        mapper = setup_mapper
+        expr   = create_expr('foo.id', lt: value)
+        expect(mapper).to receive(:lt_value).with(8)
+        mapper.expr_value(expr)
+      end
+
+      it 'delegates to "lteq_value" for the operator lt' do
+        value  = 9
+        mapper = setup_mapper
+        expr   = create_expr('foo.id', lteq: value)
+        expect(mapper).to receive(:lteq_value).with(9)
+        mapper.expr_value(expr)
+      end
+
+    end
+
+
 =begin
     xcontext '#where' do
       it 'builds a db relation using its map ' do
@@ -154,6 +197,11 @@ module Appfuel::Db
       end
     end
 =end
+
+    def create_expr(entity_attr, data)
+      Appfuel::EntityExpr.new(entity_attr, data)
+    end
+
     def setup_mapper
       obj = Object.new
       obj.extend(Mapper)

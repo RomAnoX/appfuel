@@ -78,7 +78,15 @@ module Appfuel
         relation.order(order_by)
       end
 
-      def db_where(relation, expr)
+      # Map the entity expr to a hash of db_column => value and call
+      # on the relation using that.
+      #
+      # @note this is db library specific and needs to be moved to an adapter
+      #
+      # @param expr [Appfuel::Domain::Expr]
+      # @param relation [ActiveRecord::Relation]
+      # @return [ActiveRecord::Relation]
+      def db_where(expr, relation)
         columns = entity_expr(expr)
         if expr.negated?
           return relation.where.not(columns)
@@ -87,6 +95,11 @@ module Appfuel
         relation.where(columns)
       end
 
+      # Run the expr value through a strategy pattern to allow operator
+      # specific value validation or modifications
+      #
+      # @param expr [Domain::Expr]
+      # @return [mixed]
       def expr_value(expr)
         value = expr.value
         method = "#{expr.op}_value"
