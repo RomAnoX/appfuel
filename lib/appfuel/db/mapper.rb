@@ -119,7 +119,6 @@ module Appfuel
         value + 1 ... Float::INFINITY
       end
 
-
       # @see gt_value
       def gteq_value(value)
         value ... Float::INFINITY
@@ -143,7 +142,7 @@ module Appfuel
         data   = {}
         domain.undefined_as_nil?
 
-        each_entity_attr(domain.domain_name) do |attr, map_entry|
+        each_entity_attr(domain.domain_name) do |_attr, map_entry|
           column   = map_entry.db_column
           db_class = map_entry.db_class
           next if excluded.include(column)
@@ -156,7 +155,7 @@ module Appfuel
       end
 
       def entity_value(domain, map_entry)
-        value = retieve_entity_value(map_entry.entity_attr)
+        value = retieve_entity_value(domain, map_entry.entity_attr)
         if map_entry.computed_attr?
           value = map_entry.compute_attr(value)
         end
@@ -166,14 +165,19 @@ module Appfuel
         value
       end
 
+      # @params value [mixed]
+      # @return [Boolean]
       def undefined?(value)
         value == Types::Undefined
       end
 
+      # Fetch the value for the entity attribute. When the attribute name
+      # contains a '.' then traverse the dots and call the last attribute
+      # for the value
       #
-      # project.offer.union.id
-      # foo.bar.baz
-      #
+      # @param domain [Appfuel::Domain::Entity]
+      # @param entity_attribute [String]
+      # @return [mixed]
       def retrieve_entity_value(domain, entity_attr)
         chain  = map_entry.entity_attr.split('.')
         target = domain
@@ -187,7 +191,16 @@ module Appfuel
         target
       end
 
-      def to_entity(entity, relation, results = {})
+      # This is moved to a builder pattern so a separate object will handle
+      # this responsiblity
+      #
+      # @deprecated
+      #
+      # @param _entity [String]
+      # @param _relation [ActiveRecordRelation]
+      # @param _results [Hash]
+      # @return [Appfuel::Domain::Entity]
+      def to_entity(_entity, _relation, _results = {})
         fail "this is no longer implemented see builder pattern"
       end
     end

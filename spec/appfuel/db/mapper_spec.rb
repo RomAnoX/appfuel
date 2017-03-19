@@ -112,6 +112,72 @@ module Appfuel::Db
       end
     end
 
+    context 'undefined?' do
+      it 'returns false when the value is not of type Types::Undefined' do
+        mapper = setup_mapper
+        expect(mapper.undefined?('some value')).to be false
+      end
+
+      it 'returns true when the value is of type Types::Undefined' do
+        mapper = setup_mapper
+        expect(mapper.undefined?(Types::Undefined)).to be true
+      end
+    end
+
+    context 'db_where' do
+      it 'converts expr to db columns and delegates where to relation' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'bar.id',
+          db_class: 'barish',
+          db_column: 'bar_id'
+        )
+        expr   = create_expr('foo.bar', 'bar.id', eq: 6)
+        relation = double('some relation')
+        column_hash = {
+          'bar_id' => 6
+        }
+        expect(relation).to receive(:where).with(column_hash)
+        mapper.db_where(expr, relation)
+      end
+
+      it 'returns the relation that was passed in' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'bar.id',
+          db_class: 'barish',
+          db_column: 'bar_id'
+        )
+        expr   = create_expr('foo.bar', 'bar.id', eq: 6)
+        relation = double('some relation')
+        column_hash = {
+          'bar_id' => 6
+        }
+        allow(relation).to receive(:where).with(column_hash) { relation }
+        expect(mapper.db_where(expr, relation)).to eq relation
+      end
+
+      it 'delegates to not when expr is negated' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'bar.id',
+          db_class: 'barish',
+          db_column: 'bar_id'
+        )
+        expr   = create_expr('foo.bar', 'bar.id', not_eq: 6)
+        relation = double('some relation')
+        column_hash = {
+          'bar_id' => 6
+        }
+        expect(relation).to receive(:where).with(no_args) { relation }
+        expect(relation).to receive(:not).with(column_hash) { relation }
+        expect(mapper.db_where(expr, relation)).to eq relation
+      end
+    end
+
 =begin
     xcontext '#where' do
       it 'builds a db relation using its map ' do
