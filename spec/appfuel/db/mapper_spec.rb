@@ -3,14 +3,14 @@ module Appfuel::Db
     context '#registry' do
       it 'is a reference to the mapping registry' do
         mapper = setup_mapper
-        expect(mapper.registry).to eq(MappingRegistry)
+        expect(mapper.registry).to eq mapping_registry
       end
     end
 
     context '#entity_mapped?' do
       it 'delegates to the registry :entity?' do
         mapper = setup_mapper
-        expect(MappingRegistry).to receive(:entity?).with('foo.bar')
+        expect(mapping_registry).to receive(:entity?).with('foo.bar')
         mapper.entity_mapped?('foo.bar')
       end
     end
@@ -18,7 +18,7 @@ module Appfuel::Db
     context '#db_class' do
       it 'delegates to the registry' do
         mapper = setup_mapper
-        expect(MappingRegistry).to receive(:db_class).with('foo.bar', 'id')
+        expect(mapping_registry).to receive(:db_class).with('foo.bar', 'id')
         mapper.db_class('foo.bar', 'id')
       end
     end
@@ -59,14 +59,14 @@ module Appfuel::Db
       it 'returns the value when there is no strategy for the operator' do
         value  = 5
         mapper = setup_mapper
-        expr = create_expr('foo.id', eq: value)
+        expr = create_expr('foo', 'bar.id', eq: value)
         expect(mapper.expr_value(expr)).to eq(value)
       end
 
       it 'delegates to "gt_value" for the operator gt' do
         value  = 5
         mapper = setup_mapper
-        expr   = create_expr('foo.id', gt: value)
+        expr   = create_expr('foo', 'bar.id', gt: value)
         expect(mapper).to receive(:gt_value).with(5)
         mapper.expr_value(expr)
       end
@@ -74,7 +74,7 @@ module Appfuel::Db
       it 'delegates to "gteq_value" for the operator gteq' do
         value  = 10
         mapper = setup_mapper
-        expr   = create_expr('foo.id', gteq: value)
+        expr   = create_expr('foo', 'bar.id', gteq: value)
         expect(mapper).to receive(:gteq_value).with(10)
         mapper.expr_value(expr)
       end
@@ -82,7 +82,7 @@ module Appfuel::Db
       it 'delegates to "lt_value" for the operator lt' do
         value  = 8
         mapper = setup_mapper
-        expr   = create_expr('foo.id', lt: value)
+        expr   = create_expr('foo', 'bar.id', lt: value)
         expect(mapper).to receive(:lt_value).with(8)
         mapper.expr_value(expr)
       end
@@ -90,13 +90,27 @@ module Appfuel::Db
       it 'delegates to "lteq_value" for the operator lt' do
         value  = 9
         mapper = setup_mapper
-        expr   = create_expr('foo.id', lteq: value)
+        expr   = create_expr('foo', 'bar.id', lteq: value)
         expect(mapper).to receive(:lteq_value).with(9)
         mapper.expr_value(expr)
       end
-
     end
 
+    context 'entity_expr' do
+      it 'maps the entity expr to database columns' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'bar.id',
+          db_class: 'barish',
+          db_column: 'bar_id'
+        )
+
+        expr   = create_expr('foo.bar', 'bar.id', eq: 6)
+        result = {"bar_id" => 6}
+        expect(mapper.entity_expr(expr)).to eq result
+      end
+    end
 
 =begin
     xcontext '#where' do
@@ -198,8 +212,16 @@ module Appfuel::Db
     end
 =end
 
-    def create_expr(entity_attr, data)
-      Appfuel::EntityExpr.new(entity_attr, data)
+    def create_mapping_entry(data)
+      Appfuel::Db::MappingEntry.new(data)
+    end
+
+    def create_expr(entity, entity_attr, data)
+      Appfuel::EntityExpr.new(entity, entity_attr, data)
+    end
+
+    def mapping_registry
+      Appfuel::Db::MappingRegistry
     end
 
     def setup_mapper

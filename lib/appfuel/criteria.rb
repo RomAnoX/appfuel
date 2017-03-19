@@ -268,7 +268,7 @@ module Appfuel
     end
 
     def create_expr(attr, value)
-      EntityExpr.new(attr, value)
+      EntityExpr.new(domain, attr, value)
     end
 
     def create_default_pager

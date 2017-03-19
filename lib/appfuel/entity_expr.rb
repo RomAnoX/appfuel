@@ -1,39 +1,25 @@
 module Appfuel
   class EntityExpr
     OPS = [:eq, :gt, :gteq, :lt, :lteq, :in, :like, :range]
-    attr_reader :domain, :attr, :op, :value, :original_attr
+    attr_reader :entity, :attr, :op, :value
 
-    def initialize(attr, data)
+    def initialize(entity, attr, data)
       fail "operator value pair must exist in a hash" unless data.is_a?(Hash)
-      op, value = data.first
-      self.attr   = attr
-      self.op     = op
-      self.value  = value
+      op, value  = data.first
+      @entity    = entity.to_s
+      @attr      = attr.to_s
+      self.op    = op
+      self.value = value
+
+      fail "entity name can not be empty" if @entity.empty?
+      fail "attribute can not be empty" if @attr.empty?
     end
 
     def negated?
       @negated
     end
 
-    def domain?
-      !@domain.nil?
-    end
-
     private
-
-    def attr=(value)
-      value  = value.to_s
-      fail "attribute can not be empty" if value.empty?
-
-      @original_attr  = value
-      domain, value  = value.split('.', 2)
-      if value.nil?
-        value = domain
-        domain = nil
-      end
-      @domain = domain.nil? ? nil : domain.to_s
-      @attr   = value.to_s
-    end
 
     def op=(value)
       negated, value = value.to_s.split('_')

@@ -33,7 +33,7 @@ module Appfuel
       # @param results [Hash]
       # @return [Hash]
       def entity_expr(expr, results = {})
-        column = registry.column(expr.domain, expr.original_attr)
+        column = registry.column(expr.entity, expr.attr)
         results[column] = expr_value(expr)
         results
       end
