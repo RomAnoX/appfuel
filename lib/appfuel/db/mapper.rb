@@ -137,6 +137,14 @@ module Appfuel
         Float::INFINITY .. value
       end
 
+      # Convert the entity into a hash of db tables that represent
+      # that entity. Each table has its own hash of mapped columns.
+      #
+      # @param domain [Appfuel::Domain::Entity]
+      # @param opts [Hash]
+      # @option exclued [Array] list of columns to exclude from mapping
+      #
+      # @return [Hash] each key is a table with a hash of column name/value
       def to_db(domain, opts = {})
         excluded = opts[:exclude] || {}
         data   = {}
@@ -154,6 +162,12 @@ module Appfuel
         data
       end
 
+      # Handles entity value by checking if its a computed property,
+      # fetching the value and converting undefined values to nil.
+      #
+      # @param domain [Appfuel::Domain::Entity]
+      # @param map_entry [MappingEntity]
+      # @return the value
       def entity_value(domain, map_entry)
         value = retieve_entity_value(domain, map_entry.entity_attr)
         if map_entry.computed_attr?
@@ -177,16 +191,16 @@ module Appfuel
       #
       # @param domain [Appfuel::Domain::Entity]
       # @param entity_attribute [String]
-      # @return [mixed]
+      # @return the value
       def retrieve_entity_value(domain, entity_attr)
-        chain  = map_entry.entity_attr.split('.')
+        chain  = entity_attr.split('.')
         target = domain
         chain.each do |attr_method|
           unless target.respond_to?(attr_method)
             return nil
           end
 
-          target = target.send_public(attr_method)
+          target = target.public_send(attr_method)
         end
         target
       end

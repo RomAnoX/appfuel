@@ -178,6 +178,71 @@ module Appfuel::Db
       end
     end
 
+    context '#retrieve_entity_value' do
+      it 'retrieve an attribute at the root level of the entity' do
+        mapper = setup_mapper
+        entity = Object.new
+        value  = 123
+        entity.instance_eval do
+          define_singleton_method(:id) do
+            value
+          end
+        end
+        expect(mapper.retrieve_entity_value(entity, 'id')).to eq value
+      end
+
+      it 'retrieve an attribute inside another object' do
+        mapper = setup_mapper
+        entity = Object.new
+        bar    = Object.new
+        value  = 123
+        bar.instance_eval do
+          define_singleton_method(:id) do
+            value
+          end
+        end
+
+        entity.instance_eval do
+          define_singleton_method(:bar) do
+            bar
+          end
+        end
+
+        expect(mapper.retrieve_entity_value(entity, 'bar.id')).to eq value
+      end
+
+      it 'can retrieve three levels deep' do
+        mapper = setup_mapper
+        entity = Object.new
+        bar    = Object.new
+        baz    = Object.new
+        value  = 123
+        baz.instance_eval do
+          define_singleton_method(:id) do
+            value
+          end
+        end
+        bar.instance_eval do
+          define_singleton_method(:baz) do
+            baz
+          end
+        end
+        entity.instance_eval do
+          define_singleton_method(:bar) do
+            bar
+          end
+        end
+        expect(mapper.retrieve_entity_value(entity, 'bar.baz.id')).to eq value
+
+      end
+
+      it 'returns nil when object does not respond to attr' do
+        mapper = setup_mapper
+        entity = Object.new
+        expect(mapper.retrieve_entity_value(entity, 'bar.baz.id')).to eq nil
+      end
+    end
+
 =begin
     xcontext '#where' do
       it 'builds a db relation using its map ' do
