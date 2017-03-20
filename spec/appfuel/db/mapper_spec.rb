@@ -504,10 +504,63 @@ module Appfuel::Db
         expect(relation).to receive(:where).with(columns) { relation }
         result = mapper.where(criteria, relation)
         expect(result).to eq relation
+      end
 
+      it "delegates to the db relation 'or'" do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'other_value',
+          db_class: 'barish',
+          db_column: 'db_other',
+        )
+        criteria = create_criteria('foo.bar')
+          .where('id', eq: 123)
+          .or('other_value', eq: 'blah')
+
+        relation = double('some db model')
+
+
+        expect(relation).to receive(:where).with("bar_id" => 123) { relation }
+        expect(relation).to receive(:where).with("db_other" => "blah") { relation }
+        expect(relation).to receive(:or).with(relation) { relation }
+        result = mapper.where(criteria, relation)
+        expect(result).to eq relation
       end
     end
 
+    context '#order' do
+      it 'returns the db relation when no order exists' do
+        criteria = create_criteria('foo.bar')
+        relation = double('some db model')
+        mapper   = setup_mapper
+
+        expect(mapper.order(criteria, relation)).to eq relation
+      end
+
+      it "delegates to the relation 'order' when criteria has order exprs" do
+        criteria = create_criteria('foo.bar').order_by('id')
+        relation = double('some db model')
+        mapper   = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+
+        expect(relation).to receive(:order).with({"bar_id" => :asc}) { relation }
+        expect(mapper.order(criteria, relation)).to eq(relation)
+      end
+    end
 =begin
     xcontext '#order' do
       it 'returns the relation when there is no order' do

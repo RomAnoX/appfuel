@@ -51,7 +51,7 @@ module Appfuel
 
         criteria.each do |expr, op|
           relation = if op == :or
-                       relation.or(db_where(relation, expr))
+                       relation.or(db_where(expr, relation))
                      else
                        db_where(expr, relation)
                      end
@@ -69,7 +69,7 @@ module Appfuel
         return relation unless criteria.order?
 
         order_by = {}
-        domain   = criteria.domain
+        domain   = criteria.domain_name
         criteria.order.each do |entity_attr, dir|
           column = registry.column(domain, entity_attr)
           order_by[column] = dir
