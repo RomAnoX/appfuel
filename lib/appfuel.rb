@@ -36,7 +36,6 @@ require "appfuel/entity_expr"
 require "appfuel/root_module"
 require "appfuel/validator_dependency"
 require "appfuel/container_dependency"
-require "appfuel/domain_dependency"
 require "appfuel/command_dependency"
 require "appfuel/repository_dependency"
 

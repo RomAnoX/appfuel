@@ -14,7 +14,7 @@ module Appfuel
     extend RootModule
     extend ValidatorDependency
     extend ContainerDependency
-    extend DomainDependency
+    extend Domain::DependencyInjectionDsl
 
 
     class << self

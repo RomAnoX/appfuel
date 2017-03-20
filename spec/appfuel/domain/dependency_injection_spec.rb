@@ -1,5 +1,5 @@
-module Appfuel
-  RSpec.describe DomainDependency do
+module Appfuel::Domain
+  RSpec.describe DependencyInjectionDsl do
     it 'has do domain dependencies by default' do
       expect(setup.domain_dependencies).to eq({feature: {}, global: {}})
     end
@@ -72,7 +72,7 @@ module Appfuel
 
     def setup(feature_module = 'mock feature')
       obj = Class.new do
-        extend DomainDependency
+        extend DependencyInjectionDsl
       end
 
       obj.class_eval do
