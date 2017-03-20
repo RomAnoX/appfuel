@@ -65,7 +65,7 @@ module Appfuel
 
       def compute_attr(value)
         fail "No lambda assigned to compute value" unless computed_attr?
-        @computed_attr_lambda.call(value)
+        @computed_attr.call(value)
       end
 
       private

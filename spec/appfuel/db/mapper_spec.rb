@@ -243,6 +243,83 @@ module Appfuel::Db
       end
     end
 
+    context '#entity_value' do
+      it 'returns the value for the entity attibute' do
+        mapper = setup_mapper
+        entity = Object.new
+        value  = 123
+        entity.instance_eval do
+          define_singleton_method(:id) do
+            value
+          end
+        end
+        entry = create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id'
+        )
+
+        expect(mapper.entity_value(entity, entry)).to eq 123
+      end
+
+      it 'returns nil when the value is undefined' do
+        mapper = setup_mapper
+        entity = Object.new
+        value  = Types::Undefined
+        entity.instance_eval do
+          define_singleton_method(:id) do
+            value
+          end
+        end
+        entry = create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id'
+        )
+        expect(mapper.entity_value(entity, entry)).to eq nil
+      end
+
+      it "delegates to the mapping entry's computed attribute" do
+        mapper = setup_mapper
+        entity = Object.new
+        value  = 123
+        entity.instance_eval do
+          define_singleton_method(:id) do
+            value
+          end
+        end
+        entry = create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+          computed_attr: ->(entity_value) { 'abc' }
+        )
+        expect(mapper.entity_value(entity, entry)).to eq 'abc'
+      end
+
+      it 'returns nil when a computed attribute returns undefined' do
+        mapper = setup_mapper
+        entity = Object.new
+        value  = 123
+        entity.instance_eval do
+          define_singleton_method(:id) do
+            value
+          end
+        end
+        entry = create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+          computed_attr: ->(entity_value) { Types::Undefined }
+        )
+        expect(mapper.entity_value(entity, entry)).to eq nil
+      end
+    end
+
 =begin
     xcontext '#where' do
       it 'builds a db relation using its map ' do

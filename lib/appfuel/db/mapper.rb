@@ -169,7 +169,7 @@ module Appfuel
       # @param map_entry [MappingEntity]
       # @return the value
       def entity_value(domain, map_entry)
-        value = retieve_entity_value(domain, map_entry.entity_attr)
+        value = retrieve_entity_value(domain, map_entry.entity_attr)
         if map_entry.computed_attr?
           value = map_entry.compute_attr(value)
         end
