@@ -26,8 +26,8 @@ module Appfuel
         criteria        = Criteria
         runner          = RepositoryRunner.new(repo_ns, criteria)
         repo_class_name = 'Foo::Bar::DomainRepository'
-        repo_class      = class_double(Repository)
-        repo            = instance_double(Repository)
+        repo_class      = class_double(Db::Repository)
+        repo            = instance_double(Db::Repository)
         criteria        = instance_double(Criteria)
         entity_key      = 'domain'
         attribute       = 'id'

@@ -42,7 +42,6 @@ require "appfuel/repository_dependency"
 
 # Database entity mapping
 require "appfuel/db"
-require "appfuel/repository"
 require "appfuel/repository_runner"
 
 # callable operations
