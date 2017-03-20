@@ -561,51 +561,16 @@ module Appfuel::Db
         expect(mapper.order(criteria, relation)).to eq(relation)
       end
     end
-=begin
-    xcontext '#order' do
-      it 'returns the relation when there is no order' do
-        _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
 
-        mapper = create_mapper(dsl)
-
-        criteria = create_criteria('foo.bar').where('foo.id', eq: 44)
-        expect(mapper.order(criteria, db_model)).to eq db_model
-      end
-
-      it 'builds an order expression using criteria' do
-        _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
-
-        dsl.map 'foo_id', 'foo.id'
-        allow(db_model).to receive(:column_names).with(no_args) { ['foo_id'] }
-
-        mapper = create_mapper(dsl)
-
-        criteria = create_criteria('foo.bar')
-          .where('foo.id', eq: 45)
-          .order_by('foo.id', :desc)
-
-        response = 'i am what order returns'
-        expect(db_model).to receive(:order).with("foo_id" => :desc) { response }
-        expect(mapper.order(criteria, db_model)).to eq response
-      end
-
-      it 'fails when the entity attr is not mapped' do
-        _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
-        allow(db_model).to receive(:column_names).with(no_args) { [] }
-
-        mapper = create_mapper(dsl)
-
-        criteria = create_criteria('foo.bar')
-          .where('foo.id', eq: 45)
-          .order_by('foo.id', :desc)
-
-        msg = '(bar, foo.id) not mapped'
+    context '#to_entity' do
+      it 'fails beause it is no longer implemented by the mapper' do
+        msg    = "this is no longer implemented see builder pattern"
+        mapper = setup_mapper
         expect {
-          mapper.order(criteria, db_model)
+          mapper.to_entity('entity name', 'db relation')
         }.to raise_error(RuntimeError, msg)
       end
     end
-=end
 
     def create_mapping_entry(data)
       Appfuel::Db::MappingEntry.new(data)
