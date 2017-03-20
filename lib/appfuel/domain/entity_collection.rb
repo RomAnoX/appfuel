@@ -18,31 +18,7 @@ module Appfuel
         @list          = []
         @domain_name   = domain_name
         @loaded        = false
-        @page_size     = nil
-        @total_count   = nil
-        @total_pages   = nil
-        @current_page  = nil
         self.entity_loader =  entity_loader if entity_loader
-      end
-
-      def total_pages
-        load_entities
-        @total_pages
-      end
-
-      def current_page
-        load_entities
-        @current_page
-      end
-
-      def total_count
-        load_entities
-        @total_count
-      end
-
-      def page_size
-        load_entities
-        @page_size
       end
 
       def all
@@ -62,26 +38,12 @@ module Appfuel
         @list.each {|entity| yield entity}
       end
 
-      def to_hash
-        data = {
-          total_pages: total_pages,
-          current_page: current_page,
-          total_count: total_count,
-          page_size: page_size,
-          items: []
-        }
+      def to_a
+        list = []
         each do |entity|
-          data[:items] << entity.to_h
+          list << entity.to_h
         end
-        data
-      end
-
-      def to_h
-        to_hash
-      end
-
-      def to_json
-        to_hash.to_json
+        list
       end
 
       def entity_loader?
@@ -97,13 +59,7 @@ module Appfuel
 
       def load_entities
         return false if @loaded || !entity_loader?
-
-        data          = entity_loader.call
-        @list         = data[:items] || []
-        @total_pages  = data[:total_pages]
-        @current_page = data[:current_page]
-        @total_count  = data[:total_count]
-        @page_size    = data[:page_size]
+        @list = entity_loader.call
       end
     end
   end

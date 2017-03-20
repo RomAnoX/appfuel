@@ -110,84 +110,13 @@ module Appfuel::Domain
         it 'yields each domain from the loader' do
           domain_name = 'foo.bar'
           domain      = instance_double(Entity)
-          list        = {
-            total_pages: 10,
-            current_page: 3,
-            total_count: 44,
-            page_size: 2,
-            items: [ 'foo', 'bar', 'baz' ],
-          }
+          list        = [ 'foo', 'bar', 'baz' ]
           loader      = -> { list }
           allow_domain_type(domain_name, domain)
           collection = create_collection(domain_name, loader)
           expect {|block|
             collection.each(&block)
           }.to yield_successive_args('foo','bar','baz')
-        end
-      end
-
-      context '#to_h' do
-        it 'converts the entity to an array of hashes' do
-          domain_name = 'foo.bar'
-          domain      = instance_double(Entity)
-
-          entity1 = Object.new
-          def entity1.to_h
-            {attr_1: 'entity1:value1', attr_2: 'entity1:value2'}
-          end
-
-          entity2 = Object.new
-          def entity2.to_h
-            {attr_1: 'entity2:value1', attr_2: 'entity2:value2'}
-          end
-
-          list = {
-            total_pages: 2,
-            current_page: 1,
-            total_count: 2,
-            page_size: 2,
-            items: [ entity1, entity2 ],
-          }
-
-          expected_list = list.dup
-          expected_list[:items] = [entity1.to_h, entity2.to_h]
-          loader = -> { list }
-          allow_domain_type(domain_name, domain)
-          collection = create_collection(domain_name, loader)
-          expect(collection.to_h).to eq(expected_list)
-        end
-      end
-
-      context '#to_json' do
-        it 'converts the entity to an array of hashes' do
-          domain_name = 'foo.bar'
-          domain      = instance_double(Entity)
-
-          entity1 = Object.new
-          def entity1.to_h
-            {attr_1: 'entity1:value1', attr_2: 'entity1:value2'}
-          end
-
-          entity2 = Object.new
-          def entity2.to_h
-            {attr_1: 'entity2:value1', attr_2: 'entity2:value2'}
-          end
-
-          list = {
-            total_pages: 2,
-            current_page: 1,
-            total_count: 2,
-            page_size: 2,
-            items: [ entity1, entity2 ],
-          }
-          loader = -> { list }
-          allow_domain_type(domain_name, domain)
-          collection = create_collection(domain_name, loader)
-
-          expected_list = list.dup
-          expected_list[:items] = [entity1.to_h, entity2.to_h]
-          expected_list = expected_list.to_json
-          expect(collection.to_json).to eq(expected_list)
         end
       end
     end
