@@ -53,7 +53,7 @@ module Appfuel
           relation = if op == :or
                        relation.or(db_where(relation, expr))
                      else
-                       db_where(relation, expr)
+                       db_where(expr, relation)
                      end
         end
         relation

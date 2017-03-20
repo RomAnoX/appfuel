@@ -469,61 +469,46 @@ module Appfuel::Db
         expect(mapper.to_db(entity)).to eq result
       end
     end
-=begin
-    xcontext '#where' do
-      it 'builds a db relation using its map ' do
-        _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
 
-        relation = instance_double(ActiveRecord::Relation)
-        dsl.map 'foo_id', 'foo.id'
-        allow(db_model).to receive(:column_names).with(no_args) { ['foo_id'] }
-
-        mapper = create_mapper(dsl)
-
-        criteria = create_criteria('foo.bar').where('foo.id', eq: 44)
-        expect(db_model).to receive(:where).with("foo_id" => 44) { relation }
-
-        expect(mapper.where(criteria)).to eq relation
-      end
-
-      it 'builds a db relation with a negated where' do
-        _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
-
-        relation    = instance_double(ActiveRecord::Relation)
-        where_chain = instance_double(ActiveRecord::QueryMethods::WhereChain)
-
-        dsl.map 'foo_id', 'foo.id'
-        allow(db_model).to receive(:column_names).with(no_args) { ['foo_id'] }
-
-        mapper = create_mapper(dsl)
-
-        expect(db_model).to receive(:where).with(no_args) { where_chain }
-        expect(where_chain).to receive(:not).with("foo_id" => 44) { relation }
-        criteria = create_criteria('foo.bar').where('foo.id', not_eq: 44)
-
-        expect(mapper.where(criteria)).to eq relation
-      end
-
-      it 'builds a db relation with a or relation' do
-        _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
-
-        relation = instance_double(ActiveRecord::Relation)
-        dsl.map 'foo_id', 'foo.id'
-        allow(db_model).to receive(:column_names).with(no_args) { ['foo_id'] }
-
-        mapper = create_mapper(dsl)
-
+    context '#where' do
+      it "fails when criteria has no exprs and 'all' was not called" do
         criteria = create_criteria('foo.bar')
-          .where('foo.id', eq: 44)
-          .or('foo.id', eq: 99)
+        mapper   = setup_mapper
+        relation = double('some db model')
+        msg = 'you must explicitly call :all when criteria has no exprs'
+        expect {
+          mapper.where(criteria, relation)
+        }.to raise_error(RuntimeError, msg)
+      end
 
-        expect(db_model).to receive(:where).with("foo_id" => 44) { relation }
-        expect(db_model).to receive(:or).with(relation) { relation }
-        expect(relation).to receive(:where).with("foo_id" => 99) { relation }
-        expect(mapper.where(criteria)).to eq relation
+      it 'delegated to the relation where interface with mapped columns' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'other_value',
+          db_class: 'barish',
+          db_column: 'db_other',
+        )
+        criteria = create_criteria('foo.bar').where('id', eq: 123)
+        relation = double('some db model')
+
+        columns = {'bar_id' => 123}
+
+        expect(relation).to receive(:where).with(columns) { relation }
+        result = mapper.where(criteria, relation)
+        expect(result).to eq relation
+
       end
     end
 
+=begin
     xcontext '#order' do
       it 'returns the relation when there is no order' do
         _domain, db_model, dsl = setup_mapped_entity('foo.bar', 'foo_bar')
