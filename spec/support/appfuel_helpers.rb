@@ -70,6 +70,11 @@ module AppfuelHelpers
     Appfuel::Criteria.new(domain, opts)
   end
 
+  def create_pager(data = {})
+    Appfuel::Pagination::Request.new(data)
+  end
+
+
   def undefined
     Types::Undefined
   end

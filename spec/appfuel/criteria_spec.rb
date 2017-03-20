@@ -193,19 +193,19 @@ module Appfuel
     context '#pager' do
       it 'assigns a pager to the criteria' do
         criteria = create_criteria('foo')
-        pager    = create_type('pager')
+        pager    = create_pager
         criteria.pager(pager)
         expect(criteria.pager).to eq pager
       end
 
       it 'returns an instance of the criteria to be chained' do
         criteria = create_criteria('foo')
-        pager    = create_type('pager')
+        pager    = create_pager
         expect(criteria.pager(pager)).to eq criteria
       end
 
       it 'can initialize with a pager' do
-        pager    = create_type('pager')
+        pager    = create_pager
         criteria = create_criteria('foo', pager: pager)
         expect(criteria.pager).to eq pager
       end

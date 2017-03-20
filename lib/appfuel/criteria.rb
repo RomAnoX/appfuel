@@ -197,10 +197,6 @@ module Appfuel
 
     def pager(value = nil)
       return @pager if value.nil?
-      unless value.instance_of?(Types['pager'])
-        fail ":pager must be a global pager entity"
-      end
-
       @pager = value
       self
     end
@@ -272,7 +268,7 @@ module Appfuel
     end
 
     def create_default_pager
-      Types['pager'][{}]
+      Pagination::Request.new
     end
   end
 end

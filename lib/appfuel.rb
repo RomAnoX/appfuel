@@ -28,7 +28,7 @@ require "appfuel/domain"
 require "appfuel/db_model"
 
 # Interface for dscribing domain queries
-require "appfuel/pager"
+require "appfuel/pagination"
 require "appfuel/criteria"
 require "appfuel/entity_expr"
 
