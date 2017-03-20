@@ -146,14 +146,13 @@ module Appfuel
       #
       # @return [Hash] each key is a table with a hash of column name/value
       def to_db(domain, opts = {})
-        excluded = opts[:exclude] || {}
-        data   = {}
-        domain.undefined_as_nil?
+        excluded = opts[:exclude] || []
+        data = {}
 
-        each_entity_attr(domain.domain_name) do |_attr, map_entry|
+        registry.each_entity_attr(domain.domain_name) do |_attr, map_entry|
           column   = map_entry.db_column
           db_class = map_entry.db_class
-          next if excluded.include(column)
+          next if excluded.include?(column)
           next if map_entry.skip_to_db?
 
           data[db_class] = {} unless data.key?(db_class)

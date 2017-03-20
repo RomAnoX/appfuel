@@ -320,6 +320,155 @@ module Appfuel::Db
       end
     end
 
+    context 'to_db' do
+      it 'maps entity attributes to db columns' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'other_value',
+          db_class: 'barish',
+          db_column: 'db_other',
+        )
+
+        entity = Object.new
+        def entity.domain_name
+          'foo.bar'
+        end
+
+        def entity.id
+          123
+        end
+        def entity.other_value
+          'abc'
+        end
+
+        result = {'barish' => {'bar_id' => 123, 'db_other' => 'abc'}}
+        expect(mapper.to_db(entity)).to eq result
+      end
+
+      it 'maps entity attributes to db columns for two tables' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'other_value',
+          db_class: 'barish',
+          db_column: 'db_other',
+        )
+
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'fiz_id',
+          db_class: 'fizzish',
+          db_column: 'fizish_id',
+        )
+
+        entity = Object.new
+
+        def entity.fiz_id
+          999
+        end
+
+        def entity.domain_name
+          'foo.bar'
+        end
+
+        def entity.id
+          123
+        end
+        def entity.other_value
+          'abc'
+        end
+
+        result = {
+          'barish' => {'bar_id' => 123, 'db_other' => 'abc'},
+          'fizzish' => {'fizish_id' => 999}
+        }
+        expect(mapper.to_db(entity)).to eq result
+      end
+
+
+      it 'will exclude columns given in the options' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'other_value',
+          db_class: 'barish',
+          db_column: 'db_other',
+        )
+
+        entity = Object.new
+        def entity.domain_name
+          'foo.bar'
+        end
+
+        def entity.id
+          123
+        end
+        def entity.other_value
+          'abc'
+        end
+
+        result = {'barish' => {'bar_id' => 123}}
+        expect(mapper.to_db(entity, exclude: ['db_other'])).to eq result
+      end
+
+      it 'will exclude any column whose entry has skip_to_db enabled' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'other_value',
+          db_class: 'barish',
+          db_column: 'db_other',
+          skip_to_db: true
+        )
+
+        entity = Object.new
+
+        def entity.domain_name
+          'foo.bar'
+        end
+
+        def entity.id
+          123
+        end
+        def entity.other_value
+          'abc'
+        end
+
+        result = {
+          'barish' => {'bar_id' => 123}
+        }
+        expect(mapper.to_db(entity)).to eq result
+      end
+    end
 =begin
     xcontext '#where' do
       it 'builds a db relation using its map ' do
