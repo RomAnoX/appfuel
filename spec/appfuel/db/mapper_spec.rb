@@ -562,6 +562,33 @@ module Appfuel::Db
       end
     end
 
+    context '#limit' do
+      it 'returns the relation when no limit is given' do
+        mapper = setup_mapper
+        criteria = create_criteria('foo.bar')
+        relation = double('some relation')
+        expect(mapper.limit(criteria, relation)).to eq relation
+      end
+    end
+
+    context '#exits' do
+      it 'returns true when the db exists' do
+        mapper = setup_mapper
+        mapping_registry << create_mapping_entry(
+          entity: 'foo.bar',
+          entity_attr: 'id',
+          db_class: 'barish',
+          db_column: 'bar_id',
+        )
+
+        db_model = double('some model')
+        allow_db_type('barish', db_model)
+
+        expect(db_model).to receive(:exists?).with("bar_id" => 44)
+        criteria = create_criteria('foo.bar').exists('id', 44)
+        mapper.exists?(criteria)
+      end
+    end
     context '#to_entity' do
       it 'fails beause it is no longer implemented by the mapper' do
         msg    = "this is no longer implemented see builder pattern"

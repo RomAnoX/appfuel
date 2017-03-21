@@ -102,8 +102,36 @@ module Appfuel::Db
       end
     end
 
+    context '#apply_query_conditions' do
+      it 'delegates to where, order, and limit' do
+        repo      = setup_mixin
+        criteria  = create_criteria('foo.bar')
+        start_relation = double('starting relation')
+        where_relation = double('where relation')
+        order_relation = double('order relation')
+        limit_relation = double('limit relation')
+
+        expect(repo).to receive(:where).with(criteria, start_relation) {
+          where_relation
+        }
+
+        expect(repo).to receive(:order).with(criteria, where_relation) {
+          order_relation
+        }
+
+        expect(repo).to receive(:limit).with(criteria, order_relation) {
+          limit_relation
+        }
+
+        expect(repo.apply_query_conditions(criteria, start_relation)).to(
+          eq limit_relation
+        )
+      end
+    end
+
     def setup_mixin
       repo = Object.new
+      repo.extend(Mapper)
       repo.extend(RepositoryQuery)
       repo
     end

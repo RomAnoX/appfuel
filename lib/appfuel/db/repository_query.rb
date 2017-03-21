@@ -55,11 +55,25 @@ module Appfuel
         Appfuel::Domain::EntityNotFound.new(entity_name: criteria.domain_name)
       end
 
+      # Apply where, order and limit clauses to the relation based on the
+      # criteria.
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @param relation [mixed]
+      # @return relation
+      def apply_query_conditions(criteria, relation)
+        relation = where(criteria, relation)
+        relation = order(criteria, relation)
+        relation = limit(criteria, relation)
+        relation
+      end
+
       def query(criteria)
         return execute_criteria(criteria) if criteria.exec?
 
         begin
           relation = query_relation(criteria)
+          relation = apply_query_conditions(criteria, relation)
 
           if relation.blank?
             result = handle_empty_relation(criteria, relation)

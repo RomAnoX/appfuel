@@ -78,6 +78,29 @@ module Appfuel
         relation.order(order_by)
       end
 
+      # Eventhough there is no mapping here we add the interface for
+      # consistency.
+      #
+      # @param criteria [Criteria]
+      # @param relation [DbModel, ActiveRecord::Relation]
+      # @return [ActiveRecord::Relation]
+      def limit(criteria, relation)
+        return relation unless criteria.limit?
+
+        relation.limit(criteria.limit)
+      end
+
+      # Determine if an entity exists in the database using the criteria.
+      #
+      # @param criteria [Criteria]
+      # @return [Boolean]
+      def exists?(criteria)
+        expr     = criteria.exists_expr
+        columns  = entity_expr(expr)
+        db_model = registry.db_class(expr.entity, expr.attr)
+        db_model.exists?(columns)
+      end
+
       # Map the entity expr to a hash of db_column => value and call
       # on the relation using that.
       #
