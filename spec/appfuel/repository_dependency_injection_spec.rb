@@ -1,8 +1,8 @@
 module Appfuel
-  RSpec.describe(RepositoryDependency) do
+  RSpec.describe(RepositoryDependencyInjection) do
     it 'has no dependencies by default' do
       obj = Class.new do
-        include RepositoryDependency
+        extend RepositoryDependencyInjection
       end
 
       expect(obj.repo_dependencies).to eq({})
@@ -81,7 +81,7 @@ module Appfuel
 
     def setup(name, opts = {})
       obj = Class.new do
-        include RepositoryDependency
+        extend RepositoryDependencyInjection
       end
 
       obj.repo(name, opts)

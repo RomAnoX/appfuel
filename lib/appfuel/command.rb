@@ -1,6 +1,7 @@
 module Appfuel
   class Command < Handler
     class << self
+      extend RepositoryDependencyInjection
       # The command class will always be in the Commands namespace below
       # the feature namespace.
       #
@@ -21,6 +22,5 @@ module Appfuel
       end
     end
 
-    include RepositoryDependency
   end
 end

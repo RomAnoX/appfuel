@@ -36,7 +36,7 @@ require "appfuel/root_module"
 require "appfuel/validator_dependency"
 require "appfuel/container_dependency"
 require "appfuel/command_dependency"
-require "appfuel/repository_dependency"
+require "appfuel/repository_dependency_injection"
 
 # Database entity mapping
 require "appfuel/db"
