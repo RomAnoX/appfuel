@@ -139,10 +139,11 @@ module Appfuel
           domain_name.split('.').last
         end
 
-        def empty_hash
-          data = {}
+        def empty_hash(undefined_as_nil = false)
+          data  = {}
+          value = undefined_as_nil == true ? nil : Types::Undefined
           schema.keys.each do |key|
-            data[key] = Types::Undefined
+            data[key] = value
           end
           data
         end
