@@ -2,6 +2,7 @@ require 'appfuel/db/mapping_dsl'
 require 'appfuel/db/mapping_entry'
 require 'appfuel/db/mapper'
 require 'appfuel/db/mapping_registry'
+require 'appfuel/db/repository_query'
 require 'appfuel/db/repository'
 
 module Appfuel

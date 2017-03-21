@@ -8,7 +8,7 @@ module Appfuel
         if entity_name.nil? || entity_name == Types::Undefined
           fail ":entity_name is a required attribute"
         end
-        @entity = Types[entity_name][{}]
+        @entity = Types[entity_name].new({})
       end
 
       def method_missing(method, *args, &block)

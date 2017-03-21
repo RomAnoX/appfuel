@@ -83,14 +83,6 @@ module Appfuel
         }
       end
 
-      def execute_criteria(criteria)
-        unless respond_to?(criteria.exec)
-          fail "could not execute method #{criteria.exec}"
-        end
-
-        return send(criteria.exec, criteria)
-      end
-
       # General create will create an entity in the database
       # 1. find the db_model fail otherwise
       # 2. map attributes from entity to db
