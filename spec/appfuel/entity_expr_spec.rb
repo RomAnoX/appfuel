@@ -1,5 +1,5 @@
-module Appfuel
-  RSpec.describe EntityExpr do
+module Appfuel::Domain
+  RSpec.describe Expr do
 
     context 'entity' do
       it 'assigns the entity name' do
@@ -188,7 +188,7 @@ module Appfuel
     end
 
     def create_expr(entity, attr, value)
-      EntityExpr.new(entity, attr, value)
+      Expr.new(entity, attr, value)
     end
   end
 end

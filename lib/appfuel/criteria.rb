@@ -264,7 +264,7 @@ module Appfuel
     end
 
     def create_expr(attr, value)
-      EntityExpr.new(domain_name, attr, value)
+      Domain::Expr.new(domain_name, attr, value)
     end
 
     def create_default_pager

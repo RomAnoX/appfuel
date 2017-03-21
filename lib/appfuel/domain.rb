@@ -1,5 +1,6 @@
 require_relative "domain/dsl"
 require_relative "domain/base"
+require_relative "domain/expr"
 require_relative "domain/entity"
 require_relative "domain/value_object"
 require_relative "domain/entity_not_found"

@@ -113,7 +113,7 @@ module Appfuel
         op   = result[:op]
 
         expect(op).to eq :and
-        expect(expr).to be_an_instance_of(EntityExpr)
+        expect(expr).to be_an_instance_of(Domain::Expr)
         expect(expr.attr).to eq "id"
         expect(expr.op).to eq :eq
         expect(expr.value).to eq 4
@@ -159,7 +159,7 @@ module Appfuel
         op   = last_expr[:op]
 
         expect(op).to eq :and
-        expect(expr).to be_an_instance_of(EntityExpr)
+        expect(expr).to be_an_instance_of(Domain::Expr)
         expect(expr.attr).to eq "id"
         expect(expr.op).to eq :eq
         expect(expr.value).to eq 5

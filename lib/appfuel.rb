@@ -30,7 +30,6 @@ require "appfuel/db_model"
 # Interface for dscribing domain queries
 require "appfuel/pagination"
 require "appfuel/criteria"
-require "appfuel/entity_expr"
 
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"

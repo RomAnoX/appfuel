@@ -577,7 +577,7 @@ module Appfuel::Db
     end
 
     def create_expr(entity, entity_attr, data)
-      Appfuel::EntityExpr.new(entity, entity_attr, data)
+      Appfuel::Domain::Expr.new(entity, entity_attr, data)
     end
 
     def mapping_registry
