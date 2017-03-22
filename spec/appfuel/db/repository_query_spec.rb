@@ -260,6 +260,83 @@ module Appfuel::Db
       end
     end
 
+    context '#create_pager_result' do
+      it 'creates an Appfuel::Pagination::Result' do
+        repo = setup_mixin
+        data = {
+          total_pages:  1,
+          current_page: 2,
+          total_count:  3,
+          limit_value:  4,
+          page_size:    4
+        }
+        result = repo.create_pager_result(data)
+        expect(result).to be_an_instance_of(Appfuel::Pagination::Result)
+      end
+    end
+
+    context '#create_entity_collection' do
+      it 'creates an Appfuel::Domain::EntityCollection' do
+
+        repo = setup_mixin
+        entity = double('foo.bar')
+        allow_domain_type('foo.bar', entity)
+
+        name = 'foo.bar'
+        result = repo.create_entity_collection(name)
+        expect(result).to be_an_instance_of(Appfuel::Domain::EntityCollection)
+        expect(result.domain_name).to eq(name)
+      end
+    end
+
+    context '#entity_loader' do
+      it 'returns a lamdba to be used in the entity collection' do
+        repo = setup_mixin
+        criteria = double('some criteria')
+        relation = double('some relation')
+        builder  = double('some builder')
+        result = repo.entity_loader(criteria, relation, builder)
+        expect(result.lambda?).to be true
+      end
+    end
+
+    context '#load_collection' do
+      it 'loads a collection of entities' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.bar')
+        relation = double('some relation')
+        builder  = double('some builder')
+
+        db1 = double('some db item')
+        db2 = double('some other db item')
+
+        pager = criteria.pager
+        allow(relation).to receive(:page).with(pager.page) { relation }
+        allow(relation).to receive(:per).with(pager.per_page) { relation }
+        allow(relation).to receive(:total_pages).with(no_args) { 5 }
+        allow(relation).to receive(:current_page).with(no_args) { 6 }
+        allow(relation).to receive(:total_count).with(no_args) { 7 }
+        allow(relation).to receive(:limit_value).with(no_args) { 8 }
+        allow(relation).to receive(:size).with(no_args) { 3 }
+
+        allow(relation).to receive(:each).and_yield(db1)
+                                         .and_yield(db2)
+
+        allow(builder).to receive(:call).with(criteria, db1) { 'entity1' }
+        allow(builder).to receive(:call).with(criteria, db2) { 'entity2' }
+
+        result = repo.load_collection(criteria, relation, builder)
+        expect(result[:pager]).to be_an_instance_of(Appfuel::Pagination::Result)
+        expect(result[:pager].total_pages).to eq 5
+        expect(result[:pager].current_page).to eq 6
+        expect(result[:pager].total_count).to eq 7
+        expect(result[:pager].page_limit).to eq 8
+        expect(result[:pager].page_size).to eq 3
+
+        expect(result[:items]).to eq(['entity1', 'entity2'])
+      end
+    end
+
     def setup_mixin
       repo = Object.new
       repo.extend(Appfuel::RootModule)

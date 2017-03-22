@@ -106,6 +106,59 @@ module Appfuel
         mod.const_get(klass).new
       end
 
+      # Factory method to create a pagination result
+      #
+      # @param data [Hash]
+      # @return [Appfuel::Pagination::Result]
+      def create_pager_result(data)
+        Appfuel::Pagination::Result.new(data)
+      end
+
+      # Factory method to create a domain entity
+      #
+      # @param domain_name [String]
+      # @return [Appfuel::Domain::EntityCollection]
+      def create_entity_collection(domain_name)
+        Appfuel::Domain::EntityCollection.new(domain_name)
+      end
+
+      # Creates a lambda to used with the entity collection
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @param relation [Object]
+      # @param builder  [Object]
+      # @return lambda
+      def entity_loader(criteria, relation, builder)
+        -> { load_collection(criteria, relation, builder) }
+      end
+
+      # A collection is usually loaded within an entity collection via
+      # a lambda. It setups up pagination results and builds an entity
+      # foreach record in the list
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @param relation [Object]
+      # @param builder  [Object]
+      # @return [Hash]
+      def load_collection(criteria, relation, builder)
+        pager_request = criteria.pager
+        relation = relation.page(pager_request.page).per(pager_request.per_page)
+
+        data = { items: [] }
+        data[:pager] = create_pager_result(
+          total_pages:  relation.total_pages,
+          current_page: relation.current_page,
+          total_count:  relation.total_count,
+          page_limit:  relation.limit_value,
+          page_size:    relation.size
+        )
+
+        relation.each do |db_item|
+          data[:items] << builder.call(criteria, db_item)
+        end
+        data
+      end
+
       def build_entities(criteria, relation)
         builder = create_entity_builder(criteria)
         result  = handle_empty_relation(criteria, relation)
@@ -130,37 +183,6 @@ module Appfuel
           err.set_backtrace(e.backtrace)
           raise err
         end
-      end
-
-      def entity_loader(criteria, relation, builder)
-        -> { load_collection(criteria, relation, builder) }
-      end
-
-
-      def load_collection(criteria, relation, builder)
-        pager_request = criteria.pager
-        relation = relation.page(pager_request.page).per(pager_request.per_page)
-
-        data[:pager] = create_pager_result(
-          total_pages:  relation.total_pages,
-          current_page: relation.current_page,
-          total_count:  relation.total_count,
-          limit_value:  relation.limit_value,
-          page_size:    relation.size
-        )
-
-        relation.each do |db_item|
-          data[:items] << builder.call(criteria, db_item)
-        end
-        data
-      end
-
-      def create_pager_result(data)
-        Appfuel::Pagination::Result.new(data)
-      end
-
-      def create_entity_collection(domain_name)
-        Appfuel::Domain::EntityCollection.new(domain_name)
       end
 
       private
