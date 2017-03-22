@@ -89,6 +89,23 @@ module Appfuel
         apply_query_conditions(criteria, relation)
       end
 
+      # Find the entity builder based on the criteria and
+      # return an instance of that class
+      #
+      # @raise [RuntimeError] when entity build class does not exist
+      #
+      # @param criteria [SpCore::Criteria]
+      # @return a entity builder
+      def create_entity_builder(criteria)
+        klass = "Builder::Db#{criteria.domain.classify}"
+        mod   = find_parent_module(criteria)
+        unless mod.const_defined?(klass)
+          fail "Entity Builder (#{klass}) not found for #{mod}"
+        end
+
+        mod.const_get(klass).new
+      end
+
       def build_entities(criteria, relation)
         builder = create_entity_builder(criteria)
         result  = handle_empty_relation(criteria, relation)
@@ -98,16 +115,6 @@ module Appfuel
         collection = create_entity_collection(criteria.domain_name)
         collection.entity_loader = entity_loader(criteria, relation, builder)
         collection
-      end
-
-      def create_entity_builder(criteria)
-        klass = "Builder::Db#{criteria.domain.classify}"
-        mod   = find_parent_module(criteria)
-        unless mod.const_defined?(klass)
-          fail "Entity Builder (#{klass}) not found for #{mod}"
-        end
-
-        mod.const_get(klass).new
       end
 
       def query(criteria)
@@ -143,7 +150,7 @@ module Appfuel
         )
 
         relation.each do |db_item|
-          data[:items] << builder.call(criteria, relation)
+          data[:items] << builder.call(criteria, db_item)
         end
         data
       end
@@ -153,7 +160,7 @@ module Appfuel
       end
 
       def create_entity_collection(domain_name)
-        Appfuel::Domain::EntityCollection.new(criteria.domain_name)
+        Appfuel::Domain::EntityCollection.new(domain_name)
       end
 
       private
@@ -164,6 +171,12 @@ module Appfuel
         return public_send(method, criteria)
       end
 
+      # Determine if you need the root module, or you need the feature module
+      # based on the criteria. Global domain builders would be located at the
+      # root module.
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @return [Module]
       def find_parent_module(criteria)
         mod = root_module
         unless criteria.global_domain?
@@ -171,7 +184,7 @@ module Appfuel
           unless root_module.const_defined?(feature)
             fail "Feature (#{feature}) not found for #{mod}"
           end
-          mod = root_module.get_const(feature)
+          mod = root_module.const_get(feature)
         end
         mod
       end

@@ -101,7 +101,6 @@ module Appfuel::Db
         relation  = double('some relation')
 
         expect(repo.handle_empty_relation(criteria, relation)).to eq nil
-
       end
     end
 
@@ -178,8 +177,92 @@ module Appfuel::Db
       end
     end
 
+    context 'create_entity_builder' do
+      it 'fails when the builder class does not exist' do
+        repo     = setup_mixin
+        criteria = create_criteria('bar')
+        root     = double('some module')
+
+        msg = 'Entity Builder (Builder::DbBar) not found for ' +
+              '#[Double "some module"]'
+        allow_const_defined_as_false(root, 'Builder::DbBar')
+        allow(repo).to receive(:root_module).with(no_args) { root }
+        expect {
+          repo.create_entity_builder(criteria)
+        }.to raise_error(RuntimeError, msg)
+      end
+
+      it 'fails when the feature does not exist' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.fiz')
+        root     = double('some module')
+
+        allow_const_defined_as_false(root, 'Foo')
+        allow(repo).to receive(:root_module).with(no_args) { root }
+
+        msg = 'Feature (Foo) not found for #[Double "some module"]'
+        expect {
+          repo.create_entity_builder(criteria)
+        }.to raise_error(RuntimeError, msg)
+      end
+
+      it 'returns a builder class for a global domain' do
+        repo     = setup_mixin
+        criteria = create_criteria('bar')
+        root     = double('root module')
+        builder  = double('some builder class')
+        builder_instance = double('instance of builder')
+
+        allow_const_defined_as_true(root, 'Builder::DbBar')
+        allow_const_get(root, 'Builder::DbBar', builder)
+        allow(builder).to receive(:new).with(no_args) { builder_instance }
+        allow(repo).to receive(:root_module).with(no_args) { root }
+
+        expect(repo.create_entity_builder(criteria)).to eq builder_instance
+      end
+
+      it 'returns a build class for a feature domain' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.bar')
+        root     = double('root module')
+        feature  = double('feature module')
+        builder  = double('some builder class')
+        builder_instance = double('instance of builder')
+
+        allow_const_defined_as_true(root, 'Foo')
+        allow_const_get(root, 'Foo', feature)
+
+        allow_const_defined_as_true(feature, 'Builder::DbBar')
+        allow_const_get(feature, 'Builder::DbBar', builder)
+        allow(builder).to receive(:new).with(no_args) { builder_instance }
+        allow(repo).to receive(:root_module).with(no_args) { root }
+
+        expect(repo.create_entity_builder(criteria)).to eq builder_instance
+      end
+
+      it 'fails when feature builder is not found' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.bar')
+        root     = double('root module')
+        feature  = double('feature module')
+
+        allow_const_defined_as_true(root, 'Foo')
+        allow_const_get(root, 'Foo', feature)
+
+        allow_const_defined_as_false(feature, 'Builder::DbBar')
+        allow(repo).to receive(:root_module).with(no_args) { root }
+
+        msg = 'Entity Builder (Builder::DbBar) not found for ' +
+              '#[Double "feature module"]'
+        expect {
+          repo.create_entity_builder(criteria)
+        }.to raise_error(RuntimeError, msg)
+      end
+    end
+
     def setup_mixin
       repo = Object.new
+      repo.extend(Appfuel::RootModule)
       repo.extend(Mapper)
       repo.extend(RepositoryQuery)
       repo
