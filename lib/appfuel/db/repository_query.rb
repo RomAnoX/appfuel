@@ -9,11 +9,7 @@ module Appfuel
       # @return [Dataset]
       def execute_criteria(criteria)
         query_method = "#{criteria.exec}_query"
-        unless respond_to?(query_method)
-          fail "Could not execute method #{query_method}"
-        end
-
-        return public_send(query_method, criteria)
+        call_query_method(query_method, criteria)
       end
 
       # Use the criteria entity's basename as a convention to find a method
@@ -25,11 +21,7 @@ module Appfuel
       # @return [ActiveRecord::Relation]
       def query_relation(criteria)
         query_method = "#{criteria.domain}_query"
-        unless respond_to?(query_method)
-          fail "Could not execute domain query method #{query_method}"
-        end
-
-        return public_send(query_method, criteria)
+        call_query_method(query_method, criteria)
       end
 
       # Handles the treatment of the relation when the recordset is empty
@@ -147,16 +139,12 @@ module Appfuel
         }
       end
 
-      def build_entity(name, db_model, mapper)
-        if respond_to?("build_#{name}")
-          send("build_#{name}", db_model, mapper)
-        else
-          mapper.to_entity(name, db_model)
-        end
-      end
+      private
 
-      def entity_class?(entity_key, object)
-        object == mapper.entity_class(entity_key)
+      def call_query_method(method, criteria)
+        fail "Could not execute method #{method}" unless respond_to?(method)
+
+        return public_send(method, criteria)
       end
     end
   end

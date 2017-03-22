@@ -41,7 +41,7 @@ module Appfuel::Db
       end
 
       it 'fails when method does not exist on repo' do
-        msg  = 'Could not execute domain query method my_domain_query'
+        msg  = 'Could not execute method my_domain_query'
         repo = setup_mixin
         criteria = create_criteria('my_feature.my_domain')
         expect {
