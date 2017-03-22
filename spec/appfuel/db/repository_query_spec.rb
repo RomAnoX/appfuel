@@ -270,8 +270,8 @@ module Appfuel::Db
           limit_value:  4,
           page_size:    4
         }
-        result = repo.create_pager_result(data)
-        expect(result).to be_an_instance_of(Appfuel::Pagination::Result)
+        results = repo.create_pager_result(data)
+        expect(results).to be_an_instance_of(Appfuel::Pagination::Result)
       end
     end
 
@@ -283,9 +283,9 @@ module Appfuel::Db
         allow_domain_type('foo.bar', entity)
 
         name = 'foo.bar'
-        result = repo.create_entity_collection(name)
-        expect(result).to be_an_instance_of(Appfuel::Domain::EntityCollection)
-        expect(result.domain_name).to eq(name)
+        results = repo.create_entity_collection(name)
+        expect(results).to be_an_instance_of(Appfuel::Domain::EntityCollection)
+        expect(results.domain_name).to eq(name)
       end
     end
 
@@ -295,8 +295,8 @@ module Appfuel::Db
         criteria = double('some criteria')
         relation = double('some relation')
         builder  = double('some builder')
-        result = repo.entity_loader(criteria, relation, builder)
-        expect(result.lambda?).to be true
+        results = repo.entity_loader(criteria, relation, builder)
+        expect(results.lambda?).to be true
       end
     end
 
@@ -325,15 +325,15 @@ module Appfuel::Db
         allow(builder).to receive(:call).with(criteria, db1) { 'entity1' }
         allow(builder).to receive(:call).with(criteria, db2) { 'entity2' }
 
-        result = repo.load_collection(criteria, relation, builder)
-        expect(result[:pager]).to be_an_instance_of(Appfuel::Pagination::Result)
-        expect(result[:pager].total_pages).to eq 5
-        expect(result[:pager].current_page).to eq 6
-        expect(result[:pager].total_count).to eq 7
-        expect(result[:pager].page_limit).to eq 8
-        expect(result[:pager].page_size).to eq 3
+        results = repo.load_collection(criteria, relation, builder)
+        expect(results[:pager]).to be_an_instance_of(Appfuel::Pagination::Result)
+        expect(results[:pager].total_pages).to eq 5
+        expect(results[:pager].current_page).to eq 6
+        expect(results[:pager].total_count).to eq 7
+        expect(results[:pager].page_limit).to eq 8
+        expect(results[:pager].page_size).to eq 3
 
-        expect(result[:items]).to eq(['entity1', 'entity2'])
+        expect(results[:items]).to eq(['entity1', 'entity2'])
       end
     end
 
@@ -347,9 +347,9 @@ module Appfuel::Db
 
         allow_domain_type('foo.bar', entity)
         allow(repo).to receive(:create_entity_builder).with(criteria) { builder }
-        result = repo.build_entities(criteria, relation)
-        expect(result).to be_an_instance_of(Appfuel::Domain::EntityCollection)
-        expect(result.entity_loader.lambda?).to be true
+        results = repo.build_entities(criteria, relation)
+        expect(results).to be_an_instance_of(Appfuel::Domain::EntityCollection)
+        expect(results.entity_loader.lambda?).to be true
       end
 
       it 'returns the results from #handle_empty_dataset' do
@@ -365,8 +365,8 @@ module Appfuel::Db
         allow(repo).to receive(:handle_empty_relation).with(criteria, relation) {
           'empty results'
         }
-        result = repo.build_entities(criteria, relation)
-        expect(result).to eq('empty results')
+        results = repo.build_entities(criteria, relation)
+        expect(results).to eq('empty results')
       end
 
       it 'returns a single entity' do
@@ -378,8 +378,35 @@ module Appfuel::Db
         allow_domain_type('foo.bar', entity)
         allow(repo).to receive(:create_entity_builder).with(criteria) { builder }
         allow(builder).to receive(:call).with(criteria, relation) { 'single entity' }
-        result = repo.build_entities(criteria, relation)
-        expect(result).to eq('single entity')
+        results = repo.build_entities(criteria, relation)
+        expect(results).to eq('single entity')
+      end
+    end
+
+    context '#query' do
+      it 'return results from manual query when criteria uses "exec"' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.bar').exec('foo')
+
+        def repo.foo_query(criteria)
+        end
+
+        allow(repo).to receive(:foo_query).with(criteria) { 'foo results' }
+        results = repo.query(criteria)
+        expect(results).to eq('foo results')
+      end
+
+      it 'returns the fully constructed domain' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.bar')
+        relation = 'some relation'
+
+        allow(repo).to receive(:query_relation).with(criteria) { relation }
+        allow(repo).to receive(:handle_query_conditions).with(criteria, relation) { relation }
+        allow(repo).to receive(:build_entities).with(criteria, relation) { 'the results' }
+
+        results = repo.query(criteria)
+        expect(results).to eq('the results')
       end
     end
 

@@ -176,13 +176,18 @@ module Appfuel
         collection
       end
 
+      # Query will use the database model to build a query based on the
+      # given criteria. It supports where, order and limit conditions.
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @return [Appfuel::Domain::Entity, Appfuel::Domain::EntityCollection]
       def query(criteria)
         return execute_criteria(criteria) if criteria.exec?
 
         begin
           relation = query_relation(criteria)
           relation = handle_query_conditions(criteria, relation)
-          build_entitites(criteria, relation)
+          build_entities(criteria, relation)
         rescue => e
           msg = "query failed for #{criteria.domain}: #{e.class} #{e.message}"
           err = RuntimeError.new(msg)
