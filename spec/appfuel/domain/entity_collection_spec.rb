@@ -107,7 +107,7 @@ module Appfuel::Domain
 
     context 'Enumerable' do
       context '#each' do
-        it 'yields each domain from the loader' do
+        xit 'yields each domain from the loader' do
           domain_name = 'foo.bar'
           domain      = instance_double(Entity)
           list        = [ 'foo', 'bar', 'baz' ]

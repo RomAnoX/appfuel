@@ -29,7 +29,9 @@ module Appfuel
       #
       # @param criteria [Appfuel::Criteria]
       # @return [Appfuel::Error, Appfuel::Domain::EntityNotFound, nil]
-      def handle_empty_relation(criteria, _relation)
+      def handle_empty_relation(criteria, relation)
+        return nil unless relation.blank?
+
         if criteria.error_on_empty_dataset?
           return error(criteria.domain => ["#{criteria.domain} not found"])
         end
@@ -74,26 +76,47 @@ module Appfuel
         order(criteria, relation.all)
       end
 
+      # Determines which query conditions to apply to the relation
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @param relation
+      # @return relation
+      def handle_query_conditions(criteria, relation)
+        if criteria.all?
+          return apply_query_all(criteria, relation)
+        end
+
+        apply_query_conditions(criteria, relation)
+      end
+
+      def build_entities(criteria, relation)
+        builder = create_entity_builder(criteria)
+        result  = handle_empty_relation(criteria, relation)
+        return result if result
+        return builder.call(criteria, relation) if criteria.single?
+
+        collection = create_entity_collection(criteria.domain_name)
+        collection.entity_loader = entity_loader(criteria, relation, builder)
+        collection
+      end
+
+      def create_entity_builder(criteria)
+        klass = "Builder::Db#{criteria.domain.classify}"
+        mod   = find_parent_module(criteria)
+        unless mod.const_defined?(klass)
+          fail "Entity Builder (#{klass}) not found for #{mod}"
+        end
+
+        mod.const_get(klass).new
+      end
+
       def query(criteria)
         return execute_criteria(criteria) if criteria.exec?
 
         begin
           relation = query_relation(criteria)
-          relation = if criteria.all?
-                      apply_query_all(criteria, relation)
-                     else
-                      apply_query_conditions(criteria, relation)
-                     end
-
-          if relation.blank?
-            result = handle_empty_relation(criteria, relation)
-            return result if result
-          end
-
-          result = build_collection(criteria, relation)
-          result = result.first if criteria.single?
-
-          result
+          relation = handle_query_conditions(criteria, relation)
+          build_entitites(criteria, relation)
         rescue => e
           msg = "query failed for #{criteria.domain}: #{e.class} #{e.message}"
           err = RuntimeError.new(msg)
@@ -102,41 +125,35 @@ module Appfuel
         end
       end
 
-      def build_relation(criteria)
-        if criteria.all?
-          relation = repo_mapper.db_class(criteria.domain).all
-        else
-          relation = repo_mapper.where(criteria)
-          relation = repo_mapper.order(criteria, relation)
-          relation = relation.limit(criteria.limit) if criteria.limit?
-          relation
+      def entity_loader(criteria, relation, builder)
+        -> { load_collection(criteria, relation, builder) }
+      end
+
+
+      def load_collection(criteria, relation, builder)
+        pager_request = criteria.pager
+        relation = relation.page(pager_request.page).per(pager_request.per_page)
+
+        data[:pager] = create_pager_result(
+          total_pages:  relation.total_pages,
+          current_page: relation.current_page,
+          total_count:  relation.total_count,
+          limit_value:  relation.limit_value,
+          page_size:    relation.size
+        )
+
+        relation.each do |db_item|
+          data[:items] << builder.call(criteria, relation)
         end
+        data
       end
 
-      def build_collection(criteria, relation)
-        collection = EntityCollection.new(criteria.domain_name)
-        pager      = criteria.pager
-        relation   = relation.page(pager.page).per(pager.per_page)
-
-        collection.entity_loader = entity_loader(criteria.domain, relation)
-        collection
+      def create_pager_result(data)
+        Appfuel::Pagination::Result.new(data)
       end
 
-      def entity_loader(domain_key, relation)
-        -> {
-          data = {
-            total_pages:  relation.total_pages,
-            current_page: relation.current_page,
-            total_count:  relation.total_count,
-            limit_value:  relation.limit_value,
-            page_size:    relation.size,
-            items: []
-          }
-          relation.each do |db_item|
-            data[:items] << repo_mapper.to_entity(domain_key, db_item)
-          end
-          data
-        }
+      def create_entity_collection(domain_name)
+        Appfuel::Domain::EntityCollection.new(criteria.domain_name)
       end
 
       private
@@ -145,6 +162,18 @@ module Appfuel
         fail "Could not execute method #{method}" unless respond_to?(method)
 
         return public_send(method, criteria)
+      end
+
+      def find_parent_module(criteria)
+        mod = root_module
+        unless criteria.global_domain?
+          feature = criteria.feature.classify
+          unless root_module.const_defined?(feature)
+            fail "Feature (#{feature}) not found for #{mod}"
+          end
+          mod = root_module.get_const(feature)
+        end
+        mod
       end
     end
   end

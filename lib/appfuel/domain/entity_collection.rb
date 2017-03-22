@@ -15,6 +15,7 @@ module Appfuel
           fail "#{domain_name} is not a registered type"
         end
 
+        @pager         = nil
         @list          = []
         @domain_name   = domain_name
         @loaded        = false
@@ -38,6 +39,11 @@ module Appfuel
         @list.each {|entity| yield entity}
       end
 
+      def pager
+        load_entities
+        @pager
+      end
+
       def to_a
         list = []
         each do |entity|
@@ -59,7 +65,9 @@ module Appfuel
 
       def load_entities
         return false if @loaded || !entity_loader?
-        @list = entity_loader.call
+        data = entity_loader.call
+        @list = data[:list]
+        @pager  = data[:pager]
       end
     end
   end

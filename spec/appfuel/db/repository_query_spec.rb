@@ -75,6 +75,7 @@ module Appfuel::Db
           end
         end
 
+        allow(relation).to receive(:blank?).with(no_args) { true }
         result = repo.handle_empty_relation(criteria, relation)
         expect(result).to eq(error)
       end
@@ -85,7 +86,9 @@ module Appfuel::Db
         relation  = double('some relation')
         domain    = double(Appfuel::Domain::Entity)
         not_found = double('some not found entity')
+
         allow_domain_type('foo.bar', domain)
+        allow(relation).to receive(:blank?).with(no_args) { true }
         allow(domain).to receive(:new).with({}) { not_found }
 
         result = repo.handle_empty_relation(criteria, relation)
@@ -154,6 +157,24 @@ module Appfuel::Db
         expect {
           repo.apply_query_all(criteria, relation)
         }.to raise_error(RuntimeError, msg)
+      end
+    end
+
+    context '#handle_query_conditions' do
+      it 'delegates to the "all" interface when criteria "all" is used' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.bar').all
+        relation = double('some relation')
+        expect(repo).to receive(:apply_query_all).with(criteria, relation)
+        repo.handle_query_conditions(criteria, relation)
+      end
+
+      it 'delegates to the query conditions when criteria "all" is not used' do
+        repo     = setup_mixin
+        criteria = create_criteria('foo.bar')
+        relation = double('some relation')
+        expect(repo).to receive(:apply_query_conditions).with(criteria, relation)
+        repo.handle_query_conditions(criteria, relation)
       end
     end
 
