@@ -337,6 +337,52 @@ module Appfuel::Db
       end
     end
 
+    context '#build_entities' do
+      it 'builds an entity collection' do
+        repo     = setup_mixin
+        entity   = double('some entity')
+        criteria = create_criteria('foo.bar')
+        relation = double('some relation')
+        builder  = double('some builder')
+
+        allow_domain_type('foo.bar', entity)
+        allow(repo).to receive(:create_entity_builder).with(criteria) { builder }
+        result = repo.build_entities(criteria, relation)
+        expect(result).to be_an_instance_of(Appfuel::Domain::EntityCollection)
+        expect(result.entity_loader.lambda?).to be true
+      end
+
+      it 'returns the results from #handle_empty_dataset' do
+        repo     = setup_mixin
+        entity   = double('some entity')
+        criteria = create_criteria('foo.bar')
+        relation = double('some relation')
+        builder  = double('some builder')
+
+        allow_domain_type('foo.bar', entity)
+        allow(relation).to receive(:blank?).with(no_args) { true }
+        allow(repo).to receive(:create_entity_builder).with(criteria) { builder }
+        allow(repo).to receive(:handle_empty_relation).with(criteria, relation) {
+          'empty results'
+        }
+        result = repo.build_entities(criteria, relation)
+        expect(result).to eq('empty results')
+      end
+
+      it 'returns a single entity' do
+        repo     = setup_mixin
+        entity   = double('some entity')
+        criteria = create_criteria('foo.bar', single: true)
+        relation = double('some relation')
+        builder  = double('some builder')
+        allow_domain_type('foo.bar', entity)
+        allow(repo).to receive(:create_entity_builder).with(criteria) { builder }
+        allow(builder).to receive(:call).with(criteria, relation) { 'single entity' }
+        result = repo.build_entities(criteria, relation)
+        expect(result).to eq('single entity')
+      end
+    end
+
     def setup_mixin
       repo = Object.new
       repo.extend(Appfuel::RootModule)

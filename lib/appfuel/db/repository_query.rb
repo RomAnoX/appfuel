@@ -159,6 +159,12 @@ module Appfuel
         data
       end
 
+      # Create an entity collection and assign the entity loader with
+      # the entity builder class.
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @param relation relation
+      # @return Appfuel::Domain::EntityCollection
       def build_entities(criteria, relation)
         builder = create_entity_builder(criteria)
         result  = handle_empty_relation(criteria, relation)
