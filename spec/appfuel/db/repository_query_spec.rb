@@ -129,6 +129,34 @@ module Appfuel::Db
       end
     end
 
+    context '#apply_query_all' do
+      it "delegates to the relation's :all and limit interfaces" do
+        repo           = setup_mixin
+        criteria       = create_criteria('foo.bar').all
+        start_relation = double('starting relation')
+        all_relation   = double('all relation')
+        order_relation = double('order relation')
+        expect(start_relation).to receive(:all).with(no_args) { all_relation }
+        expect(repo).to receive(:order).with(criteria, all_relation) {
+          order_relation
+        }
+
+        expect(repo.apply_query_all(criteria, start_relation)).to eq(
+          order_relation
+        )
+      end
+
+      it 'fails when the criteria did not explicitly call :all' do
+        repo      = setup_mixin
+        criteria  = create_criteria('foo.bar')
+        relation  = double('starting relation')
+        msg = 'This interface can only be used when the criteria :all is used'
+        expect {
+          repo.apply_query_all(criteria, relation)
+        }.to raise_error(RuntimeError, msg)
+      end
+    end
+
     def setup_mixin
       repo = Object.new
       repo.extend(Mapper)

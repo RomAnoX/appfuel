@@ -68,12 +68,30 @@ module Appfuel
         relation
       end
 
+      # We have an interface for getting all recordsets separately because
+      # this is usually done with no filters or limits.
+      #
+      # @param criteria [Appfuel::Criteria]
+      # @param relation
+      # @return relation
+      def apply_query_all(criteria, relation)
+        unless criteria.all?
+          fail "This interface can only be used when the criteria :all is used"
+        end
+
+        order(criteria, relation.all)
+      end
+
       def query(criteria)
         return execute_criteria(criteria) if criteria.exec?
 
         begin
           relation = query_relation(criteria)
-          relation = apply_query_conditions(criteria, relation)
+          relation = if criteria.all?
+                      apply_query_all(criteria, relation)
+                     else
+                      apply_query_conditions(criteria, relation)
+                     end
 
           if relation.blank?
             result = handle_empty_relation(criteria, relation)
