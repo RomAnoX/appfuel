@@ -12,8 +12,7 @@ module Appfuel
     module Base
       def initialize(inputs = {})
         setup_attributes(inputs)
-        hide_undefined
-        undefined_as_nil
+        enable_undefined
       rescue Dry::Types::ConstraintError => e
         msg = "#{self.class.name} could not initialize: #{e.message}"
         error = RuntimeError.new(msg)
@@ -33,7 +32,12 @@ module Appfuel
         @hide_undefined = false
       end
 
+      def undefined_as_nil?
+        @undefined_as_nil
+      end
+
       def enable_undefined
+        show_undefined
         @undefined_as_nil = false
         each_entity do |entity|
           entity.enable_undefined
@@ -41,6 +45,7 @@ module Appfuel
       end
 
       def undefined_as_nil
+        @undefined_as_nil = true
         each_entity do |entity|
           entity.undefined_as_nil
         end
@@ -185,7 +190,9 @@ module Appfuel
       def define_getter(key)
         return if respond_to?(key)
         define_singleton_method(key) do
-          instance_variable_get("@#{key}")
+          value = instance_variable_get("@#{key}")
+          value = nil if value == Types::Undefined && undefined_as_nil?
+          value
         end
       end
 
