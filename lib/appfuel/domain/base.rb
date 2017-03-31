@@ -32,10 +32,6 @@ module Appfuel
         @hide_undefined = false
       end
 
-      def undefined_as_nil?
-        @undefined_as_nil
-      end
-
       def enable_undefined
         show_undefined
         @undefined_as_nil = false
@@ -49,6 +45,10 @@ module Appfuel
         each_entity do |entity|
           entity.undefined_as_nil
         end
+      end
+
+      def undefined_as_nil?
+        @undefined_as_nil
       end
 
       def attr_typed!(name, value)
@@ -85,13 +85,13 @@ module Appfuel
           when value.is_a?(Array)
             list = []
             value.each do |item|
-              list << (item.is_a?(Appfuel::Entity) ? item.to_hash : item)
+              list << (item.is_a?(Entity) ? item.to_hash : item)
             end
             value = list
           when value.is_a?(Hash)
             dict = {}
             value.each do |value_key, item|
-              dict[value_key] = item.is_a?(Appfuel::Entity) ? item.to_hash : item
+              dict[value_key] = item.is_a?(Entity) ? item.to_hash : item
             end
             value = dict
           when value.respond_to?(:to_hash)
@@ -127,9 +127,15 @@ module Appfuel
 
       def each_entity
         each_attr_schema do |key, type|
-          if type.respond_to?(:<) && type < Appfuel::Attributes && has?(key)
+          if type.respond_to?(:<) && type < Dsl && has?(key)
             yield send(key)
           end
+        end
+      end
+
+      def each_attr
+        each_attr_schema do |key, type|
+          yield key, send(key)
         end
       end
 
@@ -139,11 +145,14 @@ module Appfuel
 
       def setup_attributes(inputs = {})
         inputs = {} if inputs.nil?
-        fail "entity inputs must be a Hash" unless inputs.is_a?(Hash)
+        inputs = inputs.to_h if inputs == self
+
+        unless inputs.is_a?(Hash)
+          fail "Can not create #{self} entity inputs must be a Hash"
+        end
 
         inputs.deep_symbolize_keys!
         self.class.schema.each do |key, type|
-
           value = Types::Undefined
           value = inputs[key] if inputs.key?(key)
           if value_object?
@@ -201,12 +210,18 @@ module Appfuel
         return if respond_to?(setter)
 
         define_singleton_method(setter) do |input|
-          instance_variable_set("@#{key}", type[input])
+          value = is_entity?(input, type) ? input : type[input]
+          instance_variable_set("@#{key}", value)
         end
       end
 
       def freeze_instance_var(key)
         instance_variable_get("@#{key}").freeze
+      end
+
+
+      def is_entity?(value, type)
+        value.respond_to?(:domain_name) && value.domain_name == type.domain_name
       end
     end
   end
