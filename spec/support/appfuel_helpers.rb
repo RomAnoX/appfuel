@@ -30,7 +30,7 @@ module AppfuelHelpers
   def allow_domain_type(name, type)
     basename = name.to_s.split('.').last
     allow_type(name, type)
-    allow(type).to receive(:basename).with(no_args) { basename }
+    allow(type).to receive(:domain_basename).with(no_args) { basename }
     type
   end
 
@@ -73,7 +73,6 @@ module AppfuelHelpers
   def create_pager(data = {})
     Appfuel::Pagination::Request.new(data)
   end
-
 
   def undefined
     Types::Undefined

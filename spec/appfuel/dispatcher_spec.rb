@@ -48,11 +48,11 @@ module Appfuel
 
       it 'runs an action with inputs from the request' do
         root_module     = class_double(Module)
-        feature_module = class_double(Module)
-        action_class   = class_double(Action)
-        inputs         = {foo: 'bar'}
-        request        = Request.new('foo/bar', inputs)
-        result         = 'this is a result'
+        feature_module  = class_double(Module)
+        action_class    = class_double(Interactor)
+        inputs          = {foo: 'bar'}
+        request         = Request.new('foo/bar', inputs)
+        result          = 'this is a result'
 
         allow(request).to receive(:inputs).with(no_args) { inputs }
         allow_root_module_to_be_a_module(root_module)

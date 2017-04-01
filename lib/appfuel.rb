@@ -38,6 +38,8 @@ require "appfuel/container_dependency"
 require "appfuel/command_dependency"
 require "appfuel/repository_dependency_injection"
 
+require "appfuel/view_model"
+
 # Database entity mapping
 require "appfuel/db"
 require "appfuel/repository_runner"
@@ -45,4 +47,4 @@ require "appfuel/repository_runner"
 # callable operations
 require "appfuel/handler"
 require "appfuel/command"
-require "appfuel/action"
+require "appfuel/interactor"

@@ -1,5 +1,5 @@
 module Appfuel
-  class Action < Handler
+  class Interactor < Handler
     include CommandDependency
     class << self
       def resolve_dependencies(results = Dry::Container.new)

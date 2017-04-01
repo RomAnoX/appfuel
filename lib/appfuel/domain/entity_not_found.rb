@@ -19,6 +19,10 @@ module Appfuel
         super
       end
 
+      def collection?
+        false
+      end
+
       def attr_typed!(name, value)
         @entity.attr_typed!(name, value)
       end
@@ -39,8 +43,8 @@ module Appfuel
         @entity.domain_name
       end
 
-      def basename
-        @entity.basename
+      def domain_basename
+        @entity.domain_basename
       end
 
       def has?(key)

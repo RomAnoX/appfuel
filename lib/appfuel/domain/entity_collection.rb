@@ -22,6 +22,14 @@ module Appfuel
         self.entity_loader =  entity_loader if entity_loader
       end
 
+      def domain_basename
+        domain_name.split('.').lash
+      end
+
+      def collection?
+        true
+      end
+
       def all
         load_entities
         @list

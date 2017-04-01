@@ -135,7 +135,7 @@ module Appfuel
           @domain_name ||= build_domain_name
         end
 
-        def basename
+        def domain_basename
           domain_name.split('.').last
         end
 

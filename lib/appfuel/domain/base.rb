@@ -20,6 +20,10 @@ module Appfuel
         raise error
       end
 
+      def collection?
+        false
+      end
+
       def hide_undefined?
         @hide_undefined
       end
@@ -72,8 +76,8 @@ module Appfuel
         self.class.domain_name
       end
 
-      def basename
-        self.class.basename
+      def domain_basename
+        self.class.domain_basename
       end
 
       def to_hash

@@ -58,13 +58,13 @@ module Appfuel::Domain
         tear_down('Foo')
       end
 
-      it 'delegates basename' do
+      it 'delegates domain_basename' do
         _entity_class, instance = setup_entity('Foo', 'foo')
 
-        expect(instance).to receive(:basename).with(no_args) {'results'}
+        expect(instance).to receive(:domain_basename).with(no_args) {'results'}
 
         not_found = EntityNotFound.new(entity_name: 'foo')
-        expect(not_found.basename).to eq 'results'
+        expect(not_found.domain_basename).to eq 'results'
 
         tear_down('Foo')
       end
