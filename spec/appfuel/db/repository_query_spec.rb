@@ -52,10 +52,11 @@ module Appfuel::Db
 
     context '#create_entity_not_found' do
       it 'creates an entity not found null object for the criteria domain' do
-        domain = double(Appfuel::Domain::Entity)
-        allow_domain_type('foo.bar', domain)
-        allow(domain).to receive(:new).with({})
-
+        domain_class = class_double(Appfuel::Domain::Entity)
+        domain       = instance_double(Appfuel::Domain::Entity)
+        allow_domain_type('foo.bar', domain_class)
+        allow(domain_class).to receive(:new).with({}) { domain }
+        allow(domain).to receive(:domain_name).with(no_args) { 'foo.bar' }
         criteria = create_criteria('foo.bar')
         repo = setup_mixin
         null_object = repo.create_entity_not_found(criteria)
@@ -85,11 +86,13 @@ module Appfuel::Db
         criteria  = create_criteria('foo.bar', single: true)
         relation  = double('some relation')
         domain    = double(Appfuel::Domain::Entity)
-        not_found = double('some not found entity')
 
-        allow_domain_type('foo.bar', domain)
+        domain_class = class_double(Appfuel::Domain::Entity)
+        domain       = instance_double(Appfuel::Domain::Entity)
+        allow_domain_type('foo.bar', domain_class)
+        allow(domain_class).to receive(:new).with({}) { domain }
+        allow(domain).to receive(:domain_name).with(no_args) { 'foo.bar' }
         allow(relation).to receive(:blank?).with(no_args) { true }
-        allow(domain).to receive(:new).with({}) { not_found }
 
         result = repo.handle_empty_relation(criteria, relation)
         expect(result).to be_an_instance_of(Appfuel::Domain::EntityNotFound)

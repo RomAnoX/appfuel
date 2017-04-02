@@ -8,26 +8,31 @@ module Appfuel
     #
     class EntityCollection
       include Enumerable
-      attr_reader :domain_name, :entity_loader
+      attr_reader :domain_name, :domain_basename, :entity_loader
 
       def initialize(domain_name, entity_loader = nil)
         unless Types.key?(domain_name)
           fail "#{domain_name} is not a registered type"
         end
 
-        @pager         = nil
-        @list          = []
-        @domain_name   = domain_name
-        @loaded        = false
-        self.entity_loader =  entity_loader if entity_loader
-      end
+        @pager  = nil
+        @list   = []
+        @loaded = false
 
-      def domain_basename
-        domain_name.split('.').lash
+        parts = domain_name.split('.')
+        @domain_name     = domain_name
+        @domain_basename = parts.last
+        @is_global       = parts.size == 1
+
+        self.entity_loader =  entity_loader if entity_loader
       end
 
       def collection?
         true
+      end
+
+      def global?
+        @is_global
       end
 
       def all

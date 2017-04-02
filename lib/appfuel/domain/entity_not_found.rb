@@ -4,11 +4,12 @@ module Appfuel
       attribute 'entity_name', 'string'
 
       def initialize(inputs = {})
-        super
+        entity_name = inputs[:entity_name]
         if entity_name.nil? || entity_name == Types::Undefined
           fail ":entity_name is a required attribute"
         end
         @entity = Types[entity_name].new({})
+        super
       end
 
       def method_missing(method, *args, &block)
@@ -21,6 +22,10 @@ module Appfuel
 
       def collection?
         false
+      end
+
+      def global?
+        @entity.global?
       end
 
       def attr_typed!(name, value)

@@ -13,11 +13,17 @@ module Appfuel
       def initialize(inputs = {})
         setup_attributes(inputs)
         enable_undefined
+        @is_global = domain_name.count('.') == 0
+
       rescue Dry::Types::ConstraintError => e
         msg = "#{self.class.name} could not initialize: #{e.message}"
         error = RuntimeError.new(msg)
         error.set_backtrace(e.backtrace)
         raise error
+      end
+
+      def global?
+        @is_global
       end
 
       def collection?

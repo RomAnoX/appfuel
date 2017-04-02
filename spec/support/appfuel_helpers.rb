@@ -30,6 +30,7 @@ module AppfuelHelpers
   def allow_domain_type(name, type)
     basename = name.to_s.split('.').last
     allow_type(name, type)
+    allow(type).to receive(:domain_name).with(no_args) { name }
     allow(type).to receive(:domain_basename).with(no_args) { basename }
     type
   end

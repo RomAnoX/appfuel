@@ -4,10 +4,10 @@ module Appfuel::Domain
     describe 'initialize' do
       it 'delegates domain_name' do
         _entity_class, instance = setup_entity('Foo', 'foo')
-        expect(instance).to receive(:domain_name).with(no_args) { 'some name' }
+        expect(instance).to receive(:domain_name).with(no_args) { 'foo' }
 
         not_found = EntityNotFound.new(entity_name: 'foo')
-        expect(not_found.domain_name).to eq 'some name'
+        expect(not_found.domain_name).to eq 'foo'
         tear_down('Foo')
       end
 
@@ -98,6 +98,7 @@ module Appfuel::Domain
 
       instance = instance_double(entity)
       allow(entity).to receive(:new).with({}) { instance }
+      allow(instance).to receive(:domain_name).with(no_args) { entity_name }
       [entity, instance]
     end
 
