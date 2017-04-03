@@ -77,21 +77,21 @@ module Appfuel
       # @param inputs [Hash]
       # @return the root module or self
       def view_model_module(dataset, inputs = {})
-        return root_module if inputs[:global_view_model] == true
+        return root_module if inputs[:global_view] == true
         return root_module if dataset.respond_to?(:global?) && dataset.global?
         self
       end
 
       # Determines how to transform the dataset when no info is given.
       #
-      # @param data [mixed]
+      # @param dataset [mixed]
       # @return lambda
-      def generic_view_model(data)
+      def generic_view_model(dataset)
         method = case
-                 when data.respond_to?(:to_view_model) then :to_view_model
-                 when data.respond_to?(:to_h)          then :to_h
-                 when data.respond_to?(:to_hash)       then :to_h
-                 when data.respond_to?(:to_a)          then :to_a
+                 when dataset.respond_to?(:to_view_model) then :to_view_model
+                 when dataset.respond_to?(:to_h)          then :to_h
+                 when dataset.respond_to?(:to_hash)       then :to_hash
+                 when dataset.respond_to?(:to_a)          then :to_a
                  else
                    :to_s
                  end
@@ -133,7 +133,7 @@ module Appfuel
       #
       # @return [lamda]
       def view_model_finder
-        ->(dataset, inputs = {}) {
+        @view_model_fined ||= ->(dataset, inputs = {}) {
           self.find_view_model(dataset, inputs)
         }
       end
