@@ -173,8 +173,40 @@ module Appfuel::ViewModel
         allow(dataset).to receive(:respond_to?).with(:global?) { false }
         expect(registry.view_model_module(dataset, inputs)).to eq registry
       end
-
     end
+
+    context '.find_view_model' do
+      it 'returns a view model with a custom name' do
+        registry = setup
+        name     = :foo_bar
+        dataset  = double('some dataset')
+        inputs   = {view_name: name}
+        model    = double('i am a view model')
+        registry.view_models[name] = model
+
+        expect(registry.find_view_model(dataset, inputs)).to eq model
+      end
+
+      it 'returns a view model with an entity name' do
+        registry = setup
+        name     = :my_entity
+        entity   = double('some entity')
+        model    = double('some viewmodel')
+
+        allow(entity).to receive(:respond_to?).with(:global?) { true }
+        allow(entity).to receive(:global?).with(no_args) { false }
+
+        allow(entity).to receive(:respond_to?).with(:domain_basename) { true }
+        allow(entity).to receive(:domain_basename).with(no_args) { name }
+
+        allow(entity).to receive(:respond_to?).with(:collection?) { true }
+        allow(entity).to receive(:collection?).with(no_args) { false }
+
+        registry.view_models[name] = model
+        expect(registry.find_view_model(entity)).to eq model
+      end
+    end
+
     def setup
       registry = Class.new do
         extend Appfuel::RootModule
