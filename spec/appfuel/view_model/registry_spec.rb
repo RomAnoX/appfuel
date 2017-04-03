@@ -205,6 +205,30 @@ module Appfuel::ViewModel
         registry.view_models[name] = model
         expect(registry.find_view_model(entity)).to eq model
       end
+
+      it 'returns the generic view model when name returns false' do
+        registry = setup
+        name     = :my_entity
+        entity   = double('some entity')
+
+        allow(entity).to receive(:respond_to?).with(:global?) { true }
+        allow(entity).to receive(:global?).with(no_args) { false }
+
+        allow(entity).to receive(:respond_to?).with(:domain_basename) { true }
+        allow(entity).to receive(:domain_basename).with(no_args) { name }
+
+        allow(entity).to receive(:respond_to?).with(:collection?) { true }
+        allow(entity).to receive(:collection?).with(no_args) { false }
+
+        # I have to do this because rspec is using respond_to on my double
+        allow(entity).to receive(:respond_to?).at_least(:once)
+
+        # we will not add the entity basename so that it won't be found
+        # causing the generic view to be used instead
+        expect(registry).to receive(:generic_view_model).with(entity) { 'blah' }
+        expect(registry.find_view_model(entity)).to eq 'blah'
+      end
+
     end
 
     def setup

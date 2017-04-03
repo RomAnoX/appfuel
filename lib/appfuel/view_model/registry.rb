@@ -18,7 +18,7 @@ module Appfuel
       # @param name [Symbol, String]
       # @return [Boolean]
       def view_model?(name)
-        view_models.key?(name.to_sym)
+        view_models.key?(name.to_s.to_sym)
       end
 
       # Dsl method used to store a reference to the block and change
@@ -33,7 +33,9 @@ module Appfuel
         fail "view models must be used with a block" unless block_given?
 
         model = build_view_model
-        name  = name.to_sym
+        name  = name.to_s.to_sym
+        fail "view model name can not be empty" if name.empty?
+
         view_models[name] = ->(data, inputs = {}) {
           model.instance_exec(data, inputs, &blk)
         }
@@ -61,10 +63,9 @@ module Appfuel
       def find_view_model(dataset, inputs = {})
         mod  = view_model_module(dataset, inputs)
         name = inputs.fetch(:view_name) { default_view_name(dataset) }
-        return generc_view_model(data) unless name
 
         unless mod.view_model?(name)
-          return mod.generic_view_model(data)
+          return mod.generic_view_model(dataset)
         end
 
         mod.view_models[name]
