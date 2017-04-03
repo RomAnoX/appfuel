@@ -30,7 +30,7 @@ module Appfuel
       # @param name [Symbol, String]
       # @return [lamda]
       def view_model(name, &blk)
-        fail "view models must be used with a block" unless block_given?
+        fail "view models must be added with a block" unless block_given?
 
         model = build_view_model
         name  = name.to_s.to_sym

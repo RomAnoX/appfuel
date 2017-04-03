@@ -30,6 +30,19 @@ module Appfuel::ViewModel
       it 'returns a lambda' do
         expect(setup.view_model_finder.lambda?).to be true
       end
+
+      it 'delegates :find_view_model in the lambda' do
+        registry = setup
+        dataset  = 'this is some dataset'
+        inputs   = {}
+        results  = 'some view model results'
+
+        expect(registry).to receive(:find_view_model).with(dataset, inputs) {
+          results
+        }
+        finder   = registry.view_model_finder
+        expect(finder.call(dataset, inputs)).to eq results
+      end
     end
 
     context '.build_view_model' do
@@ -228,7 +241,68 @@ module Appfuel::ViewModel
         expect(registry).to receive(:generic_view_model).with(entity) { 'blah' }
         expect(registry.find_view_model(entity)).to eq 'blah'
       end
+    end
 
+    describe '.present_view_model' do
+      it 'returns the raw dataset when return_format is "raw"' do
+        registry = setup
+        inputs   = {return_format: 'raw'}
+        dataset  = 'some dataset'
+
+        expect(registry.present_view_model(dataset, inputs)).to eq dataset
+      end
+
+      it 'delegates to find view model and call that view model' do
+        registry = setup
+        inputs   = {}
+        dataset  = 'some dataset'
+        vm       = double('some view model')
+        result   = 'some final view model result'
+        expect(registry).to receive(:find_view_model).with(dataset, inputs) {
+          vm
+        }
+
+        expect(vm).to receive(:call).with(dataset, inputs) { result }
+        expect(registry.present_view_model(dataset, inputs)).to eq result
+      end
+    end
+
+    describe '.view_model' do
+      it 'fails when called without a block' do
+        msg = 'view models must be added with a block'
+        registry = setup
+        expect {
+          registry.view_model('foo')
+        }.to raise_error(RuntimeError, msg)
+      end
+
+      it 'builds a view model with the view_model_class' do
+        registry = setup
+        expect(registry).to receive(:build_view_model).with(no_args)
+        registry.view_model(:foo) {|dataset, inputs| dataset }
+      end
+
+      it 'adds a lamda with the key name' do
+        registry = setup
+        registry.view_model(:foo) {|dataset, inputs| dataset }
+        expect(registry.view_models[:foo].lambda?).to be true
+      end
+
+      it 'uses the instantiated view model to call :instance_exec in the lambda' do
+        registry = setup
+        vm = double('i am a view model')
+
+        dataset = 'some dataset'
+        inputs  = {}
+
+        allow(registry).to receive(:build_view_model).with(no_args) { vm }
+        expect(vm).to receive(:instance_exec).with(dataset, inputs)
+
+        registry.view_model(:foo) {|data, stuff| data }
+
+        vm_lambda = registry.view_models[:foo]
+        vm_lambda.call(dataset, inputs)
+      end
     end
 
     def setup
