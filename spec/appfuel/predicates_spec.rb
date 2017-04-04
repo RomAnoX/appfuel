@@ -2,8 +2,8 @@ module Appfuel
   RSpec.describe Predicates do
     it 'validates a criteria type is valid' do
       schema = setup
-      criteria = instance_double(Criteria)
-      allow(criteria).to receive(:instance_of?).with(Criteria) { true }
+      criteria = instance_double(Domain::Criteria)
+      allow(criteria).to receive(:instance_of?).with(Domain::Criteria) { true }
 
       result = schema.call(foo: criteria)
       expect(result).to be_success

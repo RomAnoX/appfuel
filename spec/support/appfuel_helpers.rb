@@ -68,7 +68,7 @@ module AppfuelHelpers
   end
 
   def create_criteria(domain, opts = {})
-    Appfuel::Criteria.new(domain, opts)
+    Appfuel::Domain::Criteria.new(domain, opts)
   end
 
   def create_pager(data = {})

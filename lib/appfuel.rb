@@ -1,4 +1,3 @@
-
 # Third party dependencies
 require "json"
 require "dry-validation"
@@ -29,7 +28,6 @@ require "appfuel/db_model"
 
 # Interface for dscribing domain queries
 require "appfuel/pagination"
-require "appfuel/criteria"
 
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"
@@ -48,3 +46,45 @@ require "appfuel/repository_runner"
 require "appfuel/handler"
 require "appfuel/command"
 require "appfuel/interactor"
+
+# Appfuel
+#   container
+#     service
+#       name
+#       root_module
+#       root_path
+#
+=begin
+  configure_service do |config|
+    config.root_module  = SpService
+    config.root_path    = ROOT_PATH
+    config.db_maps      =
+    config.initializers =
+    config.config_files = [
+
+    ]
+  end
+
+  features do
+    authentication
+    audits
+    user_management
+  end
+
+  collect configure
+  run app initializer
+
+  #
+  # this should probably lazy loaded when
+  # the feature is first accessed
+  #
+=end
+module Appfuel
+  class << self
+    def configure(&block)
+      setup = Setup.new
+      yield setup
+
+    end
+  end
+end

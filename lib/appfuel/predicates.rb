@@ -3,7 +3,7 @@ module Appfuel
     include Dry::Logic::Predicates
 
     predicate(:criteria?) do |value|
-      value.instance_of?(Appfuel::Criteria)
+      value.instance_of?(Appfuel::Domain::Criteria)
     end
 
   end
