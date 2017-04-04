@@ -1,4 +1,6 @@
 require_relative 'configuration/file_loader'
+require_relative 'configuration/search'
+require_relative 'configuration/populate'
 require_relative 'configuration/definition_dsl'
 
 module Appfuel
