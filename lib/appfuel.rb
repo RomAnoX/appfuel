@@ -1,7 +1,6 @@
 # Third party dependencies
 require "json"
 require "dry-validation"
-#require "active_model/errors"
 require "active_record"
 
 require "appfuel/version"
@@ -10,6 +9,8 @@ require "appfuel/version"
 require "appfuel/types"
 require "appfuel/errors"
 require "appfuel/run_error"
+
+require "appfuel/configuration"
 
 # Action/command input/output interfaces
 require "appfuel/response"
@@ -79,12 +80,3 @@ require "appfuel/interactor"
   # the feature is first accessed
   #
 =end
-module Appfuel
-  class << self
-    def configure(&block)
-      setup = Setup.new
-      yield setup
-
-    end
-  end
-end

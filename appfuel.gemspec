@@ -23,11 +23,12 @@ Gem::Specification.new do |spec|
   # we have to lock dry-types due to failures I am encountering
   # when dynamically creating form validators. Not sure if it is the library
   # or the way I am using it.
-  spec.add_dependency "activerecord",   "5.0.1"
-  spec.add_dependency "dry-types",      "0.9.2"
-  spec.add_dependency "dry-container",  "~> 0.6"
-  spec.add_dependency "dry-validation", "~> 0.10.5"
-  spec.add_dependency "dry-monads",     "~> 0.2"
+  spec.add_dependency "activerecord",     "~> 5.0.1"
+  spec.add_dependency "dry-types",        "0.9.2"
+  spec.add_dependency "dry-container",    "~> 0.6"
+  spec.add_dependency "dry-validation",   "~> 0.10.5"
+  spec.add_dependency "dry-monads",       "~> 0.2"
+  spec.add_dependency "dry-configurable", "~> 0.6"
 
   spec.add_development_dependency "bundler",            "~> 1.13"
   spec.add_development_dependency "rake",               "~> 10.0"
