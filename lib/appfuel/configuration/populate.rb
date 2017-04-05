@@ -4,7 +4,7 @@ module Appfuel
       # This converts a definition into a hash of configuation values. It does
       # this using the following steps
       #
-      # 1. load config data from a yaml file if a file is defined
+      # 1. load config data from a yaml or json file if a file is defined
       # 2. populate all children
       # 3. merge defaults into config data that has been given or resolved
       #    from the config file
