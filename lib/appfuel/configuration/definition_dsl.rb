@@ -15,7 +15,7 @@ module Appfuel
     #   file /etc/startplus/offers.yml
     #   defaults bar: 'bif',
     #            baz: 'biz'
-    #   validator Dry::Validation.Form {
+    #   validator  {
     #     required(:name).filled
     #   }
     #
@@ -23,7 +23,7 @@ module Appfuel
     #     defaults bat: 'hit',
     #              rat: 'cheese'
     #
-    #     validator Dry::Validation.Form {
+    #     validator {
     #       required(:cheese_type).filled
     #     }
     #   end
@@ -59,7 +59,6 @@ module Appfuel
         @key       = key
         @defaults  = {}
         @file      = []
-        @file_type = :yaml
         @validator = nil
         @children  = {}
       end
@@ -81,15 +80,6 @@ module Appfuel
 
       def file?
         !@file.empty?
-      end
-
-      def file_type(value = nil)
-        return @file_type if value.nil?
-        value = value.to_s.downcase.to_sym
-        unless [:json, :yaml].include?(value)
-          fail "only json and yaml are supported"
-        end
-        @file_type = value
       end
 
       # Dsl used when you expected to manually pass in the configuration data
@@ -122,12 +112,10 @@ module Appfuel
       #
       # @params validator Dry::Validation::Schema
       # @return validator
-      def validator(handler = nil)
-        return @validator if handler.nil?
-        unless handler.respond_to?(:call)
-          fail ArgumentError, 'validator must implement call'
-        end
-        @validator = handler
+      def validator(&block)
+        return @validator unless block_given?
+
+        @validator = Dry::Validation.Schema(&block)
       end
 
       def validator?

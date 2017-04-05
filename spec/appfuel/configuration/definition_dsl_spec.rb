@@ -61,17 +61,16 @@ module Appfuel::Configuration
 
       it 'returns the validator that was set' do
         definition = create_definition('foo')
-        handler = -> {}
-        definition.validator handler
-        expect(definition.validator).to eq handler
-      end
 
-      it 'fails when the validator does not implement "call"' do
-        definition = create_definition('foo')
-        handler = Object.new
-        expect {
-          definition.validator handler
-        }.to raise_error(ArgumentError, 'validator must implement call')
+        definition.validator {
+          required(:bar).filled(:int?, gt?: 4)
+        }
+
+        expect(definition.validator.class).to be < Dry::Validation::Schema
+        inputs = {bar: 5}
+        result = definition.validator.call(inputs)
+        expect(result.success?).to be true
+        expect(result.output).to eq inputs
       end
     end
 
@@ -221,7 +220,6 @@ module Appfuel::Configuration
         definition << child1
 
         expect(definition.search('bar', 'baz')).to eq(child2)
-
       end
     end
 
