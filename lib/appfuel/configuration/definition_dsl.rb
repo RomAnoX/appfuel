@@ -15,6 +15,12 @@ module Appfuel
     #   file /etc/startplus/offers.yml
     #   defaults bar: 'bif',
     #            baz: 'biz'
+    #
+    #   env FOO_BAR: :bar,
+    #       FOO_BAZ: :baz
+    #
+    #   unsafe :some_key, :other_key
+    #
     #   validator  {
     #     required(:name).filled
     #   }
@@ -61,6 +67,7 @@ module Appfuel
         @file      = []
         @validator = nil
         @children  = {}
+        @env       = {}
       end
 
       # Dsl command used to set the file path. When used without params
@@ -90,7 +97,6 @@ module Appfuel
         @file = []
       end
 
-      #
       # Dsl command used to set default values. When used without params
       # it returns the full default hash
       #
@@ -103,6 +109,22 @@ module Appfuel
         end
 
         @defaults = settings
+      end
+
+      # Dsl command used to define what env variables will me mapped to config
+      # keys
+      #
+      # @param settings Hash
+      # @option <key>=><value> The key is the env variable and the value is
+      #                        the config key it maps to
+      # @return Hash
+      def env(settings = nil)
+        return @env if settings.nil?
+        unless settings.is_a?(Hash)
+          fail ArgumentError, 'config env settings must be a hash'
+        end
+
+        @env = settings
       end
 
       # Dsl to assign validator. When no params are given then it returns

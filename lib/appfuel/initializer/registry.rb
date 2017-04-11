@@ -16,31 +16,14 @@ module Appfuel
       #
       # @param name [Symbol, String]
       # @return [lamda]
-      def initializer(name, priority: nil, &blk)
+      def initializer(name, priority: 100, &blk)
         fail "view models must be added with a block" unless block_given?
 
-        base = build_initializer
         name = name.to_s.to_sym
         fail "initializer name can not be empty" if name.empty?
-        runner = ->(container) { base.instance_exe(container, &blk) }
-        @initializer << {name: name, runner: runner}
+        @initializers << {name: name, priority: priority, runner: blk}
       end
 
-      # This will be the class used to call `instance_exec` for the
-      # the initializer block
-      #
-      # @return Appfuel::Initializer::Base
-      def initializer_class
-        Base
-      end
-
-
-      # Building the initializer class
-      #
-      # @return Appfuel::ViewModel::Base
-      def build_initializer
-        view_model_class.new
-      end
     end
   end
 end

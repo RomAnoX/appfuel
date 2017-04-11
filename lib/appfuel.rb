@@ -30,6 +30,8 @@ require "appfuel/db_model"
 # Interface for dscribing domain queries
 require "appfuel/pagination"
 
+require "appfuel/application_root"
+
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"
 require "appfuel/validator_dependency"
@@ -47,6 +49,12 @@ require "appfuel/repository_runner"
 require "appfuel/handler"
 require "appfuel/command"
 require "appfuel/interactor"
+
+module Appfuel
+  def self.container
+    @container ||= Dry::Container.new
+  end
+end
 
 # Appfuel
 #   container

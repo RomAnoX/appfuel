@@ -53,6 +53,29 @@ module Appfuel::Configuration
       end
     end
 
+    context '#env' do
+      it 'returns an empty hash by default' do
+        definition = create_definition('foo')
+        expect(definition.env).to eq({})
+      end
+
+      it 'returns a hash when set' do
+        env = {'FOO_BAR' => :bar}
+        definition = create_definition('foo')
+        definition.env 'FOO_BAR' => :bar
+        expect(definition.env).to eq env
+      end
+
+      it 'fails when env is not a hash' do
+        msg = 'config env settings must be a hash'
+
+        definition = create_definition('foo')
+        expect {
+          definition.env 'FOO_BAR'
+        }.to raise_error(ArgumentError, msg)
+      end
+    end
+
     context '#validator' do
       it 'return nil when no validator is set' do
         definition = create_definition('foo')
