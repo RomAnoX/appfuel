@@ -11,6 +11,7 @@ require "appfuel/errors"
 require "appfuel/run_error"
 
 require "appfuel/configuration"
+require "appfuel/initialize"
 
 # Action/command input/output interfaces
 require "appfuel/response"
@@ -51,8 +52,38 @@ require "appfuel/command"
 require "appfuel/interactor"
 
 module Appfuel
-  def self.container
-    @container ||= Dry::Container.new
+  class << self
+    attr_writer :container
+
+    def container
+      @container ||= Dry::Container.new
+    end
+
+    def default_app_name
+      container[:default_app_name]
+    end
+
+    def app_container(name = nil)
+      name ||= default_app_name
+      container[name]
+    end
+
+
+    def resolve(name, app_name = nil)
+      di = app_container(app_name)
+      unless di.respond_to?(:resolve)
+        fail "application container (#{app_name}) does not implement :resolve"
+      end
+      di.resolve(name)
+    end
+
+    def register(name, value, app_name = nil)
+      di = app_container(app_name)
+      unless di.respond_to?(:register)
+        fail "application container (#{app_name}) does not implement :register"
+      end
+      di.register(name, value)
+    end
   end
 end
 

@@ -33,15 +33,24 @@ module Appfuel
     #     3) order is controlled my a main initializer.rb file that is required when
     #        the hook is fired
     #     4) an initializer accepts a container
-    def setup(root:, path:)
-      name = root.to_s.underscore
-      container.register(:app_name, name)
+    def setup(data = {})
+      root = data.fetch(:root_module) {
+        fail "A root module is required to setup Appfuel"
+      }
+
+      name = root_module.to_s.underscore
+      container.register(:default_app_name, name)
 
       app_container = Dry::Container.new
-      app_container.register(:root_module, root)
       app_container.register(:root_path, path)
+      app_container.register(:root_module, root)
+      app_container.register(:initializers, ThreadSafe::Array.new)
+      app_container.register(:config_definition, root.cofiguration_definition)
 
-      container
+      container.register(name, app_container)
+      root.load_initializers
+
+      app_container
     end
   end
 end

@@ -55,7 +55,6 @@ module Appfuel
         child_hash.each do |(def_key, definition)|
           data[def_key] ||= {}
           data[def_key] = load_file(definition) if definition.file?
-
           data[def_key] = definition.defaults.deep_merge(data[def_key])
 
           unless definition.children.empty?
