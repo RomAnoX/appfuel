@@ -131,6 +131,33 @@ module Appfuel::Configuration
         expect(definition.populate).to eq(expected)
       end
 
+      it 'merges settings from the file with defaults and env' do
+        env_data    = {'FOO_A' => 'env_a', 'FOO_C' => 'env_c'}
+        my_defaults = {a: 'a', b: 'b', c: 'c'}
+        my_env      = {FOO_A: :a, FOO_C: :c}
+        path        = '/blah.yaml'
+        settings    = {'foo' => {a: 'x', c: 'y', f: 'h'}}
+        definition     = create_definition('foo')
+
+        definition.file path
+        definition.defaults my_defaults
+        definition.env my_env
+
+        expected = {
+          "foo" => {
+            a: 'env_a',
+            b: 'b',
+            c: 'env_c',
+            f: 'h'
+          }
+        }
+
+        allow(File).to receive(:exists?).with(path) { true }
+        allow(YAML).to receive(:load_file).with(path) { settings }
+
+        expect(definition.populate(env: env_data)).to eq(expected)
+      end
+
       it 'throws an error if the file can not be found' do
         path  = '/blah.yaml'
         error = "none of :foo config files exist at (/blah.yaml)"
@@ -155,6 +182,38 @@ module Appfuel::Configuration
         allow(File).to receive(:exists?).with(path).and_return(true)
         expect(YAML).to receive(:load_file).with(path).and_return({})
         definition.populate(overrides: overrides)
+      end
+
+      it 'overrides specific config data' do
+        env_data     = {'FOO_A' => 'env_a', 'FOO_C' => 'env_c'}
+        my_defaults  = {a: 'a', b: 'b', c: 'c'}
+        my_env       = {FOO_A: :a, FOO_C: :c}
+        my_overrides = {a: 'override_a', f: 'override_f'}
+        path         = '/blah.yaml'
+        settings     = {'foo' => {a: 'x', c: 'y', f: 'h'}}
+        definition     = create_definition('foo')
+
+        definition.file path
+        definition.defaults my_defaults
+        definition.env my_env
+
+        expected = {
+          "foo" => {
+            a: 'override_a',
+            b: 'b',
+            c: 'env_c',
+            f: 'override_f'
+          }
+        }
+
+        allow(File).to receive(:exists?).with(path) { true }
+        allow(YAML).to receive(:load_file).with(path) { settings }
+
+        populate_params = {
+          env: env_data,
+          overrides: my_overrides
+        }
+        expect(definition.populate(populate_params)).to eq(expected)
       end
 
       it 'loads children definition from file' do

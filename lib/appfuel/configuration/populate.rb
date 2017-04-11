@@ -16,7 +16,8 @@ module Appfuel
       # @return Hash
       def populate(data = {})
         overrides = data[:overrides] || {}
-        config    = data[:config] || {key => {}}
+        config    = data[:config]    || {key => {}}
+        env_data  = data[:env]       || ENV
 
         if overrides.key?(:config_file) && !overrides[:config_file].nil?
           file overrides[:config_file]
@@ -26,11 +27,25 @@ module Appfuel
         config[key] ||= {}
 
         config[key] = defaults.deep_merge(config[key])
-        config[key] = config[key].deep_merge(overrides[key] || {})
+        config[key] = config[key].deep_merge(load_env(env_data, self))
+        config[key] = config[key].deep_merge(overrides || {})
 
         populate_children(children, config[key]) unless children.empty?
 
         config[key] = handle_validation(config[key])
+        config
+      end
+
+      #
+      # @param definition [DefinitionDsl]
+      # @return [Hash]
+      def load_env(env_data, definition)
+        config = {}
+        definition.env.each do |env_key, config_key|
+          env_key = env_key.to_s
+          next unless env_data.key?(env_key)
+          config[config_key] = env_data[env_key]
+        end
         config
       end
 
