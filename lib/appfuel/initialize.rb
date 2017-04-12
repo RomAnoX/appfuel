@@ -1,3 +1,4 @@
+require_relative 'initialize/setup'
 require_relative 'initialize/initializer'
 
 module Appfuel
@@ -8,16 +9,22 @@ module Appfuel
         initializers << Initializer.new(name, envs, &block)
       end
 
-      def run(container, params = {})
+      def run(params = {})
+        app_name     = params.fetch(:app_name) { Appfuel.default_app_name }
+        container    = Appfuel.app_container(app_name)
+
         overrides    = params[:overrides]  || {}
         exclude      = params[:exclude]    || []
         env          = params[:env]        || ENV
 
-        initializers = container['initializers']
-        definition   = container['config_definition']
+        initializers = container[:initializers]
+        definition   = container[:config_definition]
+
         config = definition.populate(env: env, overrides: overrides)
+
         container.register('config', config)
         env = config.fetch(:env) { fail "key (:env) is missing from config" }
+
         initializers.each do |init|
           next if !init.env_allowed?(env) || exclude.include?(init.name)
 

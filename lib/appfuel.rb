@@ -31,8 +31,6 @@ require "appfuel/db_model"
 # Interface for dscribing domain queries
 require "appfuel/pagination"
 
-require "appfuel/application_root"
-
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"
 require "appfuel/validator_dependency"
@@ -59,6 +57,11 @@ module Appfuel
       @container ||= Dry::Container.new
     end
 
+    def default_app?
+      container.key?(:default_app_name) &&
+        container.key?(container[:default_app_name])
+    end
+
     def default_app_name
       container[:default_app_name]
     end
@@ -67,7 +70,6 @@ module Appfuel
       name ||= default_app_name
       container[name]
     end
-
 
     def resolve(name, app_name = nil)
       di = app_container(app_name)
