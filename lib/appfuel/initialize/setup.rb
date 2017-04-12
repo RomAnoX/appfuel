@@ -62,10 +62,22 @@ module Appfuel
         app_name.to_s
       end
 
+      # Initializes the application container with three items:
+      #
+      # 1) the root module where all features are contained
+      # 2) an empty intializer array
+      # 3) the applications configuration definition which is used to
+      #    build out the config hash
+      #
+      # @param root [Module] the root module of the application
+      # @param container [Dry::Container] dependency injection container
+      # @return [Dry::Container]
       def build_app_container(root, container = Dry::Container.new)
         container.register(:root, root)
         container.register(:initializers, ThreadSafe::Array.new)
-        container.register(:config_definition, root.configuration_definition)
+        if root.respond_to?(:configuration_definition)
+          container.register(:config_definition, root.configuration_definition)
+        end
         container
       end
 

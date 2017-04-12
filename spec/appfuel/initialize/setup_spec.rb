@@ -71,7 +71,38 @@ module Appfuel::Initialize
         app_name = init.handle_app_name(root, params, container)
         expect(app_name).to eq("foo_bar")
       end
+    end
 
+    context '#build_app_container' do
+      it 'creates a new container when one is not given' do
+        root = double('some root module')
+        init = setup
+        result = init.build_app_container(root)
+        expect(result).to be_an_instance_of(Dry::Container)
+      end
+
+      it 'adds the root module to the app container' do
+        root = double('some root module')
+        init = setup
+        result = init.build_app_container(root)
+        expect(result[:root]).to eq(root)
+      end
+
+      it 'adds an empty initializers thread safe hash' do
+        root = double('some root module')
+        init = setup
+        result = init.build_app_container(root)
+        expect(result[:initializers]).to be_an_instance_of(ThreadSafe::Array)
+      end
+
+      it 'adds a configuration definition if the root module responds' do
+        root   = double('some root module')
+        init   = setup
+        config = 'some configuration definition'
+        allow(root).to receive(:configuration_definition).with(no_args) { config }
+        result = init.build_app_container(root)
+        expect(result[:config_definition]).to eq(config)
+      end
     end
 
     def setup
