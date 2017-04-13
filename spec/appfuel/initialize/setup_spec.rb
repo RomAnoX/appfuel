@@ -105,6 +105,18 @@ module Appfuel::Initialize
       end
     end
 
+    context '#setup_appfuel' do
+      it 'creates an application container with key from app_name' do
+        root   = double('some root module')
+        params = {root: root, app_name: :foo}
+        init   = setup
+        allow(root).to receive(:load_initializers).with(no_args)
+
+        result = init.setup_appfuel(params)
+        expect(result).to be_an_instance_of(Dry::Container)
+      end
+    end
+
     def setup
       obj = Object.new
       obj.extend(Setup)
