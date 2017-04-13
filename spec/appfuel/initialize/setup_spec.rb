@@ -106,7 +106,7 @@ module Appfuel::Initialize
     end
 
     context '#setup_appfuel' do
-      it 'creates an application container with key from app_name' do
+      it 'creates an app container with key from app_name' do
         root   = double('some root module')
         params = {root: root, app_name: :foo}
         init   = setup
@@ -114,6 +114,37 @@ module Appfuel::Initialize
 
         result = init.setup_appfuel(params)
         expect(result).to be_an_instance_of(Dry::Container)
+      end
+
+      it 'creates an app container with a name derived from the root module' do
+        root   = double('some root module')
+        params = {root: root}
+        init   = setup
+        root_name = 'FooBar'
+        allow(root).to receive(:load_initializers).with(no_args)
+        allow(root).to receive(:to_s).with(no_args) { root_name }
+
+        init.setup_appfuel(params)
+        expect(Appfuel.container[:foo_bar]).to be_an_instance_of(Dry::Container)
+      end
+
+      it 'adds an empty intializers thread safe array' do
+        root   = double('some root module')
+        params = {root: root, app_name: :foo}
+        init   = setup
+        allow(root).to receive(:load_initializers).with(no_args)
+
+        result = init.setup_appfuel(params)
+        expect(result[:initializers]).to be_an_instance_of(ThreadSafe::Array)
+      end
+
+      it 'delegates to the root module to load the initializers' do
+        root   = double('some root module')
+        params = {root: root, app_name: :foo}
+        init   = setup
+
+        expect(root).to receive(:load_initializers).with(no_args)
+        init.setup_appfuel(params)
       end
     end
 
