@@ -146,6 +146,14 @@ module Appfuel::Initialize
         expect(root).to receive(:load_initializers).with(no_args)
         init.setup_appfuel(params)
       end
+
+      it 'fails when no root module is given' do
+        msg  = 'Root module (:root) is required to setup Appfuel'
+        init = setup
+        expect {
+          init.setup_appfuel({})
+        }.to raise_error(ArgumentError, msg)
+      end
     end
 
     def setup

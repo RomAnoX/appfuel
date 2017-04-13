@@ -14,7 +14,7 @@ module Appfuel
       # @return [Dry::Container]
       def setup_appfuel(params = {})
         root = params.fetch(:root) {
-          fail "A root module (:root) is required to setup Appfuel"
+          fail ArgumentError, "Root module (:root) is required to setup Appfuel"
         }
 
         container     = Appfuel.container
