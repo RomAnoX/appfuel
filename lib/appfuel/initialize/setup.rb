@@ -65,6 +65,15 @@ module Appfuel
         if root.respond_to?(:configuration_definition)
           container.register(:config_definition, root.configuration_definition)
         end
+
+        ns = Dry::Container::Namespace.new('global') do
+          register('validators') { {} }
+          register('domain_builders') { {} }
+          register('presenters') { {} }
+        end
+
+        container.import(ns)
+
         container
       end
 
