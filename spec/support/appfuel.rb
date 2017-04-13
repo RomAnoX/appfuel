@@ -5,7 +5,6 @@ require 'appfuel'
 RSpec.configure do |config|
   config.before(:each) do
 
-    @app_container = Appfuel.container
     @db_map = Appfuel::Db::MappingRegistry.map
     @dbs    = Types::Db.container
     @types  = Types.container
@@ -14,14 +13,13 @@ RSpec.configure do |config|
     Types::Db.send(:instance_variable_set, :@container, @dbs.dup)
     Types.send(:instance_variable_set, :@container, @types.dup)
     Appfuel::Db::MappingRegistry.map = @db_map.dup
-    Appfuel.container = @app_container.dup
+    Appfuel.container = Dry::Container.new
   end
 
   config.after(:each) do
     Types::Db.send(:instance_variable_set, :@container, @dbs)
     Types.send(:instance_variable_set, :@container, @types)
     Appfuel::Db::MappingRegistry.map = @db_map
-    Appfuel.container = @app_container
   end
 
   config.include AppfuelHelpers
