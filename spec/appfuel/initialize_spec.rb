@@ -23,6 +23,7 @@ module Appfuel
   context '.run' do
     it 'populates the configuration definition in the app container' do
       root = double('some root module')
+      allow(root).to receive(:root_path).with(no_args) { 'some/path' }
       definition = Appfuel::Configuration.define :foo do
         defaults bar: 'bar',
                  baz: 'baz'
@@ -32,7 +33,7 @@ module Appfuel
 
       params = {root: root, app_name: :foo}
       init = setup_init
-      container = init.setup_appfuel(params)
+      init.setup_appfuel(params)
     end
 
     def setup_init

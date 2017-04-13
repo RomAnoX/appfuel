@@ -60,6 +60,7 @@ module Appfuel
       # @return [Dry::Container]
       def build_app_container(root, container = Dry::Container.new)
         container.register(:root, root)
+        container.register(:root_path, root.root_path)
         container.register(:initializers, ThreadSafe::Array.new)
         if root.respond_to?(:configuration_definition)
           container.register(:config_definition, root.configuration_definition)

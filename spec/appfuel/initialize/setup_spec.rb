@@ -3,7 +3,7 @@ module Appfuel::Initialize
     context '#handle_default_app_name' do
       it 'assigns the default app name when default_app is true' do
         params    = {app_name: 'foo', default_app: true}
-        root      = double('some root module')
+        root      = mock_root
         container = build_container
         init      = setup
 
@@ -14,7 +14,7 @@ module Appfuel::Initialize
       it 'assigns the default app name when appfuel does not have one' do
         # NOTE: we do not set the default_app flag
         params    = {app_name: 'bar'}
-        root      = double('some root module')
+        root      = mock_root
         container = build_container
         init      = setup
         allow(Appfuel).to receive(:default_app?).with(no_args) { false }
@@ -26,12 +26,11 @@ module Appfuel::Initialize
         # NOTE: we do not set the default_app flag or app_name
         params    = {}
         root_name = "FooBar"
-        root      = double('some root module')
+        root      = mock_root(name: root_name)
         container = build_container
         init      = setup
 
         allow(Appfuel).to receive(:default_app?).with(no_args) { false }
-        allow(root).to receive(:to_s).with(no_args) { root_name }
         init.handle_app_name(root, params, container)
         expect(container[:default_app_name]).to eq("foo_bar")
       end
@@ -39,19 +38,18 @@ module Appfuel::Initialize
       it 'does not assign a default name when appfuel has one' do
         params    = {}
         root_name = "FooBar"
-        root      = double('some root module')
+        root      = mock_root(name: root_name)
         container = build_container
         init      = setup
 
         allow(Appfuel).to receive(:default_app?).with(no_args) { true }
-        allow(root).to receive(:to_s).with(no_args) { root_name }
         init.handle_app_name(root, params, container)
         expect(container.key?(:default_app_name)).to be false
       end
 
       it 'returns the app_name passed into params' do
         params    = {app_name: 'bar'}
-        root      = double('some root module')
+        root      = mock_root
         container = build_container
         init      = setup
         allow(Appfuel).to receive(:default_app?).with(no_args) { false }
@@ -62,12 +60,11 @@ module Appfuel::Initialize
       it 'returns the app_name derived from the root' do
         params    = {}
         root_name = "FooBar"
-        root      = double('some root module')
+        root      = mock_root(name: root_name)
         container = build_container
         init      = setup
 
         allow(Appfuel).to receive(:default_app?).with(no_args) { false }
-        allow(root).to receive(:to_s).with(no_args) { root_name }
         app_name = init.handle_app_name(root, params, container)
         expect(app_name).to eq("foo_bar")
       end
@@ -75,28 +72,28 @@ module Appfuel::Initialize
 
     context '#build_app_container' do
       it 'creates a new container when one is not given' do
-        root = double('some root module')
+        root = mock_root
         init = setup
         result = init.build_app_container(root)
         expect(result).to be_an_instance_of(Dry::Container)
       end
 
       it 'adds the root module to the app container' do
-        root = double('some root module')
+        root = mock_root
         init = setup
         result = init.build_app_container(root)
         expect(result[:root]).to eq(root)
       end
 
       it 'adds an empty initializers thread safe hash' do
-        root = double('some root module')
+        root = mock_root
         init = setup
         result = init.build_app_container(root)
         expect(result[:initializers]).to be_an_instance_of(ThreadSafe::Array)
       end
 
       it 'adds a configuration definition if the root module responds' do
-        root   = double('some root module')
+        root   = mock_root
         init   = setup
         config = 'some configuration definition'
         allow(root).to receive(:configuration_definition).with(no_args) { config }
@@ -107,7 +104,7 @@ module Appfuel::Initialize
 
     context '#setup_appfuel' do
       it 'creates an app container with key from app_name' do
-        root   = double('some root module')
+        root   = mock_root
         params = {root: root, app_name: :foo}
         init   = setup
         allow(root).to receive(:load_initializers).with(no_args)
@@ -117,29 +114,27 @@ module Appfuel::Initialize
       end
 
       it 'creates an app container with a name derived from the root module' do
-        root   = double('some root module')
-        params = {root: root}
-        init   = setup
+        init      = setup
         root_name = 'FooBar'
+        root      = mock_root(name: root_name)
+        params    = {root: root}
         allow(root).to receive(:load_initializers).with(no_args)
-        allow(root).to receive(:to_s).with(no_args) { root_name }
 
         init.setup_appfuel(params)
         expect(Appfuel.container[:foo_bar]).to be_an_instance_of(Dry::Container)
       end
 
       it 'adds an empty intializers thread safe array' do
-        root   = double('some root module')
+        root   = mock_root
         params = {root: root, app_name: :foo}
         init   = setup
-        allow(root).to receive(:load_initializers).with(no_args)
 
         result = init.setup_appfuel(params)
         expect(result[:initializers]).to be_an_instance_of(ThreadSafe::Array)
       end
 
       it 'delegates to the root module to load the initializers' do
-        root   = double('some root module')
+        root   = mock_root
         params = {root: root, app_name: :foo}
         init   = setup
 
@@ -154,6 +149,14 @@ module Appfuel::Initialize
           init.setup_appfuel({})
         }.to raise_error(ArgumentError, msg)
       end
+    end
+
+    def mock_root(name: 'foo', path: 'some/root/path')
+      root = double('some root module')
+      allow(root).to receive(:load_initializers).with(no_args)
+      allow(root).to receive(:root_path).with(no_args) { path }
+      allow(root).to receive(:to_s).with(no_args) { name }
+      root
     end
 
     def setup
