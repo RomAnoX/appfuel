@@ -13,19 +13,27 @@ module Appfuel
       #
       # @return [Dry::Container]
       def setup_appfuel(params = {})
-        root = params.fetch(:root) {
-          fail ArgumentError, "Root module (:root) is required to setup Appfuel"
-        }
+        app_container       = params[:app_container] || Dry::Container.new
+        framework_container = Appfuel.container
 
-        container     = Appfuel.container
-        app_name      = handle_app_name(root, params, container)
-        app_container = build_app_container(root)
+        app_container = build_app_container(params, app_container)
+        app_name = handle_app_name(params, app_container, framework_container)
 
-        container.register(app_name, app_container)
+        framework_container.register(app_name, app_container)
 
-        root.load_initializers
+        if params.key?(:after_setup)
+          handle_after_setup(params[:after_setup], app_container)
+        end
 
         app_container
+      end
+
+      def handle_after_setup(hook, container)
+        unless hook.respond_to?(:call)
+          fail ArgumentError, "After setup hook (:after_setup) must " +
+            "implement :call, which takes the di container as its only arg"
+        end
+        hook.call(container)
       end
 
       # Determine the app name for input params or the parsing the root
@@ -39,10 +47,13 @@ module Appfuel
       # @option default_app [Bool] force the assignment of default name
       #
       # @return [String]
-      def handle_app_name(root, params, container)
-        app_name  = params.fetch(:app_name) { root.to_s.underscore }
+      def handle_app_name(params, app_container, framework_container)
+        app_name = params.fetch(:app_name) {
+          app_container[:root].to_s.underscore
+        }
+
         if params[:default_app] == true || !Appfuel.default_app?
-          container.register(:default_app_name, app_name)
+          framework_container.register(:default_app_name, app_name)
         end
 
         app_name.to_s
@@ -58,13 +69,22 @@ module Appfuel
       # @param root [Module] the root module of the application
       # @param container [Dry::Container] dependency injection container
       # @return [Dry::Container]
-      def build_app_container(root, container = Dry::Container.new)
+      def build_app_container(params, container = Dry::Container.new)
+        root = params.fetch(:root) {
+          fail ArgumentError, "Root module (:root) is required"
+        }
+
+        root_path = params.fetch(:root_path) {
+          fail ArgumentError, "Root path (:root_path) is required"
+        }
+
         container.register(:root, root)
-        container.register(:root_path, root.root_path)
-        container.register(:initializers, ThreadSafe::Array.new)
-        if root.respond_to?(:configuration_definition)
-          container.register(:config_definition, root.configuration_definition)
+        container.register(:root_path, root_path)
+        if params.key?(:config_definition)
+          container.register(:config_definition, params[:config_definition])
         end
+
+        container.register(:initializers, ThreadSafe::Array.new)
 
         ns = Dry::Container::Namespace.new('global') do
           register('validators') { {} }
