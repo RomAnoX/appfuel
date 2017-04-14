@@ -19,28 +19,37 @@ module Appfuel
       end
     end
 
-    context '.run' do
-      it 'populates the configuration definition in the app container' do
-        definition = Appfuel::Configuration.define :foo do
-          defaults bar: 'bar',
-            baz: 'baz'
-        end
 
-        root = double('some root module')
-        params = {
-          root: root,
-          app_name: :foo,
-          root_path: 'foo/bar',
-          config_definition: definition
-        }
-        init = setup_init
-        init.setup_appfuel(params)
+    context 'handle_configuration' do
+      it 'populates the configuration and registers config and its env' do
+        definition = double('some config definition')
+        env        = {some: 'env vars'}
+        overrides  = {some: 'cli overrides'}
+        inputs     = {env: env, overrides: overrides}
+        config     = {some: 'configs', env: 'dev'}
+        container  = build_container(config_definition: definition)
+
+        allow(definition).to receive(:populate).with(inputs) { config }
+
+        Initialize.handle_configuration(container, inputs)
+        expect(container[:config]).to eq(config)
+        expect(container[:env]).to eq('dev')
       end
 
-      def setup_init
-        obj = Object.new
-        obj.extend(Appfuel::Initialize::Setup)
-        obj
+      it 'fails when no env is in the config' do
+        definition = double('some config definition')
+        env        = {some: 'env vars'}
+        overrides  = {some: 'cli overrides'}
+        inputs     = {env: env, overrides: overrides}
+        config     = {some: 'configs'}
+        container  = build_container(config_definition: definition)
+
+        allow(definition).to receive(:populate).with(inputs) { config }
+
+        msg = 'key (:env) is missing from config'
+        expect {
+          Initialize.handle_configuration(container, inputs)
+        }.to raise_error(RuntimeError, msg)
       end
     end
   end
