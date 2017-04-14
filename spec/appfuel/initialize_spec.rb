@@ -18,30 +18,30 @@ module Appfuel
         expect(list[1].name).to eq "bar"
       end
     end
-  end
 
-  context '.run' do
-    it 'populates the configuration definition in the app container' do
-      definition = Appfuel::Configuration.define :foo do
-        defaults bar: 'bar',
-                 baz: 'baz'
+    context '.run' do
+      it 'populates the configuration definition in the app container' do
+        definition = Appfuel::Configuration.define :foo do
+          defaults bar: 'bar',
+            baz: 'baz'
+        end
+
+        root = double('some root module')
+        params = {
+          root: root,
+          app_name: :foo,
+          root_path: 'foo/bar',
+          config_definition: definition
+        }
+        init = setup_init
+        init.setup_appfuel(params)
       end
 
-      root = double('some root module')
-      params = {
-        root: root,
-        app_name: :foo,
-        root_path: 'foo/bar',
-        config_definition: definition
-      }
-      init = setup_init
-      init.setup_appfuel(params)
-    end
-
-    def setup_init
-      obj = Object.new
-      obj.extend(Appfuel::Initialize::Setup)
-      obj
+      def setup_init
+        obj = Object.new
+        obj.extend(Appfuel::Initialize::Setup)
+        obj
+      end
     end
   end
 end

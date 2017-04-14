@@ -83,6 +83,8 @@ module Appfuel
     # manually. This is assigned during setup via the module
     # Appfuel::Initialize::Setup
     #
+    # @raises Dry::Container::Error when default_app_name is not registered
+    #
     # @return [String]
     def default_app_name
       framework_container[:default_app_name]
@@ -111,7 +113,7 @@ module Appfuel
     def resolve(key, app_name = nil)
       di = app_container(app_name)
       unless di.respond_to?(:resolve)
-        fail "application container (#{app_name}) does not implement :resolve"
+        fail "Application container (#{app_name}) does not implement :resolve"
       end
       di.resolve(key)
     end
@@ -129,7 +131,7 @@ module Appfuel
     def register(key, value, app_name = nil)
       di = app_container(app_name)
       unless di.respond_to?(:register)
-        fail "application container (#{app_name}) does not implement :register"
+        fail "Application container (#{app_name}) does not implement :register"
       end
       di.register(key, value)
     end
