@@ -3,14 +3,14 @@ module Appfuel
     context '.define' do
       it 'adds an initializer into the app containers initializers' do
         list = []
-        allow(Appfuel).to receive(:resolve).with(:initializers) { list }
+        allow(Appfuel).to receive(:resolve).with('initializers', nil) { list }
         Initialize.define("foo") {}
         expect(list.first).to be_an_instance_of(Initialize::Initializer)
       end
 
       it 'appends another initializer on to the first' do
         list = []
-        allow(Appfuel).to receive(:resolve).with(:initializers) { list }
+        allow(Appfuel).to receive(:resolve).with('initializers', nil) { list }
         Initialize.define("foo") {}
         Initialize.define("bar") {}
 

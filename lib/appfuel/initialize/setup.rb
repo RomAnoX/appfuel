@@ -14,7 +14,7 @@ module Appfuel
       # @return [Dry::Container]
       def setup_appfuel(params = {})
         app_container       = params[:app_container] || Dry::Container.new
-        framework_container = Appfuel.container
+        framework_container = Appfuel.framework_container
 
         app_container = build_app_container(params, app_container)
         app_name = handle_app_name(params, app_container, framework_container)
@@ -59,12 +59,30 @@ module Appfuel
         app_name.to_s
       end
 
-      # Initializes the application container with three items:
+      # Initializes the application container with:
       #
-      # 1) the root module where all features are contained
-      # 2) an empty intializer array
-      # 3) the applications configuration definition which is used to
-      #    build out the config hash
+      # Application Container
+      #   root: This is the root module that holds the namespaces for all
+      #         features, actions, commands etc. This is required.
+      #
+      #   root_path: This is the root path of app where the source code
+      #              lives. We use this to autoload this features. This
+      #              is still under design so it might not stay.
+      #
+      #   config_definition: This is the definition object that we use to
+      #                      build out the configuration hash. This is optional
+      #
+      #   initializers: This is an array that hold all the initializers to be
+      #                 run. This builder will handle creating the array. It is
+      #                 populated via appfuel dsl Appfuel::Initialize#define
+      #
+      #   global.validators: This is a hash that holds all global validators.
+      #                      this builder will handle creating the hash. It is
+      #                      populated via appfuel dsl
+      #                      Appfuel::Validator#global_validator
+      #
+      #   global.domain_builders:
+      #   global.presenters
       #
       # @param root [Module] the root module of the application
       # @param container [Dry::Container] dependency injection container
@@ -98,7 +116,6 @@ module Appfuel
       end
 
       def bootstrap_appfuel(overrides: {}, env: ENV)
-
       end
     end
   end

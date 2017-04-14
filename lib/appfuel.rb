@@ -50,74 +50,88 @@ require "appfuel/command"
 require "appfuel/interactor"
 
 module Appfuel
+  # The appfuel top level interface mainly deals with interacting with both
+  # the application dependency injection container and the framework di
+  # container.
   class << self
-    attr_writer :container
+    attr_writer :framework_container
 
-    def container
-      @container ||= Dry::Container.new
+    # The framework dependency injection container holds information
+    # specific to appfuel plus an app container for each app it will manage.
+    # While it is most common to has only a single app it is designed to
+    # host multiple app since all there dependencies are contained in one
+    # container.
+    #
+    # @return [Dry::Container]
+    def framework_container
+      @framework_container ||= Dry::Container.new
     end
 
+
+    # The default app name must exist and the container must be registered
+    # for this to be true
+    #
+    # @return [Bool]
     def default_app?
-      container.key?(:default_app_name) &&
-        container.key?(container[:default_app_name])
+      framework_container.key?(:default_app_name) &&
+        framework_container.key?(framework_container[:default_app_name])
     end
 
+    # Used when retrieving, resolving an item from or registering an item
+    # with an application container without using its name. The default
+    # app is considered the main app where all others have to be specified
+    # manually. This is assigned during setup via the module
+    # Appfuel::Initialize::Setup
+    #
+    # @return [String]
     def default_app_name
-      container[:default_app_name]
+      framework_container[:default_app_name]
     end
 
+    # The application container is a di container used to hold all dependencies
+    # for the given application.
+    #
+    # @raises Dry::Container::Error when name is not registered
+    #
+    # @param name [String, Nil]  default name is used when name is nil
+    # @return [Dry::Container]
     def app_container(name = nil)
-      name ||= default_app_name
-      container[name]
+      framework_container[name || default_app_name]
     end
 
-    def resolve(name, app_name = nil)
+    # Resolve an item out of the application container
+    #
+    # @raises RuntimeError when container does not implement :resolve
+    # @raises Dry::Container::Error when key is not registered
+    # @raises Dry::Container::Error when app_name is not registered
+    #
+    # @param key [String] key of the item in the app container
+    # @param app_name [String, Nil] name of the app container
+    # @return the item that was resolved with name
+    def resolve(key, app_name = nil)
       di = app_container(app_name)
       unless di.respond_to?(:resolve)
         fail "application container (#{app_name}) does not implement :resolve"
       end
-      di.resolve(name)
+      di.resolve(key)
     end
 
-    def register(name, value, app_name = nil)
+
+    # Register an item in the application container
+    #
+    # @raises RuntimeError when container does not implement :register
+    # @raises Dry::Container::Error when key is not registered
+    # @raises Dry::Container::Error when app_name is not registered
+    #
+    # @param key [String] key of the item in the app container
+    # @param app_name [String, Nil] name of the app container
+    # @return the item that was resolved with name
+    def register(key, value, app_name = nil)
       di = app_container(app_name)
       unless di.respond_to?(:register)
         fail "application container (#{app_name}) does not implement :register"
       end
-      di.register(name, value)
+      di.register(key, value)
     end
   end
 end
-
-# Appfuel
-#   container
-#     service
-#       name
-#       root_module
-#       root_path
-#
-=begin
-  configure_service do |config|
-    config.root_module  = SpService
-    config.root_path    = ROOT_PATH
-    config.db_maps      =
-    config.initializers =
-    config.config_files = [
-
-    ]
-  end
-
-  features do
-    authentication
-    audits
-    user_management
-  end
-
-  collect configure
-  run app initializer
-
-  #
-  # this should probably lazy loaded when
-  # the feature is first accessed
-  #
-=end

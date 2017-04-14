@@ -13,7 +13,7 @@ RSpec.configure do |config|
     Types::Db.send(:instance_variable_set, :@container, @dbs.dup)
     Types.send(:instance_variable_set, :@container, @types.dup)
     Appfuel::Db::MappingRegistry.map = @db_map.dup
-    Appfuel.container = Dry::Container.new
+    Appfuel.framework_container = Dry::Container.new
   end
 
   config.after(:each) do

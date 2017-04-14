@@ -163,7 +163,8 @@ module Appfuel::Initialize
         init   = setup
 
         init.setup_appfuel(params)
-        expect(Appfuel.container[:foo_bar]).to be_an_instance_of(Dry::Container)
+        result = Appfuel.framework_container[:foo_bar]
+        expect(result).to be_an_instance_of(Dry::Container)
       end
 
       it 'adds an empty intializers thread safe array' do
