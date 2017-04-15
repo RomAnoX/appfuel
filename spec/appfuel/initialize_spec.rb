@@ -111,15 +111,36 @@ module Appfuel
           Initialize.handle_initializers(container, 'my_app')
         }.to raise_error(RuntimeError, msg)
       end
+    end
 
-      def setup_container(initializer, env, config)
-        inputs = {
-          initializers: [initializer],
-          config: config,
-          env: env
-        }
-        build_container(inputs)
+    context '.run' do
+      it 'handles configuration and initializers' do
+        app_name  = 'foo'
+        params    = {foo: 'bar'}
+        container = build_container
+        allow(Appfuel).to receive(:default_app_name) { app_name }
+        allow(Appfuel).to receive(:app_container).with(app_name) { container }
+
+        expect(Initialize).to(
+          receive(:handle_configuration).with(container, params)
+        ) { container }
+
+        expect(Initialize).to(
+          receive(:handle_initializers).with(container, app_name, params)
+        ) { container }
+
+        result = Initialize.run(params)
+        expect(result).to eq(container)
       end
+    end
+
+    def setup_container(initializer, env, config)
+      inputs = {
+        initializers: [initializer],
+        config: config,
+        env: env
+      }
+      build_container(inputs)
     end
   end
 end

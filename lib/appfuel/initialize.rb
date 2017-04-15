@@ -76,11 +76,19 @@ module Appfuel
         container
       end
 
+      # This will initialize the app by handling configuration and running
+      # all the initilizers, which will result in an app container that has
+      # registered the config, env, and anything else the initializers
+      # decide to add.
+      #
+      # @param params [Hash]
+      # @option app_name [String] name of the app to initialize, (optional)
+      # @return [Dry::Container]
       def run(params = {})
         app_name  = params.fetch(:app_name) { Appfuel.default_app_name }
         container = Appfuel.app_container(app_name)
         handle_configuration(container, params)
-        handle_intializers(container, app_name, params)
+        handle_initializers(container, app_name, params)
 
         container
       end
