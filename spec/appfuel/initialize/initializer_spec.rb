@@ -8,12 +8,17 @@ module Appfuel::Initialize
 
       it 'adds a single env to the env list' do
         init = create_initializer(:foo, :dev) {}
-        expect(init.envs).to eq([:dev])
+        expect(init.envs).to eq(['dev'])
       end
 
       it 'adds a list of env' do
         init = create_initializer(:foo, [:dev, :qa]) {}
-        expect(init.envs).to eq([:dev, :qa])
+        expect(init.envs).to eq(['dev', 'qa'])
+      end
+
+      it 'downcases all environment codes' do
+        init = create_initializer(:foo, :PROD) {}
+        expect(init.envs).to eq(['prod'])
       end
 
       it 'defaults to an empty list of envs' do

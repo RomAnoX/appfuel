@@ -52,5 +52,40 @@ module Appfuel
         }.to raise_error(RuntimeError, msg)
       end
     end
+
+    context 'handle_initializers' do
+      it 'runs the only initializer' do
+        config = {bar: 'with bar'}
+        env = 'development'
+        initializer = Initialize::Initializer.new(:foo) do |configs, container|
+          container.register(:foo, "foo has been initialized - #{configs[:bar]}")
+        end
+        inputs = {
+          initializers: [initializer],
+          config: config,
+          env: env
+        }
+        container = build_container(inputs)
+
+        Initialize.handle_initializers(container, 'my_app')
+        expect(container[:foo]).to eq("foo has been initialized - with bar")
+      end
+
+      it 'skips initializer when env is not allowed' do
+        config = {bar: 'with bar'}
+        env = 'development'
+        initializer = Initialize::Initializer.new(:foo, :qa) do |configs, container|
+          container.register(:foo, "bar")
+        end
+        inputs = {
+          initializers: [initializer],
+          config: config,
+          env: env
+        }
+        container = build_container(inputs)
+        expect(initializer).not_to receive(:call)
+        Initialize.handle_initializers(container, 'my_app')
+      end
+    end
   end
 end

@@ -17,6 +17,18 @@ module Appfuel
         initializers << Initializer.new(name, envs, &block)
       end
 
+      # Populate configuration definition that is in the container and
+      # add its results to the container. It also adds the environment from
+      # the config to the container for easier access.
+      #
+      # @raises RuntimeError when :env is not in the config
+      #
+      #
+      # @param container [Dry::Container]
+      # @param params [Hash]
+      # @option overrides [Hash] used to override config values
+      # @option env [ENV] used to collect environment variables
+      # @return [Dry::Container] that was passed in
       def handle_configuration(container, params = {})
         overrides    = params[:overrides]  || {}
         env          = params[:env]        || ENV
@@ -31,21 +43,29 @@ module Appfuel
         container
       end
 
-      def handle_initializers(app_name, container, params)
+      # Run all initializers registered in the app container
+      #
+      # @param container [Dry::Container] application container
+      # @param app_name [String] name of the app for errors
+      # @param params [Hash]
+      # @option excludes [Array] list of initializers to exclude from running
+      # @return [Dry::Container] same container passed in
+      def handle_initializers(container, app_name, params = {})
         exclude = params[:exclude] || []
-
-        env    = container[:env]
-        config = container[:config]
+        env     = container[:env]
+        config  = container[:config]
 
         container[:initializers].each do |init|
-          next if !init.env_allowed?(env) || exclude.include?(init.name)
+          if !init.env_allowed?(env) || exclude.include?(init.name)
+            next
+          end
 
           begin
             init.call(config, container)
           rescue => e
             msg = "[Appfuel:#{app_name}] Initialization FAILURE " + e.message
             error = RuntimeError.new(msg)
-            error.set_backtrac(e.backtrace)
+            error.set_backtrace(e.backtrace)
             raise error
           end
         end
@@ -56,7 +76,7 @@ module Appfuel
         app_name  = params.fetch(:app_name) { Appfuel.default_app_name }
         container = Appfuel.app_container(app_name)
         handle_configuration(container, params)
-        handle_intializers(app_name, container, params)
+        handle_intializers(container, app_name, params)
 
         container
       end
