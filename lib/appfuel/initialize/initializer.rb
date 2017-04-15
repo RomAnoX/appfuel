@@ -8,6 +8,8 @@ module Appfuel
         @envs = []
 
         env = [env] if env.is_a?(String) || env.is_a?(Symbol)
+        env = []    if env.nil?
+
         unless env.is_a?(Array)
           fail ArgumentError, "environments must be a string, symbol or array"
         end

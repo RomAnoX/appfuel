@@ -55,36 +55,70 @@ module Appfuel
 
     context 'handle_initializers' do
       it 'runs the only initializer' do
-        config = {bar: 'with bar'}
-        env = 'development'
         initializer = Initialize::Initializer.new(:foo) do |configs, container|
           container.register(:foo, "foo has been initialized - #{configs[:bar]}")
         end
-        inputs = {
-          initializers: [initializer],
-          config: config,
-          env: env
-        }
-        container = build_container(inputs)
+        container = setup_container(initializer, 'dev', bar: 'with bar')
 
         Initialize.handle_initializers(container, 'my_app')
         expect(container[:foo]).to eq("foo has been initialized - with bar")
       end
 
       it 'skips initializer when env is not allowed' do
-        config = {bar: 'with bar'}
-        env = 'development'
         initializer = Initialize::Initializer.new(:foo, :qa) do |configs, container|
           container.register(:foo, "bar")
         end
+        container = setup_container(initializer, 'dev', bar: 'some config')
+        expect(initializer).not_to receive(:call)
+        Initialize.handle_initializers(container, 'my_app')
+      end
+
+      it 'skips when initializer is excluded, exclude name is a symbol' do
+        initializer = Initialize::Initializer.new(:foo) do |configs, container|
+          container.register(:foo, "bar")
+        end
+        container = setup_container(initializer, 'dev', bar: 'some config')
+        expect(initializer).not_to receive(:call)
+        Initialize.handle_initializers(container, 'my_app', exclude: [:foo])
+      end
+
+      it 'skips when initializer is excluded, exclude name is a string' do
+        initializer = Initialize::Initializer.new(:foo) do |configs, container|
+          container.register(:foo, "bar")
+        end
+        container = setup_container(initializer, 'dev', bar: 'some config')
+
+        expect(initializer).not_to receive(:call)
+        Initialize.handle_initializers(container, 'my_app', exclude: ['foo'])
+      end
+
+      it 'fails when exlude is not an array' do
+        msg = ':exclude must be an array'
+        expect {
+          container = build_container
+          Initialize.handle_initializers(container, 'my_app', exclude: 'blah')
+        }.to raise_error(ArgumentError, msg)
+      end
+
+      it 'handles raised errors' do
+        initializer = Initialize::Initializer.new(:foo) do |configs, container|
+          fail "I am an error"
+        end
+
+        container = setup_container(initializer, 'dev', bar: 'some config')
+        msg = '[Appfuel:my_app] Initialization FAILURE - I am an error'
+        expect {
+          Initialize.handle_initializers(container, 'my_app')
+        }.to raise_error(RuntimeError, msg)
+      end
+
+      def setup_container(initializer, env, config)
         inputs = {
           initializers: [initializer],
           config: config,
           env: env
         }
-        container = build_container(inputs)
-        expect(initializer).not_to receive(:call)
-        Initialize.handle_initializers(container, 'my_app')
+        build_container(inputs)
       end
     end
   end

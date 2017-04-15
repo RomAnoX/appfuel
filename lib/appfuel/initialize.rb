@@ -52,9 +52,13 @@ module Appfuel
       # @return [Dry::Container] same container passed in
       def handle_initializers(container, app_name, params = {})
         exclude = params[:exclude] || []
-        env     = container[:env]
-        config  = container[:config]
+        unless exclude.is_a?(Array)
+          fail ArgumentError, ":exclude must be an array"
+        end
+        exclude.map! {|item| item.to_s}
 
+        env    = container[:env]
+        config = container[:config]
         container[:initializers].each do |init|
           if !init.env_allowed?(env) || exclude.include?(init.name)
             next
@@ -63,7 +67,7 @@ module Appfuel
           begin
             init.call(config, container)
           rescue => e
-            msg = "[Appfuel:#{app_name}] Initialization FAILURE " + e.message
+            msg = "[Appfuel:#{app_name}] Initialization FAILURE - " + e.message
             error = RuntimeError.new(msg)
             error.set_backtrace(e.backtrace)
             raise error
