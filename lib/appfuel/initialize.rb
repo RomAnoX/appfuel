@@ -1,4 +1,3 @@
-require_relative 'initialize/setup'
 require_relative 'initialize/initializer'
 
 module Appfuel

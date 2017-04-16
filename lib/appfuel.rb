@@ -11,6 +11,7 @@ require "appfuel/errors"
 require "appfuel/run_error"
 
 require "appfuel/configuration"
+require "appfuel/application_root"
 require "appfuel/initialize"
 
 # Action/command input/output interfaces
