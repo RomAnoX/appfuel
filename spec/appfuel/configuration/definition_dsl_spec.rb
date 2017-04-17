@@ -118,12 +118,10 @@ module Appfuel::Configuration
         definition.defaults my_defaults
 
         expected = {
-          "foo" => {
-            a: 'x',
-            b: 'b',
-            c: 'y',
-            f: 'h'
-          }
+          a: 'x',
+          b: 'b',
+          c: 'y',
+          f: 'h'
         }
 
         allow(File).to receive(:exists?).with(path) { true }
@@ -144,12 +142,10 @@ module Appfuel::Configuration
         definition.env my_env
 
         expected = {
-          "foo" => {
-            a: 'env_a',
-            b: 'b',
-            c: 'env_c',
-            f: 'h'
-          }
+          a: 'env_a',
+          b: 'b',
+          c: 'env_c',
+          f: 'h'
         }
 
         allow(File).to receive(:exists?).with(path) { true }
@@ -198,12 +194,10 @@ module Appfuel::Configuration
         definition.env my_env
 
         expected = {
-          "foo" => {
-            a: 'override_a',
-            b: 'b',
-            c: 'env_c',
-            f: 'override_f'
-          }
+          a: 'override_a',
+          b: 'b',
+          c: 'env_c',
+          f: 'override_f'
         }
 
         allow(File).to receive(:exists?).with(path) { true }
@@ -237,11 +231,9 @@ module Appfuel::Configuration
 
         result = definition.populate
         expected = {
-          'foo' => {
-            'bar' => bar[:hash].merge({
-              'bos' => bos[:hash]
-            })
-          }
+          'bar' => bar[:hash].merge({
+            'bos' => bos[:hash]
+          })
         }
         expect(result).to eq(expected)
       end

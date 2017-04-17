@@ -16,24 +16,27 @@ module Appfuel
       # @return Hash
       def populate(data = {})
         overrides = data[:overrides] || {}
-        config    = data[:config]    || {key => {}}
+        config    = data[:config]    || {}
         env_data  = data[:env]       || ENV
 
         if overrides.key?(:config_file) && !overrides[:config_file].nil?
           file overrides[:config_file]
         end
 
-        config = load_file(self) if file?
-        config[key] ||= {}
+        if file?
+          config = load_file(self)
+          config = config[key]
+        end
 
-        config[key] = defaults.deep_merge(config[key])
-        config[key] = config[key].deep_merge(load_env(env_data, self))
-        config[key] = config[key].deep_merge(overrides || {})
+        config ||= {}
 
-        populate_children(children, config[key]) unless children.empty?
+        config = defaults.deep_merge(config)
+        config = config.deep_merge(load_env(env_data, self))
+        config = config.deep_merge(overrides || {})
 
-        config[key] = handle_validation(config[key])
-        config
+        populate_children(children, config) unless children.empty?
+
+        handle_validation(config)
       end
 
       #

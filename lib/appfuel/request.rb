@@ -2,7 +2,7 @@ module Appfuel
   class Request
     attr_reader :action_route, :feature, :action, :inputs
 
-    def initialize(action_route, inputs)
+    def initialize(action_route, inputs = {})
       unless inputs.respond_to?(:to_h)
         fail "inputs must respond to :to_h"
       end

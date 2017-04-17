@@ -114,7 +114,19 @@ module Appfuel
       container
     end
 
-    def bootstrap_appfuel(overrides: {}, env: ENV)
+    def bootstrap(overrides: {}, env: ENV)
+      Initialize.run(overrides: overrides, env: env)
+    end
+
+    def dispatch(route, inputs = {})
+      container = Appfuel.app_container
+      request   = Request.new(route, inputs)
+      root      = container[:root_module]
+      unless root.const_defined?(request.feature)
+        class_name = "#{root.to_s.underscore}/#{feature.underscore}"
+        require class_name
+      end
+      ap root.const_defined?(request.feature)
     end
   end
 end
