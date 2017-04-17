@@ -23,18 +23,30 @@ module Appfuel
     # @param route [String]
     # @return [Array]
     def parse_route(route)
-      feature, action = route.to_s.split('/')
+      feature_name, action_name = route.to_s.split('/')
 
-      # NOTE: feature.strip! returns nil we are really after the empty?
-      if feature.nil? || (feature.strip! || feature.empty?)
-        fail "feature is missing, action route must be like <feature/action>"
-      end
+      feature_name = handle_parsed_string(feature_name)
+      action_name  = handle_parsed_string(action_name)
 
-      if action.nil? || (action.strip! || action.empty?)
-        fail "action is missing, action route must be like <feature/action>"
-      end
+      handle_empty_feature(feature_name)
+      handle_empty_action(action_name)
 
-      [route, feature.classify, action.classify]
+
+      [route, feature_name.classify, action_name.classify]
+    end
+
+    def handle_parsed_string(value)
+      value.to_s.strip
+    end
+
+    def handle_empty_feature(feature_name)
+      return unless feature_name.empty?
+      fail "feature is missing, action route must be like <feature/action>"
+    end
+
+    def handle_empty_action(action_name)
+      return unless action_name.empty?
+      fail "action is missing, action route must be like <feature/action>"
     end
   end
 end
