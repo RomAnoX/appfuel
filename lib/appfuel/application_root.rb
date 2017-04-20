@@ -134,15 +134,5 @@ module Appfuel
       ap action
       action.run(inputs)
     end
-
-    private
-
-    def validate_feature_loader(container, app_name = nil)
-
-    end
-
-    def validate_feature_initializer(container, app_name = nil)
-
-    end
   end
 end

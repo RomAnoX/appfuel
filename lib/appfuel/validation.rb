@@ -1,3 +1,3 @@
-require_relative 'validation/handler_dsl'
-require_relative 'validation/runner'
+require_relative 'validation/validator'
+require_relative 'validation/validator_pipe'
 

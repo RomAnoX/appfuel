@@ -1,5 +1,8 @@
 module Appfuel
-  module Validation
+  module Handler
+    #
+    #
+    #
     # 1) single block validator. A basic validator that is only used by
     #    that particular interactor
     #
@@ -49,7 +52,7 @@ module Appfuel
     #   name: to identify the pipe in errors and register it with container
     #   code: lambda to run
     #   call: run the lamda
-    module HandlerDsl
+    module ValidatorDsl
       def validators(*args)
         @validators ||= []
         return @validators if args.empty?

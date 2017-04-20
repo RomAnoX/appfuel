@@ -1,5 +1,5 @@
 module Appfuel
-  RSpec.describe Dispatcher do
+  RSpec.xdescribe Dispatcher do
 
     context '#dispatch no root module injected' do
       it 'fails when root module is not a module' do

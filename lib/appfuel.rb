@@ -49,8 +49,6 @@ require "appfuel/repository_runner"
 
 # callable operations
 require "appfuel/handler"
-require "appfuel/command"
-require "appfuel/interactor"
 
 module Appfuel
   # The appfuel top level interface mainly deals with interacting with both
