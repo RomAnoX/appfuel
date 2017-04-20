@@ -18,10 +18,11 @@ module Appfuel
       app_container = build_app_container(params, app_container)
       app_name = handle_app_name(params, app_container, framework_container)
 
+      app_container.register(:app_name, app_name)
       framework_container.register(app_name, app_container)
 
-      if params.key?(:after_setup)
-        handle_after_setup(params[:after_setup], app_container)
+      if params.key?(:on_after_setup)
+        handle_after_setup(params[:on_after_setup], app_container)
       end
 
       app_container
@@ -95,21 +96,27 @@ module Appfuel
         fail ArgumentError, "Root path (:root_path) is required"
       }
 
+      feature_initializer = params.fetch(:feature_initializer) {
+        Feature::Initializer.new
+      }
+
+      action_loader = params.fetch(:action_loader) {
+        Feature::ActionLoader.new
+      }
+
+      root_name = root.to_s.underscore
       container.register(:root, root)
+      container.register(:root_name, root_name)
       container.register(:root_path, root_path)
+      container.register(:features_path, "#{root_name}/features")
+      container.register(:feature_initializer, feature_initializer)
+      container.register(:action_loader, action_loader)
+
       if params.key?(:config_definition)
         container.register(:config_definition, params[:config_definition])
       end
 
-      container.register(:initializers, ThreadSafe::Array.new)
-
-      ns = Dry::Container::Namespace.new('global') do
-        register('validators') { {} }
-        register('domain_builders') { {} }
-        register('presenters') { {} }
-      end
-
-      container.import(ns)
+      Appfuel.setup_container_dependencies('global', container)
 
       container
     end
@@ -118,15 +125,24 @@ module Appfuel
       Initialize.run(overrides: overrides, env: env)
     end
 
-    def dispatch(route, inputs = {})
+    def call(route, inputs = {})
       container = Appfuel.app_container
       request   = Request.new(route, inputs)
-      root      = container[:root_module]
-      unless root.const_defined?(request.feature)
-        class_name = "#{root.to_s.underscore}/#{feature.underscore}"
-        require class_name
-      end
-      ap root.const_defined?(request.feature)
+
+      container[:feature_initializer].call(request.feature, container)
+      action = container[:action_loader].call(request, container)
+      ap action
+      action.run(inputs)
+    end
+
+    private
+
+    def validate_feature_loader(container, app_name = nil)
+
+    end
+
+    def validate_feature_initializer(container, app_name = nil)
+
     end
   end
 end

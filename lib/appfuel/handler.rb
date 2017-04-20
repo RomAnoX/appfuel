@@ -11,10 +11,7 @@ module Appfuel
   #     Handler.run(inputs)
   #
   class Handler
-    extend RootModule
-    extend ValidatorDependency
-    extend ContainerDependency
-    extend Domain::DependencyInjectionDsl
+    extend Validation::HandlerDsl
 
 
     class << self
@@ -40,7 +37,8 @@ module Appfuel
       end
 
       def build_handler(container = Dry::Container.new)
-        self.new(resolve_dependencies(container))
+        self.new(container)
+        #self.new(resolve_dependencies(container))
       end
 
       # Run will validate all inputs; returning on input failures, resolving
@@ -53,11 +51,13 @@ module Appfuel
       def run(inputs = {})
         begin
           response = resolve_inputs(inputs)
+          ap 'validator response'
           return response if response.failure?
-
           valid_inputs = response.ok
 
           result = build_handler.call(valid_inputs)
+          ap 'building the handler'
+          ap result
           result = create_response(result) unless response?(result)
         rescue RunError => e
           result = e.response

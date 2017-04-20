@@ -101,7 +101,7 @@ module Appfuel
           root_path: 'some/path',
         }
         result = init.build_app_container(params)
-        expect(result[:initializers]).to be_an_instance_of(ThreadSafe::Array)
+        expect(result['global.initializers']).to be_an_instance_of(ThreadSafe::Array)
       end
 
       it 'adds a configuration definition if the root module responds' do
@@ -172,7 +172,7 @@ module Appfuel
         init   = setup
 
         result = init.setup_appfuel(params)
-        expect(result[:initializers]).to be_an_instance_of(ThreadSafe::Array)
+        expect(result['global.initializers']).to be_an_instance_of(ThreadSafe::Array)
       end
 
       it 'fires of after_setup hook' do
@@ -183,7 +183,7 @@ module Appfuel
           root: mock_root,
           app_name: :foo,
           root_path: 'foo/bar',
-          after_setup: hook,
+          on_after_setup: hook,
           app_container: app_container
         }
 
@@ -218,7 +218,7 @@ module Appfuel
         params = {
           root: mock_root,
           root_path: '/balh',
-          after_setup: 'bad hook'
+          on_after_setup: 'bad hook'
         }
         expect {
           init.setup_appfuel(params)

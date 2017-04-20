@@ -13,6 +13,7 @@ require "appfuel/run_error"
 require "appfuel/configuration"
 require "appfuel/application_root"
 require "appfuel/initialize"
+require "appfuel/feature"
 
 # Action/command input/output interfaces
 require "appfuel/response"
@@ -22,6 +23,7 @@ require "appfuel/dispatcher"
 
 # Custom predicates & validators
 require "appfuel/predicates"
+require "appfuel/validation"
 require "appfuel/validators"
 
 # Domain Entities
@@ -135,6 +137,51 @@ module Appfuel
         fail "Application container (#{app_name}) does not implement :register"
       end
       di.register(key, value)
+    end
+
+    def setup_container_dependencies(namespace_key, container)
+      container.namespace(namespace_key) do
+        register('initializers', ThreadSafe::Array.new)
+        register('validators', {})
+        register('domain_builders', {})
+        register('presenters', {})
+      end
+      container
+    end
+
+    # Run all initializers registered in the app container
+    #
+    # @param container [Dry::Container] application container
+    # @param app_name [String] name of the app for errors
+    # @param params [Hash]
+    # @option excludes [Array] list of initializers to exclude from running
+    # @return [Dry::Container] same container passed in
+    def run_initializers(key, container, exclude = [])
+      unless exclude.is_a?(Array)
+        fail ArgumentError, ":exclude must be an array"
+      end
+      exclude.map! {|item| item.to_s}
+
+      env    = container[:env]
+      config = container[:config]
+      container["#{key}.initializers"].each do |init|
+        if !init.env_allowed?(env) || exclude.include?(init.name)
+          next
+        end
+
+        begin
+          init.call(config, container)
+        rescue => e
+          app_name = container[:app_name]
+          msg = "[Appfuel:#{app_name}] Initialization FAILURE - " + e.message
+          error = RuntimeError.new(msg)
+          error.set_backtrace(e.backtrace)
+          raise error
+        end
+      end
+      container.register("#{key}.initialized", true)
+
+      container
     end
   end
 end

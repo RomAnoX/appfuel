@@ -1,12 +1,15 @@
 module Appfuel
   class Interactor < Handler
-    include CommandDependency
     class << self
+      def inherited(klass)
+        ap klass
+      end
+
       def resolve_dependencies(results = Dry::Container.new)
         super
-        resolve_container(results)
+        #resolve_container(results)
         resolve_domains(results)
-        resolve_commands(results)
+        #resolve_commands(results)
         results
       end
 

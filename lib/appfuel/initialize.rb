@@ -11,8 +11,8 @@ module Appfuel
       # @param name [String] name of the initializer
       # @param envs [String, Symbol, Array] A env,list of envs this can run in
       # @param app_name [String] name of app for this initializer
-      def define(name, envs = [], app_name = nil, &block)
-        initializers = Appfuel.resolve('initializers', app_name)
+      def define(namespace_key, name, envs = [], app_name = nil, &block)
+        initializers = Appfuel.resolve("#{namespace_key}.initializers", app_name)
         initializers << Initializer.new(name, envs, &block)
       end
 
@@ -42,39 +42,6 @@ module Appfuel
         container
       end
 
-      # Run all initializers registered in the app container
-      #
-      # @param container [Dry::Container] application container
-      # @param app_name [String] name of the app for errors
-      # @param params [Hash]
-      # @option excludes [Array] list of initializers to exclude from running
-      # @return [Dry::Container] same container passed in
-      def handle_initializers(container, app_name, params = {})
-        exclude = params[:exclude] || []
-        unless exclude.is_a?(Array)
-          fail ArgumentError, ":exclude must be an array"
-        end
-        exclude.map! {|item| item.to_s}
-
-        env    = container[:env]
-        config = container[:config]
-        container[:initializers].each do |init|
-          if !init.env_allowed?(env) || exclude.include?(init.name)
-            next
-          end
-
-          begin
-            init.call(config, container)
-          rescue => e
-            msg = "[Appfuel:#{app_name}] Initialization FAILURE - " + e.message
-            error = RuntimeError.new(msg)
-            error.set_backtrace(e.backtrace)
-            raise error
-          end
-        end
-        container
-      end
-
       # This will initialize the app by handling configuration and running
       # all the initilizers, which will result in an app container that has
       # registered the config, env, and anything else the initializers
@@ -87,7 +54,7 @@ module Appfuel
         app_name  = params.fetch(:app_name) { Appfuel.default_app_name }
         container = Appfuel.app_container(app_name)
         handle_configuration(container, params)
-        handle_initializers(container, app_name, params)
+        Appfuel.run_initializers('global', container, params[:exclude] || [])
 
         container
       end

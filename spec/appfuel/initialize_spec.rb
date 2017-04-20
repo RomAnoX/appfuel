@@ -3,16 +3,21 @@ module Appfuel
     context '.define' do
       it 'adds an initializer into the app containers initializers' do
         list = []
-        allow(Appfuel).to receive(:resolve).with('initializers', nil) { list }
-        Initialize.define("foo") {}
+        allow(Appfuel).to receive(:resolve).with("global.initializers", nil) {
+          list
+        }
+        Initialize.define("global", "foo") {}
         expect(list.first).to be_an_instance_of(Initialize::Initializer)
       end
 
       it 'appends another initializer on to the first' do
         list = []
-        allow(Appfuel).to receive(:resolve).with('initializers', nil) { list }
-        Initialize.define("foo") {}
-        Initialize.define("bar") {}
+        list = []
+        allow(Appfuel).to receive(:resolve).with("global.initializers", nil) {
+          list
+        }
+        Initialize.define("global", "foo") {}
+        Initialize.define("global", "bar") {}
 
         expect(list[0].name).to eq "foo"
         expect(list[1].name).to eq "bar"
@@ -60,17 +65,17 @@ module Appfuel
         end
         container = setup_container(initializer, 'dev', bar: 'with bar')
 
-        Initialize.handle_initializers(container, 'my_app')
+        Appfuel.run_initializers('global', container)
         expect(container[:foo]).to eq("foo has been initialized - with bar")
       end
 
       it 'skips initializer when env is not allowed' do
         initializer = Initialize::Initializer.new(:foo, :qa) do |configs, container|
-          container.register(:foo, "bar")
+          container.register("global", :foo)
         end
         container = setup_container(initializer, 'dev', bar: 'some config')
         expect(initializer).not_to receive(:call)
-        Initialize.handle_initializers(container, 'my_app')
+        Appfuel.run_initializers('global', container)
       end
 
       it 'skips when initializer is excluded, exclude name is a symbol' do
@@ -79,7 +84,7 @@ module Appfuel
         end
         container = setup_container(initializer, 'dev', bar: 'some config')
         expect(initializer).not_to receive(:call)
-        Initialize.handle_initializers(container, 'my_app', exclude: [:foo])
+        Appfuel.run_initializers("global", container, [:foo])
       end
 
       it 'skips when initializer is excluded, exclude name is a string' do
@@ -89,14 +94,14 @@ module Appfuel
         container = setup_container(initializer, 'dev', bar: 'some config')
 
         expect(initializer).not_to receive(:call)
-        Initialize.handle_initializers(container, 'my_app', exclude: ['foo'])
+        Appfuel.run_initializers("global", container, ['foo'])
       end
 
       it 'fails when exlude is not an array' do
         msg = ':exclude must be an array'
         expect {
           container = build_container
-          Initialize.handle_initializers(container, 'my_app', exclude: 'blah')
+          Appfuel.run_initializers("global", container, 'blah')
         }.to raise_error(ArgumentError, msg)
       end
 
@@ -108,7 +113,7 @@ module Appfuel
         container = setup_container(initializer, 'dev', bar: 'some config')
         msg = '[Appfuel:my_app] Initialization FAILURE - I am an error'
         expect {
-          Initialize.handle_initializers(container, 'my_app')
+          Appfuel.run_initializers("global", container)
         }.to raise_error(RuntimeError, msg)
       end
     end
@@ -125,8 +130,8 @@ module Appfuel
           receive(:handle_configuration).with(container, params)
         ) { container }
 
-        expect(Initialize).to(
-          receive(:handle_initializers).with(container, app_name, params)
+        expect(Appfuel).to(
+          receive(:run_initializers).with('global', container, [])
         ) { container }
 
         result = Initialize.run(params)
@@ -136,11 +141,15 @@ module Appfuel
 
     def setup_container(initializer, env, config)
       inputs = {
-        initializers: [initializer],
+        app_name: 'my_app',
         config: config,
         env: env
       }
-      build_container(inputs)
+      container = build_container(inputs)
+      container.namespace('global') do
+        register('initializers', [initializer])
+      end
+      container
     end
   end
 end
