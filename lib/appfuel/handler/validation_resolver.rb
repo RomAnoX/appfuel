@@ -1,5 +1,5 @@
 module Appfuel
-  module Validation
+  module Handler
     # The handler is responsible for logic involved when an Action or a Command
     # is run. There are two ways to execute a handler:
     #   1) using its call interface
@@ -11,7 +11,8 @@ module Appfuel
     #   example:
     #     Handler.run(inputs)
     #
-    class Runner
+    module ValidationResolver
+
       # Ensures inputs are valid or that its ok to use the raw inputs.
       # It will return a failed response object when validation fails
       # and a successful response with the valid inputs inside ok.
@@ -25,11 +26,13 @@ module Appfuel
       #
       # @param inputs [Hash] raw inputs to be validated
       # @return [Response]
-      def call(validators, container, inputs = {})
+      def resolve_inputs(inputs = {})
+        return ok(inputs) if skip_validation?
+        return ok({}) unless validators?
+
         response = nil
         has_failed = false
         validators.each do |validator|
-          fail_fast = data[:fail_fast] || false
           if validator.pipe?
             result = handle_validator_pipe(validator, inputs)
             inputs = result unless result == false
@@ -42,7 +45,7 @@ module Appfuel
             next
           end
 
-          return error(result.errors(full: true)) if fail_fast
+          return error(result.errors(full: true)) if validator.fail_fast?
           has_failed = true
           response = handle_error_inputs(result, response)
         end
@@ -71,21 +74,12 @@ module Appfuel
       end
 
       def handle_validator_pipe(pipe, inputs)
-
-        result = pipe.call(inputs, inject_pipe_dependencies)
+        result = pipe.call(inputs, Dry::Container.new)
         return false unless result
         unless result.is_a?(Hash)
           fail "multi validator proc must return a Hash"
         end
         result
-      end
-
-      def inject_pipe_dependencies
-        container = Dry::Container.new
-        app_container = Appfuel.container
-
-        container.register(:repo_runner, app_container[:repo_runner])
-        container
       end
     end
   end

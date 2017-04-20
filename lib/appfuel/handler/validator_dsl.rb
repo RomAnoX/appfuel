@@ -2,13 +2,26 @@ module Appfuel
   module Handler
     #
     #
-    #
     # 1) single block validator. A basic validator that is only used by
     #    that particular interactor
     #
-    #     validator do
+    #
+    #     validator('foo', fail_fast: true) do
     #
     #     end
+    #
+    #    validator Dry::Validation.Schama do
+    #
+    #    end
+    #
+    #    validator 'foo', Dry::Validation.Schema do
+    #
+    #    end
+    #
+    #    validator 'foo', Dry::Validation.Schema, fail_fast: true do
+    #
+    #    end
+    #
     #
     # 2) single validator from the features validators located in the app
     #    container under the key "features.<feature-name>.validators.<validator-name>"
@@ -40,6 +53,20 @@ module Appfuel
     # 8) using global pipe in multiple validator declaration
     #   validators 'foo', 'global-pipe.bar', 'base'
     #
+    # 9) validator_schema is used to use Dry::Validations with out our block
+    #    processing
+    #
+    #    validation_schema 'foo', Dry::Validation.Schama do
+    #
+    #    end
+    #
+    #    validation_schema Dry::Validation.Schema do
+    #
+    #    end
+    #
+    #    validation_schema 'foo', fail_fast: true, Dry::Validation.Schema do
+    #
+    #    end
     #
     # validator
     #   name: to identify it in errors and as a key to register it with container
@@ -90,34 +117,29 @@ module Appfuel
 
         validators << {validator: callable, fail_fast: false}
       end
-      def validator(type = nil, opts = {}, &blk)
-        validate_fail_fast(opts)
-        return validator_with_block(type, opts, &blk) if block_given?
-
-        if type.respond_to?(:call)
-          validators << {validator: type, fail_fast: opts[:fail_fast]}
-          return
-        end
-
-        unless type.is_a?(Symbol)
-          fail 'first arg must be a symbol or respond to :call if no block is given'
-        end
 
 
-        validators << {validator: load_validator(type, opts), fail_fast: opts[:fail_fast]}
+      def default_validator_name
+        self.to_s.split('::').last.underscore
+      end
+
+      def validator(key = nil, opts = {}, &block)
+        key = default_validator_name if key.nil?
+        return handle_validator_block(key, opts, &block) if block_given?
+
+
+        validators << load_validator(type, opts)
       end
 
       def load_validator(key, opts = {})
         fail "validator must have a key" if key.nil?
-        if [:schema, :form].include?(key)
-          fail ':form and :schema are reserved validator keys'
-        end
 
-        if opts[:global] == true
-          resolve_global_validator(key)
-        else
-          resolve_feature_validator(key)
+        container_key = convert_to_container_key(key)
+        container = Appfuel.app_container
+        unless container.key?(container_key)
+          fail "Could not locate validator with (#{container_key})"
         end
+        container[container_key]
       end
 
       def validators?
@@ -134,22 +156,16 @@ module Appfuel
 
       private
 
-      def validator_with_block(type, opts, &blk)
-        # happens with an anonomous validator that needs to fail fast
-        if type.is_a?(Hash)
-          opts = type
-          type = nil
+      def handle_validator_block(key, opts = {}, &block)
+        fail_fast   = opts[:fail_fast] == true ? true : false
+        schema_type = (opts.fetch(:type) { 'form' }).to_s.downcase
+        unless ['form', 'schema'].include?(schema_type)
+          fail "validator type must 'form' or 'schema' (#{schema_type}) given"
         end
 
-        type = :form if type.nil?
-        unless [:form, :schema].include?(type)
-          fail "type must be :form or :schema #{type} given"
-        end
-        method = type.to_s.capitalize
-
-        app_validator = root_module.container[:app_validator]
-        schema = Dry::Validation.send(method, app_validator, &blk)
-        validators << {validator: schema, fail_fast: opts[:fail_fast]}
+        method = schema_type.capitalize
+        schema = Dry::Validation.send(method, &block)
+        validators << Validation::Validator.new(key, schema, fail_fast: fail_fast)
       end
 
       def resolve_feature_validator(name)

@@ -14,12 +14,18 @@ module Appfuel
     #
     class Base
       extend ValidatorDsl
+      extend ValidationResolver
+
       #extend RepositoryInjectionDsl
       #extend ContainerInjectionDsl
       #extend CommandInjectionDsl
       #extend DomainInjectionDsl
       #
       class << self
+        def response_handler
+          @response_handler ||= ResponseHandler.new
+        end
+
         # Resolve dependencies for this handler into a container that will
         # later be injected into the handlers initializer
         #
@@ -55,26 +61,6 @@ module Appfuel
           end
 
           result
-        end
-
-        # Ensures inputs are valid or that its ok to use the raw inputs.
-        # It will return a failed response object when validation fails
-        # and a successful response with the valid inputs inside ok.
-        #
-        # NOTE: When no validators are declared inputs are forced to an
-        #       empty hash. If you want raw inputs you must use the
-        #       skip_validation interface in the ValidatorDependency mixin.
-        #
-        # collect all errors under one key until a fail fast is found or the
-        # end is reached
-        #
-        # @param inputs [Hash] raw inputs to be validated
-        # @return [Response]
-        def resolve_inputs(inputs = {})
-          return ok(inputs) if skip_validation?
-          return ok({}) unless validators?
-
-          response
         end
 
         def error(*args)

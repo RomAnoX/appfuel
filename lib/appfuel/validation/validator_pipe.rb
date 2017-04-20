@@ -1,6 +1,6 @@
 module Appfuel
   module Validation
-    class Validator
+    class ValidatorPipe
       attr_reader :name, :dependencies, :code
 
       def initialize(name, dependencies = {}, &block)
