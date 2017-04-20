@@ -14,7 +14,6 @@ module Appfuel
     #
     class Base
       extend ValidatorDsl
-      extend ValidationResolver
 
       #extend RepositoryInjectionDsl
       #extend ContainerInjectionDsl
@@ -24,6 +23,12 @@ module Appfuel
       class << self
         def response_handler
           @response_handler ||= ResponseHandler.new
+        end
+
+        def feature_key
+          parts = self.to_s.split('::')
+          feature_name = parts[1].underscore
+          "features.#{feature_name}"
         end
 
         # Resolve dependencies for this handler into a container that will

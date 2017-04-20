@@ -10,19 +10,6 @@ module Appfuel
     #
     #     end
     #
-    #    validator Dry::Validation.Schama do
-    #
-    #    end
-    #
-    #    validator 'foo', Dry::Validation.Schema do
-    #
-    #    end
-    #
-    #    validator 'foo', Dry::Validation.Schema, fail_fast: true do
-    #
-    #    end
-    #
-    #
     # 2) single validator from the features validators located in the app
     #    container under the key "features.<feature-name>.validators.<validator-name>"
     #
@@ -94,7 +81,7 @@ module Appfuel
 
       def convert_to_container_key(key)
         parts = key.to_s.split('.')
-        last  = part.last
+        last  = parts.last
         first = parts.first
         case first
           when 'global'      then "global.validators.#{last}"
@@ -124,11 +111,13 @@ module Appfuel
       end
 
       def validator(key = nil, opts = {}, &block)
-        key = default_validator_name if key.nil?
-        return handle_validator_block(key, opts, &block) if block_given?
-
-
-        validators << load_validator(type, opts)
+        key  = default_validator_name if key.nil?
+        item = if block_given?
+                 Appfuel::Validation.build_validator(key, opts, &block)
+               else
+                 load_validator(key, opts)
+               end
+        validators << item
       end
 
       def load_validator(key, opts = {})
@@ -139,6 +128,7 @@ module Appfuel
         unless container.key?(container_key)
           fail "Could not locate validator with (#{container_key})"
         end
+
         container[container_key]
       end
 
@@ -154,26 +144,60 @@ module Appfuel
         @skip_validation = true
       end
 
-      private
+      def resolve_inputs(inputs = {})
+        return ok(inputs) if skip_validation?
+        return ok({}) unless validators?
 
-      def handle_validator_block(key, opts = {}, &block)
-        fail_fast   = opts[:fail_fast] == true ? true : false
-        schema_type = (opts.fetch(:type) { 'form' }).to_s.downcase
-        unless ['form', 'schema'].include?(schema_type)
-          fail "validator type must 'form' or 'schema' (#{schema_type}) given"
+        response = nil
+        has_failed = false
+        validators.each do |validator|
+          if validator.pipe?
+            result = handle_validator_pipe(validator, inputs)
+            inputs = result unless result == false
+            next
+          end
+
+          result = validator.call(inputs)
+          if result.success? && !has_failed
+            response = handle_successful_inputs(result, response)
+            next
+          end
+
+          return error(result.errors(full: true)) if validator.fail_fast?
+          has_failed = true
+          response = handle_error_inputs(result, response)
         end
 
-        method = schema_type.capitalize
-        schema = Dry::Validation.send(method, &block)
-        validators << Validation::Validator.new(key, schema, fail_fast: fail_fast)
+        fail "multi validators can not be only Procs" if response.nil?
+
+        response
       end
 
-      def resolve_feature_validator(name)
-        ap 'i am in resolve feature validators'
+      private
+
+      def handle_successful_inputs(result, response)
+        if response.nil?
+          ok(result.output)
+        else
+          ok(response.ok.merge(result.output))
+        end
       end
 
-      def resolve_global_validator(name)
-        ap 'i am in resolve global validators'
+      def handle_error_inputs(result, response)
+        if response.nil?
+          error(result.errors(full: true))
+        else
+          error(result.errors(full: true).merge(response.error_messages))
+        end
+      end
+
+      def handle_validator_pipe(pipe, inputs)
+        result = pipe.call(inputs, Dry::Container.new)
+        return false unless result
+        unless result.is_a?(Hash)
+          fail "multi validator proc must return a Hash"
+        end
+        result
       end
     end
   end

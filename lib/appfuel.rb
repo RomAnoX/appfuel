@@ -24,7 +24,6 @@ require "appfuel/dispatcher"
 # Custom predicates & validators
 require "appfuel/predicates"
 require "appfuel/validation"
-require "appfuel/validators"
 
 # Domain Entities
 require "appfuel/domain"
@@ -36,7 +35,6 @@ require "appfuel/pagination"
 
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"
-require "appfuel/validator_dependency"
 require "appfuel/container_dependency"
 require "appfuel/command_dependency"
 require "appfuel/repository_dependency_injection"
@@ -181,5 +179,6 @@ module Appfuel
 
       container
     end
+
   end
 end
