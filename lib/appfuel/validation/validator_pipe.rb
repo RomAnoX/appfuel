@@ -17,6 +17,10 @@ module Appfuel
           fail ArgumentError, "block is required"
         end
 
+        unless block.arity == 2
+          fail ArgumentError, "validator pipe block needs two params"
+        end
+
         @name = name
         @code = block
         @dependencies = dependencies

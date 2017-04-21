@@ -16,9 +16,23 @@ module Appfuel::Validation
         }.to raise_error(ArgumentError, msg)
       end
 
+      it 'fails when the arity is not 2' do
+        msg = "validator pipe block needs two params"
+        expect {
+          ValidatorPipe.new('foo'){ }
+        }.to raise_error(ArgumentError, msg)
+      end
+
       it 'defaults to an empty dependency hash' do
         pipe = ValidatorPipe.new('foo'){|inputs, data| }
         expect(pipe.dependencies).to be_empty
+      end
+    end
+
+    describe '#pipe?' do
+      it 'always returns true' do
+        pipe = ValidatorPipe.new('foo'){|inputs, data| }
+        expect(pipe.pipe?).to be true
       end
     end
   end
