@@ -14,7 +14,9 @@ module Appfuel
       # @return [Validator]
       def initialize(name, schema, fail_fast: false)
         @name = name
-        fail "Schema must implement :call" unless schema.respond_to?(:call)
+        unless schema.respond_to?(:call)
+          fail ArgumentError, "schema must implement :call"
+        end
         @schema = schema
 
         fail_fast == true ? enable_fail_fast : disable_fail_fast
