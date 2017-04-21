@@ -13,7 +13,12 @@ module Appfuel
       # @param dependencies [Hash] for dependency injection
       # @return [ValidatorPipe]
       def initialize(name, dependencies = {}, &block)
-        @code    = block
+        unless block_given?
+          fail ArgumentError, "block is required"
+        end
+
+        @name = name
+        @code = block
         @dependencies = dependencies
       end
 
