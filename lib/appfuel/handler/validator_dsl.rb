@@ -67,6 +67,7 @@ module Appfuel
     #   code: lambda to run
     #   call: run the lamda
     module ValidatorDsl
+
       def validators(*args)
         @validators ||= []
         return @validators if args.empty?
@@ -79,47 +80,35 @@ module Appfuel
         end
       end
 
-      def convert_to_container_key(key)
-        parts = key.to_s.split('.')
-        last  = parts.last
-        first = parts.first
-        case first
-          when 'global'      then "global.validators.#{last}"
-          when 'global-pipe' then "global.validator-pipes.#{last}"
-          when 'pipe'        then "#{feature_key}.validator-pipes.#{last}"
-          else
-            "#{feature_key}.validators.#{first}"
-        end
-      end
-
-      def dynamic_inputs(callable, opts = {})
-        callable = load_validator(callable, opts) if callable.is_a?(Symbol)
-        if !callable.respond_to?(:lambda?) || !callable.lambda?
-          fail "dynamic validation inputs must be a lambda"
-        end
-
-        if callable.arity != 2
-          fail "dynamic input lambda must have 2 params (inputs, data)"
-        end
-
-        validators << {validator: callable, fail_fast: false}
-      end
-
-
+      # When no name for a validator is given then the default name will
+      # be the name of the concrete handler class
+      #
+      # @return [String]
       def default_validator_name
         self.to_s.split('::').last.underscore
       end
 
+      # Converts a given block to a validator or load the validator from
+      # either global or feature validators
+      #
+      # @param key [String] name of the validator
+      # @param opts [Hash] options for creating a validator
+      # @option fail_fast [Bool] allows that validator to fail immediately
+      # @return [Nil]
       def validator(key = nil, opts = {}, &block)
         key  = default_validator_name if key.nil?
-        item = if block_given?
-                 Appfuel::Validation.build_validator(key, opts, &block)
-               else
-                 load_validator(key, opts)
-               end
-        validators << item
+        validators << build_validator(key, opts, &block)
+        nil
       end
 
+      # load a validator with the given key from the app container.
+      #
+      # @note the key is encode and will be decoded first
+      #       @see ValidatorDsl#convert_to_container_key for details
+      #
+      # @param key [String]
+      # @param opts [Hash]
+      # @return Appfuel::Validation::Validator
       def load_validator(key, opts = {})
         fail "validator must have a key" if key.nil?
 
@@ -132,18 +121,32 @@ module Appfuel
         container[container_key]
       end
 
+      # return [Bool]
       def validators?
         !validators.empty?
       end
 
+      # Used when resolving inputs to determine if we should apply any
+      # validation
+      #
+      # return [Bool]
       def skip_validation?
         @skip_validation == true
       end
 
+      # Dsl method to allow a handler to tell the system not to validate
+      # anything and use the raw inputs
+      #
+      # return [Bool]
       def skip_validation!
         @skip_validation = true
       end
 
+      # Validate all inputs using the list of validators that were assigned
+      # using the dsl methods.
+      #
+      # @param inputs [Hash]
+      # @return Appfuel::Response
       def resolve_inputs(inputs = {})
         return ok(inputs) if skip_validation?
         return ok({}) unless validators?
@@ -175,6 +178,45 @@ module Appfuel
 
       private
 
+      # Decodes the given key into a dependency injection namespace that is
+      # used to find a validator or pipe in the app container. It decodes
+      # to a global or feature namespaces.
+      #
+      # @param key [String]
+      # #return [String]
+      def convert_to_container_key(key)
+        parts = key.to_s.split('.')
+        last  = parts.last
+        first = parts.first
+        case first
+          when 'global'      then "global.validators.#{last}"
+          when 'global-pipe' then "global.validator-pipes.#{last}"
+          when 'pipe'        then "features.#{feature_key}.validator-pipes.#{last}"
+          else
+            "features.#{feature_key}.validators.#{first}"
+        end
+      end
+
+      # Create a validator for the handler or load it from the container
+      # depending on if a block is given
+      #
+      # @param key [String] key used to identify the item
+      # @param opts [Hash]
+      # @return [
+      #   Appfuel::Validation::Validator,
+      #   Appfuel::Validation::ValidatorPipe
+      #   ]
+      def build_validator(key, opts = {}, &block)
+        return load_validator(key, opts)  unless block_given?
+
+        Appfuel::Validation.build_validator(key, opts, &block)
+      end
+
+      # Creates a response the first time otherwise it merges the results
+      # from the last validator into the response
+      #
+      # @param results [Hash] successful valid inputs
+      # @param response [Appfuel::Response]
       def handle_successful_inputs(result, response)
         if response.nil?
           ok(result.output)
@@ -183,6 +225,11 @@ module Appfuel
         end
       end
 
+      # Creates a response the first time otherwise it merges the error
+      # results from the last validator into the response
+      #
+      # @param results [Hash] successful valid inputs
+      # @param response [Appfuel::Response]
       def handle_error_inputs(result, response)
         if response.nil?
           error(result.errors(full: true))
@@ -191,6 +238,11 @@ module Appfuel
         end
       end
 
+      # Delegates call to the validator pipe
+      #
+      # @param pipe [Appfuel::Validation::ValidatorPipe]
+      # @param inputs [Hash]
+      # @return [Hash]
       def handle_validator_pipe(pipe, inputs)
         result = pipe.call(inputs, Dry::Container.new)
         return false unless result
