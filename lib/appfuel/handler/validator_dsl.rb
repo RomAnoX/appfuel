@@ -191,9 +191,9 @@ module Appfuel
         case first
           when 'global'      then "global.validators.#{last}"
           when 'global-pipe' then "global.validator-pipes.#{last}"
-          when 'pipe'        then "features.#{feature_key}.validator-pipes.#{last}"
+          when 'pipe'        then "#{feature_key}.validator-pipes.#{last}"
           else
-            "features.#{feature_key}.validators.#{first}"
+            "#{feature_key}.validators.#{first}"
         end
       end
 

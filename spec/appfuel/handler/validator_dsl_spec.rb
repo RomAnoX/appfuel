@@ -82,6 +82,70 @@ module Appfuel::Handler
           dsl.load_validator(key)
         }.to raise_error(RuntimeError, msg)
       end
+
+      it 'fails when key is nil' do
+        dsl = setup_dsl('foo')
+        msg = 'validator must have a key'
+        expect {
+          dsl.load_validator(nil)
+        }.to raise_error(RuntimeError, msg)
+      end
+    end
+
+    context 'validator' do
+      it 'loads a validator when only a key is given' do
+        dsl = setup_dsl
+        expect(dsl).to receive(:load_validator).with('foo', {})
+        dsl.validator('foo')
+      end
+
+      it 'delegates building to Appfuel::Validation when block is given' do
+        dsl = setup_dsl
+        expect(Appfuel::Validation).to receive(:build_validator).with('foo', {})
+        dsl.validator('foo'){}
+      end
+
+      it 'adds the validator to the validator list' do
+        dsl = setup_dsl
+        validator = 'some validator'
+        allow(dsl).to receive(:load_validator).with('foo', {}) { validator }
+
+        dsl.validator('foo')
+        expect(dsl.validators.first).to eq(validator)
+      end
+
+      it 'adds a validator to the list when a block is given' do
+        dsl = setup_dsl
+        validator = 'some validator'
+        expect(Appfuel::Validation).to(
+          receive(:build_validator).with('foo', {})
+        ) { validator }
+        dsl.validator('foo'){}
+        expect(dsl.validators.first).to eq(validator)
+      end
+
+      it 'returns nil' do
+        dsl = setup_dsl
+        validator = 'some validator'
+        allow(dsl).to receive(:load_validator).with('foo', {}) { validator }
+
+        expect(dsl.validator('foo')).to eq(nil)
+      end
+    end
+
+    context 'validators?' do
+      it 'returns false when there are no validators' do
+        dsl = setup_dsl
+        expect(dsl.validators?).to be false
+      end
+
+      it 'returns true when validators exist' do
+        dsl = setup_dsl
+        validator = 'some validator'
+        allow(dsl).to receive(:load_validator).with('foo', {}) { validator }
+        dsl.validator('foo')
+        expect(dsl.validators?).to be true
+      end
     end
 
     def setup_dsl(feature_key_name = 'foo')
@@ -89,7 +153,7 @@ module Appfuel::Handler
       obj.extend(ValidatorDsl)
 
       obj.define_singleton_method(:feature_key) do
-        feature_key_name
+        "features.#{feature_key_name}"
       end
 
       obj
