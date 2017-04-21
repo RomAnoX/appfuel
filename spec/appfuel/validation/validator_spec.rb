@@ -1,5 +1,5 @@
 module Appfuel::Validation
-  RSpec.describe Appfuel::Validation do
+  RSpec.describe Validator do
     describe '#initialize' do
       it 'requires a name and a schema' do
         name = 'my_validator'

@@ -36,7 +36,6 @@ module Appfuel
         @fail_fast = false
       end
 
-
       # @return [Bool]
       def fail_fast?
         @fail_fast
