@@ -133,6 +133,24 @@ module Appfuel::Handler
       end
     end
 
+    context 'validators' do
+      it 'loads multiple validators' do
+        container = build_container
+        validator_a = 'I am a'
+        validator_b = 'I am b'
+        container.namespace('features.foo.validators') do
+          register('b', validator_b)
+          register('a', validator_a)
+        end
+
+        allow(Appfuel).to receive(:app_container).with(no_args) { container }
+        dsl = setup_dsl('foo')
+        dsl.validators('a', 'b')
+        expect(dsl.validators[0]).to eq(validator_a)
+        expect(dsl.validators[1]).to eq(validator_b)
+      end
+    end
+
     context 'validators?' do
       it 'returns false when there are no validators' do
         dsl = setup_dsl
@@ -145,6 +163,19 @@ module Appfuel::Handler
         allow(dsl).to receive(:load_validator).with('foo', {}) { validator }
         dsl.validator('foo')
         expect(dsl.validators?).to be true
+      end
+    end
+
+    context 'skip_validation?' do
+      it 'returns false by default' do
+        dsl = setup_dsl
+        expect(dsl.skip_validation?).to be false
+      end
+
+      it 'returns true when toggled ' do
+        dsl = setup_dsl
+        dsl.skip_validation!
+        expect(dsl.skip_validation?).to be true
       end
     end
 

@@ -72,11 +72,8 @@ module Appfuel
         @validators ||= []
         return @validators if args.empty?
 
-        container = Appfuel.app_container
         args.each do |arg|
-          container_key = convert_to_container_key(arg)
-          container = Appfuel.app_container
-          @validators << container[container_key]
+          @validators << load_validator(arg)
         end
       end
 
