@@ -14,6 +14,7 @@ module Appfuel
     #
     class Base
       extend ValidatorDsl
+      extend InjectDsl
 
       #extend RepositoryInjectionDsl
       #extend ContainerInjectionDsl
