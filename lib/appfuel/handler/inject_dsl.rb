@@ -18,7 +18,7 @@ module Appfuel
       # @return [Hash]
       def injections
         @injections ||= {
-          domain: {},
+          domains: {},
           container: {}
         }
       end
@@ -53,7 +53,7 @@ module Appfuel
         end
 
         if type == :domain
-          return injections[:domain][key] = opts[:as]
+          return injections[:domains][key] = opts[:as]
         end
 
         cat = case type
@@ -118,27 +118,28 @@ module Appfuel
       # @return [String] fully qualified namespaced key
       def convert_to_qualified_container_key(key, type_ns)
         parts     = key.to_s.split('.')
-        namespace = feature_key
+        namespace = "#{feature_key}."
         if parts[0].downcase == 'global'
-          namespace = 'global'
+          namespace = 'global.'
           parts.shift
         end
 
+        # when the key is a global container the namespace is only the path
         if type_ns == "container"
+          namespace = '' if namespace == 'global.'
           type_ns = ''
-          parts.unshift
         else
           type_ns = "#{type_ns}."
         end
 
         path = parts.join('.')
-        "#{namespace}.#{type_ns}#{path}"
+        "#{namespace}#{type_ns}#{path}"
       end
 
       # @param type [Symbol]
       # @return [Bool]
       def inject_type?(type)
-        TYPES.include(type)
+        TYPES.include?(type)
       end
     end
   end
