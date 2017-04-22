@@ -49,7 +49,7 @@ module Appfuel
       # @return nil
       def inject(type, key, opts = {})
         unless inject_type?(type)
-          fail "inject type must be #{TYPE.join(",")} #{type} given"
+          fail "inject type must be #{TYPES.join(",")} #{type} given"
         end
 
         if type == :domain

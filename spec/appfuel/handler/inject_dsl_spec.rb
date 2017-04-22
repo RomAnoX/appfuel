@@ -71,6 +71,14 @@ module Appfuel::Handler
         result = dsl.inject(:repo, 'bar', as: 'repo')
         expect(result).to eq(nil)
       end
+
+      it 'fails when the type of injection is invalid' do
+        dsl = setup_dsl
+        msg = 'inject type must be domain,cmd,repo,container foo given'
+        expect {
+          dsl.inject :foo, :bar
+        }.to raise_error(RuntimeError, msg)
+      end
     end
 
     def setup_dsl(feature_key_name = 'foo')
