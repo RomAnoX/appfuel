@@ -69,6 +69,11 @@ module Appfuel
           expect(request.feature).to eq 'foo'
           expect(request.action).to eq 'bar'
         end
+
+        it 'builds a container namespace from the action route' do
+          request = create_request('foo/bar', {})
+          expect(request.namespace).to eq 'features.foo.actions.bar'
+        end
       end
 
       context 'initializing with inputs' do
