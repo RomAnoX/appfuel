@@ -16,30 +16,42 @@ module Appfuel
       extend ValidatorDsl
       extend InjectDsl
 
-      #extend RepositoryInjectionDsl
-      #extend ContainerInjectionDsl
-      #extend CommandInjectionDsl
-      #extend DomainInjectionDsl
-      #
       class << self
+
+        def inherited(klass)
+          root = klass.root_name
+          return if root == 'appfuel'
+
+          container = Appfuel.app_container(root)
+          container.register(klass.qualified_handler_key, klass)
+        end
+
         def response_handler
           @response_handler ||= ResponseHandler.new
         end
 
-        def feature_key
-          parts = self.to_s.split('::')
-          feature_name = parts[1].underscore
-          "features.#{feature_name}"
+        def container_path_list
+          @container_path ||= parse_class_name
         end
 
-        # Resolve dependencies for this handler into a container that will
-        # later be injected into the handlers initializer
-        #
-        # @param  results  [Dry::Container] dependency injection container
-        # @return [Dry::Container]
-        def resolve_dependencies(results = Dry::Container.new)
-          #results.register(:criteria_class, criteria_class)
-          #results
+        def root_name
+          @root_name ||= container_path_list.first
+        end
+
+        def parse_class_name
+          self.to_s.split('::').map {|i| i.underscore }
+        end
+
+        def handler_key
+          @handler_key ||= container_path_list[2..-1].join('.')
+        end
+
+        def qualified_handler_key
+          @qualified_handler_key ||= "#{feature_key}.#{handler_key}"
+        end
+
+        def feature_key
+          @feature_key ||= "features.#{container_path_list[1]}"
         end
 
         # Run will validate all inputs; returning on input failures, resolving

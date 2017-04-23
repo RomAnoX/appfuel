@@ -36,10 +36,8 @@ module Appfuel
       hook.call(container)
     end
 
-    # Determine the app name for input params or the parsing the root
-    # module if no params are specified. This also handles assigning
-    # the default app name so that you don't have give Appfuel the
-    # name everytime you want to deal with the container
+    # The application name is determined by the root module. We use the
+    # lower case underscored version of the root module name
     #
     # @param root [Module] The root module of the application
     # @param params [Hash] input params from setup
@@ -48,15 +46,13 @@ module Appfuel
     #
     # @return [String]
     def handle_app_name(params, app_container, framework_container)
-      app_name = params.fetch(:app_name) {
-        app_container[:root].to_s.underscore
-      }
+      app_name = app_container[:root].to_s.underscore
 
       if params[:default_app] == true || !Appfuel.default_app?
         framework_container.register(:default_app_name, app_name)
       end
 
-      app_name.to_s
+      app_name
     end
 
     # Initializes the application container with:

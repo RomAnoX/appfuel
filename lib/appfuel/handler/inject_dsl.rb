@@ -68,7 +68,40 @@ module Appfuel
         nil
       end
 
+      def resolve_dependencies(result = Dry::Container.new)
+        result = resolve_domain_dependencies(result)
+        resolve_container_dependencies(result)
+      end
+
+      def resolve_domain_dependencies(container)
+        injections[:domains].each do |key, alias_name|
+          unless Types.key?(key)
+            fail "Could not inject domain (#{key}) not registered in Types"
+          end
+          domain = Types[key]
+          container_key = alias_name || domain.domain_basename
+          container.register(container_key, domain)
+        end
+        container
+      end
+
+      def resolve_container_dependencies(container)
+        app_container = Appfuel.app_container
+        injections[:container].each do |key, alias_name|
+          unless app_container.key?(key)
+            fail "Could not inject (#{key}) not registered in app container"
+          end
+
+          basename = key.split('.').last
+          item = app_container[key]
+          container_key = alias_name || basename
+          container.register(container_key, item)
+        end
+      end
+
       private
+
+
 
       # Convert the injection key to a fully qualified namespaced key that
       # is used to pull an item out of the app container.
