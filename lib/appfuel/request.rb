@@ -33,7 +33,7 @@ module Appfuel
       handle_empty_action(action_name)
 
 
-      [route, feature_name.underscore, action_name.underscore]
+      [route, feature_name, action_name]
     end
 
     def handle_parsed_string(value)
