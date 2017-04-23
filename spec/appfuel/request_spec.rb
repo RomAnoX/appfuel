@@ -7,24 +7,24 @@ module Appfuel
           expect(request.action_route).to eq 'foo/bar'
         end
 
-        it 'parses a feature from the route into a class name' do
+        it 'parses a feature from the route into a container key' do
           request = create_request('foo/bar', {})
-          expect(request.feature).to eq 'Foo'
+          expect(request.feature).to eq 'foo'
         end
 
-        it 'parse a feature with underscores into a class name' do
+        it 'parse a feature with underscores into a container key' do
           request = create_request('foo_doo/bar', {})
-          expect(request.feature).to eq 'FooDoo'
+          expect(request.feature).to eq 'foo_doo'
         end
 
-        it 'parses an action from the route into a class name' do
+        it 'parses an action from the route into a container key' do
           request = create_request('foo/bar', {})
-          expect(request.action).to eq 'Bar'
+          expect(request.action).to eq 'bar'
         end
 
-        it 'parse an action with underscores into a class name' do
+        it 'parse an action with underscores into a container key' do
           request = create_request('foo/bar_dar', {})
-          expect(request.action).to eq 'BarDar'
+          expect(request.action).to eq 'bar_dar'
         end
 
         it 'fails when the route is nil' do
@@ -66,8 +66,8 @@ module Appfuel
         it 'ignores anything more than one forward slash' do
           request = create_request('foo/bar/baz', {})
           expect(request.action_route).to eq 'foo/bar/baz'
-          expect(request.feature).to eq 'Foo'
-          expect(request.action).to eq 'Bar'
+          expect(request.feature).to eq 'foo'
+          expect(request.action).to eq 'bar'
         end
       end
 

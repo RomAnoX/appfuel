@@ -1,6 +1,6 @@
 module Appfuel
   class Request
-    attr_reader :action_route, :feature, :action, :inputs
+    attr_reader :action_route, :feature, :action, :inputs, :namespace
 
     def initialize(action_route, inputs = {})
       unless inputs.respond_to?(:to_h)
@@ -8,6 +8,7 @@ module Appfuel
       end
       @inputs = inputs.to_h
       @action_route, @feature, @action = parse_route(action_route)
+      @namespace = "features.#{feature}.actions.#{action}"
     end
 
     private
@@ -32,7 +33,7 @@ module Appfuel
       handle_empty_action(action_name)
 
 
-      [route, feature_name.classify, action_name.classify]
+      [route, feature_name.underscore, action_name.underscore]
     end
 
     def handle_parsed_string(value)
