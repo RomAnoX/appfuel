@@ -19,7 +19,6 @@ require "appfuel/feature"
 require "appfuel/response"
 require "appfuel/response_handler"
 require "appfuel/request"
-require "appfuel/dispatcher"
 
 # Custom predicates & validators
 require "appfuel/predicates"

@@ -127,8 +127,6 @@ module Appfuel
 
       container[:feature_initializer].call(request.feature, container)
       action = container[:action_loader].call(request, container)
-      ap 'going to dispatch action:'
-      ap action
       action.run(inputs)
     end
   end

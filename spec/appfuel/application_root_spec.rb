@@ -225,6 +225,10 @@ module Appfuel
       end
     end
 
+    context '#call' do
+
+    end
+
     def mock_root(name: 'foo')
       root = double('some root')
       allow(root).to receive(:to_s).with(no_args) { name }
