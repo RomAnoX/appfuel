@@ -126,7 +126,7 @@ module Appfuel
       request   = Request.new(route, inputs)
 
       container[:feature_initializer].call(request.feature, container)
-      action = container[:action_loader].call(request, container)
+      action = container[:action_loader].call(request.namespace, container)
       action.run(inputs)
     end
   end
