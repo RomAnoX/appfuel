@@ -138,6 +138,7 @@ module Appfuel
         register('validator-pipes', {})
         register('domain_builders', {})
         register('presenters', {})
+        register('mappings.db', {})
       end
       container
     end
