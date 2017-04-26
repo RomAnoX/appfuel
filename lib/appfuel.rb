@@ -11,7 +11,7 @@ require "appfuel/errors"
 require "appfuel/run_error"
 
 require "appfuel/configuration"
-require "appfuel/application_root"
+require "appfuel/application"
 require "appfuel/initialize"
 require "appfuel/feature"
 

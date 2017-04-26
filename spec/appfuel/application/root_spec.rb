@@ -1,5 +1,5 @@
-module Appfuel
-  RSpec.describe ApplicationRoot do
+module Appfuel::Application
+  RSpec.describe Root do
     context '#handle_default_app_name' do
       it 'assigns the default app name when default_app is true' do
         params = {
@@ -237,7 +237,7 @@ module Appfuel
 
     def setup
       obj = Object.new
-      obj.extend(ApplicationRoot)
+      obj.extend(Root)
       obj
     end
   end
