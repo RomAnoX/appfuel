@@ -135,10 +135,9 @@ module Appfuel
       container.namespace(namespace_key) do
         register('initializers', ThreadSafe::Array.new)
         register('validators', {})
-        register('validator-pipes', {})
+        register('validator_pipes', {})
         register('domain_builders', {})
         register('presenters', {})
-        register('mappings.db', {})
       end
       container
     end

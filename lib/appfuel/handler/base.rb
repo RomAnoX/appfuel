@@ -1,25 +1,13 @@
 module Appfuel
   module Handler
-
-    # The handler is responsible for logic involved when an Action or a Command
-    # is run. There are two ways to execute a handler:
-    #   1) using its call interface
-    #   example:
-    #     handler = Handler.new
-    #     handler.call(inputs, dependency_injection)
-    #
-    #   2) using its class level run interface example)
-    #   example:
-    #     Handler.run(inputs)
-    #
     class Base
       extend ValidatorDsl
       extend InjectDsl
+      extend Appfuel::Application::ContainerKey
 
       class << self
-
         def inherited(klass)
-          root = klass.root_name
+          root = klass.container_root_key
           return if root == 'appfuel'
 
           container = Appfuel.app_container(root)
@@ -30,28 +18,12 @@ module Appfuel
           @response_handler ||= ResponseHandler.new
         end
 
-        def container_path_list
-          @container_path ||= parse_class_name
-        end
-
-        def root_name
-          @root_name ||= container_path_list.first
-        end
-
-        def parse_class_name
-          self.to_s.split('::').map {|i| i.underscore }
-        end
-
         def handler_key
           @handler_key ||= container_path_list[2..-1].join('.')
         end
 
         def qualified_handler_key
           @qualified_handler_key ||= "#{feature_key}.#{handler_key}"
-        end
-
-        def feature_key
-          @feature_key ||= "features.#{container_path_list[1]}"
         end
 
         # Run will validate all inputs; returning on input failures, resolving
