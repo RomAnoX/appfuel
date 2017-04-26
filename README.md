@@ -1,3 +1,4 @@
+[![Travis Build Status](https://travis-ci.org/rsb/appfuel.svg?branch=master)](https://travis-ci.org/rsb/appfuel)
 [![Code Climate](https://codeclimate.com/github/rsb/appfuel/badges/gpa.svg)](https://codeclimate.com/github/rsb/appfuel)
 [![Test Coverage](https://codeclimate.com/github/rsb/appfuel/badges/coverage.svg)](https://codeclimate.com/github/rsb/appfuel/coverage)
 [![Issue Count](https://codeclimate.com/github/rsb/appfuel/badges/issue_count.svg)](https://codeclimate.com/github/rsb/appfuel)
