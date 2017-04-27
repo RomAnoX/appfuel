@@ -169,13 +169,19 @@ module Appfuel::Application
     end
 
     context 'qualified container key' do
-      it 'returns false with path belongs to a feature' do
+      it 'returns the key in the format top_container_key.relative_container_key' do
         mixin = setup
         mixin.container_path = ['foo', 'bar', 'baz']
-        expect(mixin.container_qualified_key).to eq('features.bar.baz')
+        expected_key = "#{mixin.top_container_key}.#{mixin.container_relative_key}"
+        expect(mixin.container_qualified_key).to eq(expected_key)
       end
 
-
+      it 'returns top_container_key.relative_container_key even when global' do
+        mixin = setup
+        mixin.container_path = ['foo', 'global', 'baz']
+        expected_key = "#{mixin.top_container_key}.#{mixin.container_relative_key}"
+        expect(mixin.container_qualified_key).to eq(expected_key)
+      end
     end
 
     def setup

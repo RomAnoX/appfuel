@@ -40,7 +40,6 @@ module Appfuel
         def run(inputs = {}, container = Dry::Container.new)
           begin
             response = resolve_inputs(inputs)
-            ap 'validator response'
             return response if response.failure?
             valid_inputs = response.ok
 
