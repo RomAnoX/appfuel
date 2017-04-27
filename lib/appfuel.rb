@@ -42,6 +42,7 @@ require "appfuel/db"
 require "appfuel/repository_runner"
 
 # callable operations
+require "appfuel/repository"
 require "appfuel/handler"
 
 module Appfuel
