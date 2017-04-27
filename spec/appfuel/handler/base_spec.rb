@@ -22,6 +22,7 @@ module Appfuel::Handler
         )
       end
     end
+
     def setup(container = Dry::Container.new, class_name = "FooApp::Bar::Fiz")
       allow(Appfuel).to receive(:app_container) { container }
       allow(Base).to receive(:to_s) { class_name }
