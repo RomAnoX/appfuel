@@ -4,25 +4,18 @@ module Appfuel
       extend ValidatorDsl
       extend InjectDsl
       extend Appfuel::Application::ContainerKey
+      extend Appfuel::Application::ContainerClassRegistration
 
       # Class level interfaces used by the framwork to register and run
       # handlers
       class << self
-        # All handlers are automatically registered into the application
-        # container which allows them to easily be retrieved for execution.
-        # The ContainerKey mixin handles converting ruby class namespaces to
-        # container key, so we simply need to obtain the qualified namespace
-        # key for this class extending this, that does not belong to appfuel.
+
+        # Register the extending class with the application container
         #
         # @param klass [Class] the handler class that is inheriting this
         # @return nil
         def inherited(klass)
-          root = klass.container_root_name
-          return if root == 'appfuel'
-
-          container = Appfuel.app_container(root)
-          container.register(klass.container_qualified_key, klass)
-          nil
+          register_container_class(klass)
         end
 
         def response_handler

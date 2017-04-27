@@ -131,10 +131,27 @@ module Appfuel
       di.register(key, value)
     end
 
+
+    #
+    # inject :repo, 'global.offer_db', as :repo
+    # 'global.repositories.offer_db
+    # global
+    #   repositories
+    #     offer_db
+    #
+    # projects
+    #     repositories
+    #       offer_db
+    #       offer_yml
+    #
+    #
+    #
+    #
     def setup_container_dependencies(namespace_key, container)
       container.namespace(namespace_key) do
         register('initializers', ThreadSafe::Array.new)
         register('validators', {})
+        register('repositories', {})
         register('validator_pipes', {})
         register('domain_builders', {})
         register('presenters', {})
