@@ -28,15 +28,15 @@ module Appfuel::Application
       it 'can be manually assigned' do
         mixin = setup
         list  = ['foo', 'bar', 'baz']
-        mixin.container_path_list = list
-        expect(mixin.container_path_list).to eq(list)
+        mixin.container_path = list
+        expect(mixin.container_path).to eq(list)
       end
 
       it 'fails when list is not an array' do
         mixin = setup
         msg = 'container path list must be an array'
         expect {
-          mixin.container_path_list = 'foo'
+          mixin.container_path = 'foo'
         }.to raise_error(RuntimeError, msg)
       end
     end
@@ -44,13 +44,13 @@ module Appfuel::Application
     context '#container_path_list?' do
       it 'returns false by default cause no list exists' do
         mixin = setup
-        expect(mixin.container_path_list?).to be false
+        expect(mixin.container_path?).to be false
       end
 
       it 'returns true with a path is assigned' do
         mixin = setup
-        mixin.container_path_list = ['foo', 'bar', 'baz']
-        expect(mixin.container_path_list?).to be true
+        mixin.container_path = ['foo', 'bar', 'baz']
+        expect(mixin.container_path?).to be true
       end
     end
 
@@ -60,7 +60,7 @@ module Appfuel::Application
         mixin = setup
         mixin.load_path_from_ruby_namespace(namespace)
         list = ['foo', 'bar_baz', 'boo']
-        expect(mixin.container_path_list).to eq(list)
+        expect(mixin.container_path).to eq(list)
       end
     end
 
@@ -70,7 +70,7 @@ module Appfuel::Application
         mixin = setup
         mixin.load_path_from_container_namespace(namespace)
         list = ['foo', 'bar', 'biz_baz']
-        expect(mixin.container_path_list).to eq(list)
+        expect(mixin.container_path).to eq(list)
       end
     end
 
@@ -80,32 +80,102 @@ module Appfuel::Application
         mixin = setup
         allow(mixin).to receive(:to_s).with(no_args) { namespace }
         list = ['fiz', 'bar_baz', 'boo']
-        expect(mixin.container_path_list).to eq(list)
+        expect(mixin.container_path).to eq(list)
       end
     end
 
-    context 'container_root_key' do
+    context 'container_root_name' do
       it 'returns the first key in contain_path_list' do
         mixin = setup
-        mixin.container_path_list = ['foo', 'bar', 'baz']
-        expect(mixin.container_root_key).to eq('foo')
+        mixin.container_path = ['foo', 'bar', 'baz']
+        expect(mixin.container_root_name).to eq('foo')
       end
     end
 
-    context 'global_key' do
+    context 'container_global_name' do
       it 'returns the text for global namespace' do
         mixin = setup
-        mixin.container_path_list = ['foo', 'bar', 'baz']
-        expect(mixin.global_key).to eq('global')
+        mixin.container_path = ['foo', 'bar', 'baz']
+        expect(mixin.container_global_name).to eq('global')
       end
     end
 
-    context 'feature_key' do
+    context 'container_features_root_name' do
+      it 'returns "features"' do
+        mixin = setup
+        expect(mixin.container_features_root_name).to eq('features')
+
+      end
+    end
+
+    context 'container_feature_name' do
+      it 'returns the name of the feature the 2nd index in container_path' do
+        mixin = setup
+        path  = ['foo', 'bar', 'baz']
+        mixin.container_path = path
+        expect(mixin.container_feature_name).to eq(path[1])
+      end
+    end
+
+    context 'container_feature_key' do
       it 'returns the namespace for the feature' do
         mixin = setup
-        mixin.container_path_list = ['foo', 'bar', 'baz']
-        expect(mixin.feature_key).to eq('features.bar')
+        mixin.container_path = ['foo', 'bar', 'baz']
+        expect(mixin.container_feature_key).to eq('features.bar')
       end
+    end
+
+
+    context 'container_relative_key' do
+      it 'returns the relative path from the feature' do
+        mixin = setup
+        mixin.container_path = ['foo', 'bar', 'baz','biz']
+        expect(mixin.container_relative_key).to eq('baz.biz')
+      end
+
+      it 'returns the relative path from global' do
+        mixin = setup
+        mixin.container_path = ['foo', 'global', 'bar']
+        expect(mixin.container_relative_key).to eq('bar')
+      end
+    end
+
+    context 'container_global_path?' do
+      it 'returns false with path belongs to a feature' do
+        mixin = setup
+        mixin.container_path = ['foo', 'bar', 'baz','biz']
+        expect(mixin.container_global_path?).to be false
+      end
+
+      it 'returns true with a path that has "global" as the second item' do
+        mixin = setup
+        mixin.container_path = ['foo', 'global', 'baz','biz']
+        expect(mixin.container_global_path?).to be true
+      end
+    end
+
+    context 'top_container_key' do
+      it 'returns "global for a global path' do
+        mixin = setup
+        mixin.container_path = ['foo', 'global', 'baz','biz']
+        expect(mixin.top_container_key).to eq('global')
+      end
+
+      it 'returns the container_feature_key when it is not global' do
+        mixin = setup
+        mixin.container_path = ['foo', 'bar', 'baz','biz']
+        expect(mixin.top_container_key).to eq('features.bar')
+      end
+    end
+
+    context 'qualified container key' do
+      it 'returns false with path belongs to a feature' do
+        mixin = setup
+        mixin.container_path = ['foo', 'bar', 'baz']
+        expect(mixin.container_qualified_key).to eq('features.bar.baz')
+      end
+
+
     end
 
     def setup

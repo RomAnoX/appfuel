@@ -5,26 +5,30 @@ module Appfuel
       extend InjectDsl
       extend Appfuel::Application::ContainerKey
 
+      # Class level interfaces used by the framwork to register and run
+      # handlers
       class << self
+        # All handlers are automatically registered into the application
+        # container which allows them to easily be retrieved for execution.
+        # The ContainerKey mixin handles converting ruby class namespaces to
+        # container key, so we simply need to obtain the qualified namespace
+        # key for this class extending this, that does not belong to appfuel.
+        #
+        # @param klass [Class] the handler class that is inheriting this
+        # @return nil
         def inherited(klass)
-          root = klass.container_root_key
+          root = klass.container_root_name
           return if root == 'appfuel'
 
           container = Appfuel.app_container(root)
-          container.register(klass.qualified_handler_key, klass)
+          container.register(klass.container_qualified_key, klass)
+          nil
         end
 
         def response_handler
           @response_handler ||= ResponseHandler.new
         end
 
-        def handler_key
-          @handler_key ||= container_path_list[2..-1].join('.')
-        end
-
-        def qualified_handler_key
-          @qualified_handler_key ||= "#{feature_key}.#{handler_key}"
-        end
 
         # Run will validate all inputs; returning on input failures, resolving
         # declared dependencies, then delegate to the handlers call method with
