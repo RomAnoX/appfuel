@@ -108,7 +108,7 @@ module Appfuel::Db
     end
 
     context '#apply_query_conditions' do
-      it 'delegates to where, order, and limit' do
+      xit 'delegates to where, order, and limit' do
         repo      = setup_mixin
         criteria  = create_criteria('foo.bar')
         start_relation = double('starting relation')
@@ -135,7 +135,7 @@ module Appfuel::Db
     end
 
     context '#apply_query_all' do
-      it "delegates to the relation's :all and limit interfaces" do
+      xit "delegates to the relation's :all and limit interfaces" do
         repo           = setup_mixin
         criteria       = create_criteria('foo.bar').all
         start_relation = double('starting relation')

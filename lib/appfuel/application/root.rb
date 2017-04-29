@@ -101,14 +101,19 @@ module Appfuel
           Feature::ActionLoader.new
         }
 
+        repo_initializer = params.fetch(:repository_initializer) {
+          Repository::Initializer.new
+        }
+
         root_name = root.to_s.underscore
         container.register(:root, root)
         container.register(:root_name, root_name)
         container.register(:root_path, root_path)
+        container.register(:repository_mappings, {})
+        container.register(:repository_initializer, repo_initializer)
         container.register(:features_path, "#{root_name}/features")
         container.register(:feature_initializer, feature_initializer)
         container.register(:action_loader, action_loader)
-
         if params.key?(:config_definition)
           container.register(:config_definition, params[:config_definition])
         end

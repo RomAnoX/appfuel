@@ -1,8 +1,8 @@
 module Appfuel
   module Repository
     class MappingEntry
-      attr_reader :domain_name, :domain_attr, :computed_attr, :persistence_attr,
-                  :persistence
+      attr_reader :domain_name, :domain_attr, :computed_attr, :storage_attr,
+                  :storage, :container, :container_key
 
       def initialize(data)
         unless data.respond_to?(:to_h)
@@ -10,27 +10,30 @@ module Appfuel
         end
 
         data = data.to_h
-        self.domain_name = data.fetch(:domain_name) do
+        @domain_name = data.fetch(:domain_name) {
           fail "Fully qualified domain name is required"
-        end
+        }.to_s
 
-        self.persistence = data.fetch(:persistence) do
-          fail "Persistence classes hash is required"
-        end
+        @storage = data.fetch(:storage) {
+          fail "Storage classes hash is required"
+        }
 
-        self.persistence_attr = data.fetch(:persistence_attr) do
-          fail "Persistence attribute is required"
-        end
+        @storage_attr = data.fetch(:storage_attr) {
+          fail "Storage attribute is required"
+        }.to_s
 
-        self.domain_attr = data.fetch(:domain_attr) do
+        @domain_attr = data.fetch(:domain_attr) {
           fail "Domain attribute is required"
-        end
+        }
 
-        self.skip = data.fetch(:skip) { false }
+        @skip = data[:skip] == true ? true : false
 
         if data.key?(:computed_attr)
           computed_attr_lambda(data[:computed_attr])
         end
+
+        @container = data[:container]
+        @container_key = "mappings.#{domain_name}.#{domain_attr}"
       end
 
       def skip?
@@ -47,26 +50,6 @@ module Appfuel
       end
 
       private
-      def domain_name=(value)
-        @domain_name = value.to_s
-      end
-
-      def persistence=(value)
-        @persistence = value
-      end
-
-      def persistence_attr=(value)
-        @persistence_attr = value.to_s
-      end
-
-      def domain_attr=(value)
-        @domain_attr = value.to_s
-      end
-
-      def skip=(value)
-        @skip = value == true ? true : false
-      end
-
       def computed_attr_lambda(value)
         unless value.lambda?
           fail "computed attributes require a lambda as a value"

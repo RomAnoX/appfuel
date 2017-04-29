@@ -1,20 +1,8 @@
 module Appfuel
   module Db
-    class Repository
-      extend Appfuel::Application::ContainerKey
-      include Mapper
+    class Repository < Appfuel::Repository::Base
       include RepositoryQuery
-
-      class << self
-        def inherited(klass)
-          root = klass.container_root_name
-          return if root == 'appfuel'
-
-          container = Appfuel.app_container(root)
-          container.register(klass.container_qualified_key, klass)
-        end
-      end
-
+      include Mapper
     end
   end
 end

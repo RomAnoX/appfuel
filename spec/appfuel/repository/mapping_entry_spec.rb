@@ -9,7 +9,7 @@ module Appfuel::Repository
       end
 
       it 'fails when there is no persistence' do
-        msg = 'Persistence classes hash is required'
+        msg = 'Storage classes hash is required'
         expect {
           create_entry(domain_name: 'foo')
         }.to raise_error(RuntimeError, msg)
@@ -17,20 +17,20 @@ module Appfuel::Repository
 
 
       it 'fails when there is no persistence_attr' do
-        msg = 'Persistence attribute is required'
+        msg = 'Storage attribute is required'
         expect {
-          create_entry(domain_name: 'foo', persistence: {foo: 'bar'})
+          create_entry(domain_name: 'foo', storage: {foo: 'bar'})
         }.to raise_error(RuntimeError, msg)
       end
 
       it 'fails when there is no entity_attr' do
         data = {
           domain_name: 'foo.bar',
-          persistence: {
+          storage: {
             db: 'foo',
             yaml: 'balh'
           },
-          persistence_attr: 'bar'
+          storage_attr: 'bar'
         }
         msg = 'Domain attribute is required'
         expect {
@@ -49,14 +49,14 @@ module Appfuel::Repository
         expect(entry.domain_attr).to eq(default_map_data[:domain_attr])
       end
 
-      it 'assigns the persistence classes' do
+      it 'assigns the storage classes' do
         entry = create_entry(default_map_data)
-        expect(entry.persistence).to eq(default_map_data[:persistence])
+        expect(entry.storage).to eq(default_map_data[:storage])
       end
 
-      it 'assigns the persistence attribute' do
+      it 'assigns the storage attribute' do
         entry = create_entry(default_map_data)
-        expect(entry.persistence_attr).to eq(default_map_data[:persistence_attr])
+        expect(entry.storage_attr).to eq(default_map_data[:storage_attr])
       end
 
       it 'skip is false by default' do
@@ -68,16 +68,26 @@ module Appfuel::Repository
         entry = create_entry(default_map_data.merge(skip: true))
         expect(entry.skip?).to be true
       end
+
+      it 'assigns the container name' do
+        entry = create_entry(default_map_data.merge(container: 'foo'))
+        expect(entry.container).to eq('foo')
+      end
+
+      it 'assigns a default value of nil for container' do
+        entry = create_entry(default_map_data)
+        expect(entry.container).to eq(nil)
+      end
     end
 
     def default_map_data
       {
         domain_name: 'foo.bar',
         domain_attr: 'id',
-        persistence: {
+        storage: {
           db: 'DbFooish'
         },
-        persistence_attr: 'foo_id',
+        storage_attr: 'foo_id',
       }
     end
 

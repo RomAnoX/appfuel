@@ -27,7 +27,6 @@ require "appfuel/validation"
 # Domain Entities
 require "appfuel/domain"
 
-require "appfuel/db_model"
 
 # Interface for dscribing domain queries
 require "appfuel/pagination"
@@ -37,12 +36,12 @@ require "appfuel/root_module"
 
 require "appfuel/view_model"
 
-# Database entity mapping
+require "appfuel/repository"
 require "appfuel/db"
+require "appfuel/db_model"
 require "appfuel/repository_runner"
 
 # callable operations
-require "appfuel/repository"
 require "appfuel/handler"
 
 module Appfuel
@@ -133,21 +132,6 @@ module Appfuel
     end
 
 
-    #
-    # inject :repo, 'global.offer_db', as :repo
-    # 'global.repositories.offer_db
-    # global
-    #   repositories
-    #     offer_db
-    #
-    # projects
-    #     repositories
-    #       offer_db
-    #       offer_yml
-    #
-    #
-    #
-    #
     def setup_container_dependencies(namespace_key, container)
       container.namespace(namespace_key) do
         register('initializers', ThreadSafe::Array.new)
@@ -194,6 +178,5 @@ module Appfuel
 
       container
     end
-
   end
 end
