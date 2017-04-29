@@ -15,22 +15,18 @@ module Appfuel
         if options.is_a?(String)
           options = {db: options}
         end
+
+        fail "options must be a hash" unless options.is_a?(Hash)
+
         @entry_class = options[:entry_class] || MappingEntry
         @domain_name = domain_name.to_s
         @entries = []
         @storage = {}
         @container = options[:container]
-
-        ADAPTERS.each do |type|
-          @storage[type] = options[type] if options.key?(type)
-        end
+        @storage = translate_storage_keys(options)
 
         if @storage.empty?
           fail "mapping must have at least one of #{ADAPTERS.join(',')}"
-        end
-
-        @storage.each do |key, value|
-          fail "#{key} can not be empty" if value.to_s.empty?
         end
 
         fail "entity name can not be empty" if @domain_name.empty?
@@ -48,6 +44,30 @@ module Appfuel
         })
 
         @entries << entry_class.new(data)
+      end
+
+      private
+
+      #
+      # global.user
+      # global.storage.db.user
+      # membership.user
+      # features.membership.storage.{type}.user
+      def translate_storage_keys(storage_hash)
+        hash = {}
+        ADAPTERS.each do |type|
+          next unless storage_hash.key?(type)
+          partial_key = storage_hash[type].to_s
+          if partial_key.empty?
+            fail "#{type} can not be empty"
+          end
+
+          top, *parts = partial_key.split('.')
+
+          top = "features.#{top}" unless top == 'global'
+          hash[type] = "#{top}.storage.#{type}.#{parts.join('.')}"
+        end
+        hash
       end
     end
   end

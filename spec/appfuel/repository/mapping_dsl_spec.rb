@@ -10,7 +10,10 @@ module Appfuel::Repository
       end
 
       it 'assigns the storage as a hash with db: bar' do
-        expect(create_dsl('foo', 'bar').storage).to eq({db: 'bar'})
+        result = {
+          db: 'global.storage.db.bar'
+        }
+        expect(create_dsl('foo', 'global.bar').storage).to eq(result)
       end
 
       it 'fails when db name is empty' do
@@ -19,15 +22,31 @@ module Appfuel::Repository
           create_dsl("foo", '')
         }.to raise_error(RuntimeError, msg)
       end
+
+      context '#initialize storage keys' do
+        it 'converts partial feature storage key to qualified container keys' do
+          options = {
+            db: 'foo.some_db_class',
+            yaml: 'foo.some_yaml_class'
+          }
+          dsl = create_dsl('foo', options)
+          expected_storage = {
+            db: 'features.foo.storage.db.some_db_class',
+            yaml: 'features.foo.storage.yaml.some_yaml_class'
+          }
+
+          expect(dsl.storage).to eq(expected_storage)
+        end
+      end
     end
 
     context '#map' do
       it 'maps storage attr to attributes as strings' do
-        dsl = create_dsl('foo', 'bar')
+        dsl = create_dsl('foo', 'global.bar')
         data = {
           domain_name: 'foo',
           domain_attr: 'id',
-          storage: {db: 'bar'},
+          storage: {db: 'global.storage.db.bar'},
           storage_attr: 'bar_id',
           container: nil
         }
@@ -37,11 +56,11 @@ module Appfuel::Repository
 
       it 'maps a computed property' do
         value = -> {'foo'}
-        dsl = create_dsl('foo', 'bar')
+        dsl = create_dsl('foo', 'bar.baz')
         data = {
           domain_name: 'foo',
           domain_attr: 'created_at',
-          storage: {db: 'bar'},
+          storage: {db: 'features.bar.storage.db.baz'},
           storage_attr: 'created_at',
           computed_attr: value,
           container: nil
@@ -51,11 +70,11 @@ module Appfuel::Repository
       end
 
       it 'maps a column that will skip all' do
-        dsl = create_dsl('foo', db: 'bar')
+        dsl = create_dsl('foo', db: 'global.bar')
         data = {
           domain_name: 'foo',
           domain_attr: 'blah',
-          storage: {db: 'bar'},
+          storage: {db: 'global.storage.db.bar'},
           storage_attr: 'bar_blah',
           skip: true,
           container: nil
@@ -65,11 +84,11 @@ module Appfuel::Repository
       end
 
       it 'assigns the container these maps belong to' do
-        dsl = create_dsl('foo', db: 'bar', container: 'fooish')
+        dsl = create_dsl('foo', db: 'global.bar', container: 'fooish')
         data = {
           domain_name: 'foo',
           domain_attr: 'blah',
-          storage: {db: 'bar'},
+          storage: {db: 'global.storage.db.bar'},
           storage_attr: 'bar_blah',
           container: 'fooish'
         }
