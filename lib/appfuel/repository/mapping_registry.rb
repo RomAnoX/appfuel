@@ -16,7 +16,7 @@ module Appfuel
         #
         # @param entity [String]
         # @return [Boolean]
-        def entity?(domain_name)
+        def domain?(domain_name)
           map.key?(domain_name)
         end
 
@@ -25,9 +25,9 @@ module Appfuel
         # @param entity [String] name of the entity
         # @param attr [String] name of the attribute
         # @return [Boolean]
-        def entity_attr?(entity, attr)
-          return false unless entity?(entity)
-          map[entity].key?(attr)
+        def domain_attr?(domain_name, domain_attr)
+          return false unless entity?(domain_name)
+          map[domain_name].key?(domain_attr)
         end
 
         # Returns a mapping entry for a given entity
@@ -38,13 +38,13 @@ module Appfuel
         # @param entity [String] name of the entity
         # @param attr [String] name of the attribute
         # @return [Boolean]
-        def find(entity, attr)
-          validate_entity(entity)
+        def find(domain_name, domain_attr)
+          validate_entity(domain_name)
 
-          unless map[entity].key?(attr)
-            fail "Entity (#{entity}) attr (#{attr}) is not registered"
+          unless map[domain_name].key?(domain_attr)
+            fail "Entity (#{domain_name}) attr (#{domain_attr}) not registered"
           end
-          map[entity][attr]
+          map[domain_name][domain_attr]
         end
 
         # Iterates over all entries for a given entity

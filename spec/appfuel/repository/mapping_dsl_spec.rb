@@ -9,8 +9,8 @@ module Appfuel::Repository
         expect(create_dsl('foo', 'bar').domain_name).to eq 'foo'
       end
 
-      it 'assigns the persistence as a hash with db: bar' do
-        expect(create_dsl('foo', 'bar').persistence).to eq({db: 'bar'})
+      it 'assigns the storage as a hash with db: bar' do
+        expect(create_dsl('foo', 'bar').storage).to eq({db: 'bar'})
       end
 
       it 'fails when db name is empty' do
@@ -22,13 +22,13 @@ module Appfuel::Repository
     end
 
     context '#map' do
-      it 'maps persistence attr to attributes as strings' do
+      it 'maps storage attr to attributes as strings' do
         dsl = create_dsl('foo', 'bar')
         data = {
           domain_name: 'foo',
           domain_attr: 'id',
-          persistence: {db: 'bar'},
-          persistence_attr: 'bar_id',
+          storage: {db: 'bar'},
+          storage_attr: 'bar_id',
           container: nil
         }
         expect_new_mapping_entry(data)
@@ -41,8 +41,8 @@ module Appfuel::Repository
         data = {
           domain_name: 'foo',
           domain_attr: 'created_at',
-          persistence: {db: 'bar'},
-          persistence_attr: 'created_at',
+          storage: {db: 'bar'},
+          storage_attr: 'created_at',
           computed_attr: value,
           container: nil
         }
@@ -55,8 +55,8 @@ module Appfuel::Repository
         data = {
           domain_name: 'foo',
           domain_attr: 'blah',
-          persistence: {db: 'bar'},
-          persistence_attr: 'bar_blah',
+          storage: {db: 'bar'},
+          storage_attr: 'bar_blah',
           skip: true,
           container: nil
         }
@@ -69,8 +69,8 @@ module Appfuel::Repository
         data = {
           domain_name: 'foo',
           domain_attr: 'blah',
-          persistence: {db: 'bar'},
-          persistence_attr: 'bar_blah',
+          storage: {db: 'bar'},
+          storage_attr: 'bar_blah',
           container: 'fooish'
         }
         expect_new_mapping_entry(data)

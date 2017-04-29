@@ -6,7 +6,7 @@ module Appfuel
     # and don't want any incorrect method_missing calls to be confused when
     # collecting mapped values vs when defining them.
     class MappingDsl
-      attr_reader :domain_name, :persistence, :entries, :entry_class,
+      attr_reader :domain_name, :storage, :entries, :entry_class,
                   :container
 
       ADAPTERS = [:db, :yaml, :json, :hash]
@@ -18,18 +18,18 @@ module Appfuel
         @entry_class = options[:entry_class] || MappingEntry
         @domain_name = domain_name.to_s
         @entries = []
-        @persistence = {}
+        @storage = {}
         @container = options[:container]
 
         ADAPTERS.each do |type|
-          @persistence[type] = options[type] if options.key?(type)
+          @storage[type] = options[type] if options.key?(type)
         end
 
-        if @persistence.empty?
+        if @storage.empty?
           fail "mapping must have at least one of #{ADAPTERS.join(',')}"
         end
 
-        @persistence.each do |key, value|
+        @storage.each do |key, value|
           fail "#{key} can not be empty" if value.to_s.empty?
         end
 
@@ -42,8 +42,8 @@ module Appfuel
         data = opts.merge({
           domain_name: domain_name,
           domain_attr: domain_attr,
-          persistence: persistence,
-          persistence_attr: name,
+          storage: storage,
+          storage_attr: name,
           container: container,
         })
 
