@@ -44,7 +44,7 @@ module Appfuel::Repository
         expect(entry.domain_name).to eq(default_map_data[:domain_name])
       end
 
-      it 'assigns the entity_attr' do
+      it 'assigns the domain_attr' do
         entry = create_entry(default_map_data)
         expect(entry.domain_attr).to eq(default_map_data[:domain_attr])
       end

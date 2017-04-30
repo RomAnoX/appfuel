@@ -5,18 +5,17 @@ module Appfuel
       extend Appfuel::Application::ContainerClassRegistration
 
       class << self
-        attr_writer :registry
+        attr_writer :mapper
         def inherited(klass)
           register_container_class(klass)
         end
 
-        def registry
-          @registry ||= registry_from_app_container
+        def mapper
+          @mapper ||= create_mapper
         end
 
-        def registry_from_app_container
-          container = Appfuel.app_container(container_root_name)
-          container[:repository_registry]
+        def create_mapper(maps = nil)
+          Mapper.new(maps)
         end
       end
     end

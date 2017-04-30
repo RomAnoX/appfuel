@@ -37,6 +37,20 @@ module Appfuel::Repository
 
           expect(dsl.storage).to eq(expected_storage)
         end
+
+        it 'converts global keys to the correct container namespace' do
+          options = {
+            db: 'global.some_db_class',
+            yaml: 'global.some_yaml_class'
+          }
+          dsl = create_dsl('foo', options)
+          expected_storage = {
+            db: 'global.storage.db.some_db_class',
+            yaml: 'global.storage.yaml.some_yaml_class'
+          }
+
+          expect(dsl.storage).to eq(expected_storage)
+        end
       end
     end
 
