@@ -94,56 +94,106 @@ module Appfuel::Repository
       end
     end
 
-    xcontext '.each_entity_attr' do
-      it 'yields the each entry' do
-        entry = create_entry(default_entry_data)
-        registry << entry
+    context '.each_entity_attr' do
+      it 'yields each entry for a mapped domain entity' do
 
+        entry1 = 'first entry, object does not matter'
+        map = {
+          'foo.bar' => {
+            'attr_1' => entry1
+          }
+        }
+
+        mapper = create_mapper('my_root', map)
         expect {|b|
-          registry.each_entity_attr('foo.bar', &b)
-        }.to yield_with_args entry.entity_attr, entry
+          mapper.each_entity_attr('foo.bar', &b)
+        }.to yield_with_args(entry1)
       end
 
       it 'yields two entries' do
-        entry2_data = default_entry_data
-        entry2_data[:entity_attr] = 'baz'
-        entry2_data[:db_column] = 'baz_id'
+        entry1 = 'first entry, object does not matter'
+        entry2 = 'second entry, object does not matter'
+        map = {
+          'foo.bar' => {
+            'attr_1' => entry1,
+            'attr_2' => entry2
+          }
+        }
 
-        entry1 = create_entry(default_entry_data)
-        entry2 = create_entry(entry2_data)
-
-        registry << entry1
-        registry << entry2
+        mapper = create_mapper('my_root', map)
 
         expect {|b|
-          registry.each_entity_attr('foo.bar', &b)
-        }.to yield_successive_args(
-              [entry1.entity_attr, entry1],
-              [entry2.entity_attr, entry2])
+          mapper.each_entity_attr('foo.bar', &b)
+        }.to yield_successive_args(entry1, entry2)
       end
     end
 
-    xcontext '.column_mapped?' do
+    context '.storage_attr_mapped?' do
       it 'returns false when the column is not mapped' do
-        entry = create_entry(default_entry_data)
-        registry << entry
-        expect(registry.column_mapped?('foo.bar', 'baz')).to be false
+        entry = instance_double(MappingEntry)
+        allow(entry).to receive(:storage_attr).with(no_args) { 'not_baz' }
+        map = {
+          'foo.bar' => {
+            'bif' => entry
+          }
+        }
+        mapper = create_mapper('my_root', map)
+        expect(mapper.storage_attr_mapped?('foo.bar', 'baz')).to be false
       end
 
       it 'returns true when the column is mapped' do
-        entry = create_entry(default_entry_data)
-        registry << entry
-        expect(registry.column_mapped?('foo.bar', 'bar_id')).to be true
+        entry = instance_double(MappingEntry)
+        allow(entry).to receive(:storage_attr).with(no_args) { 'bar_id' }
+        map = {
+          'foo.bar' => {
+            'bif' => entry
+          }
+        }
+        mapper = create_mapper('my_root', map)
+        expect(mapper.storage_attr_mapped?('foo.bar', 'bar_id')).to be true
       end
 
       it 'fails when entity is not mapped' do
         msg = 'Entity (foo.bar) is not registered'
+        mapper = create_mapper('my_root', {})
         expect {
-          registry.column_mapped?('foo.bar', 'bar_id')
+          mapper.storage_attr_mapped?('foo.bar', 'bar_id')
         }.to raise_error(RuntimeError, msg)
       end
     end
 
+    context '#storage_attr' do
+      it 'fails when entity is not mapped' do
+        msg = 'Entity (foo.bar) is not registered'
+        mapper = create_mapper('my_root', {})
+        expect {
+          mapper.storage_attr('foo.bar', 'id')
+        }.to raise_error(RuntimeError, msg)
+      end
+
+      it 'fails when the entity attribute is not mapped' do
+        map = {'foo.bar' => {}}
+        mapper = create_mapper('my_root', map)
+        msg = 'Entity (foo.bar) attr (baz) is not registered'
+        expect {
+          mapper.storage_attr('foo.bar', 'baz')
+        }.to raise_error(RuntimeError, msg)
+      end
+
+      it 'returns the attribute value mapped' do
+        entry = instance_double(MappingEntry)
+        attr_value = 'some value'
+        allow(entry).to receive(:storage_attr).with(no_args) { attr_value }
+        map = {
+          'foo.bar' => {
+            'bif' => entry
+          }
+        }
+        mapper = create_mapper('my_root', map)
+        expect(mapper.storage_attr('foo.bar', 'bif')).to eq(attr_value)
+      end
+
+    end
     def default_entry_data(data = {})
       default = {
         domain: 'foo.bar',

@@ -74,23 +74,22 @@ module Appfuel
       #
       # @yield [attr, entry] expose the entity attr name and entry
       #
-      # @param entity [String] name of the entity
+      # @param entity_name [String] qualified entity name "<feature>.<entity>"
       # @return [void]
-      def each_domain_attr(domain_name)
-        validate_domain(domain_name)
-
-        map[domain_name].each do |attr, entry|
-          yield attr, entry
+      def each_entity_attr(entity_name)
+        validate_domain(entity_name)
+        map[entity_name].each do |_attr, entry|
+          yield entry
         end
       end
 
       # Determine if an column is mapped for a given entity
       #
-      # @param entity [String] name of the entity
-      # @param attr [String] name of the attribute
+      # @param entity_name [String] qualified entity name "<feature>.<entity>"
+      # @param storage_attr [String] name the persistence attr
       # @return [Boolean]
-      def storage_attr_mapped?(domain_name, storage_attr)
-        each_domain_attr(entity) do |_attr, entry|
+      def storage_attr_mapped?(entity_name, storage_attr)
+        each_entity_attr(entity_name) do |entry|
           return true if storage_attr == entry.storage_attr
         end
 
@@ -102,11 +101,11 @@ module Appfuel
       # @raise [RuntimeError] when entity not found
       # @raise [RuntimeError] when attr not found
       #
-      # @param entity [String] name of the entity
-      # @param attr [String] name of the attribute
+      # @param entity_name [String] qualified entity name "<feature>.<entity>"
+      # @param entity_attr [String] name of the attribute
       # @return [String]
-      def storage_attr(domain_name, domain_attr)
-        find(domain_name, domain_attr).storage_attr
+      def storage_attr(entity_name, entity_attr)
+        find(entity_name, entity_attr).storage_attr
       end
 
       # Returns the storage class based on type
