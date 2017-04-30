@@ -58,16 +58,16 @@ module Appfuel
       # @raise [RuntimeError] when entity not found
       # @raise [RuntimeError] when attr not found
       #
-      # @param entity [String] name of the entity
-      # @param attr [String] name of the attribute
+      # @param entity_name [String] qualified entity name "<feature>.<entity>"
+      # @param entity_attr [String] name of the attribute
       # @return [Boolean]
-      def find(domain_name, domain_attr)
-        validate_domain(domain_name)
+      def find(entity_name, entity_attr)
+        validate_domain(entity_name)
 
-        unless map[domain_name].key?(domain_attr)
-          fail "Domain (#{domain_name}) attr (#{domain_attr}) not registered"
+        unless map[entity_name].key?(entity_attr)
+          fail "Entity (#{entity_name}) attr (#{entity_attr}) is not registered"
         end
-        map[domain_name][domain_attr]
+        map[entity_name][entity_attr]
       end
 
       # Iterates over all entries for a given entity
@@ -126,9 +126,9 @@ module Appfuel
       end
 
       private
-      def validate_domain(domain_name)
-        unless domain_name?(domain_name)
-          fail "Domain (#{domain_name}) is not registered"
+      def validate_domain(entity_name)
+        unless entity?(entity_name)
+          fail "Entity (#{entity_name}) is not registered"
         end
       end
 

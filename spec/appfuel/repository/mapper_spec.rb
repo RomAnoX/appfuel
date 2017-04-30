@@ -50,43 +50,46 @@ module Appfuel::Repository
     context 'entity_attr?' do
       it 'returns false when entity is not registered' do
         map = {}
-        mapper = create_mapper('foo', map)
+        mapper = create_mapper('my_root', map)
         expect(mapper.entity_attr?('foo.bar', 'id')).to be false
       end
 
       it 'returns false when entity exists but attr does not' do
         map = {'foo.bar' => {}}
-        mapper = create_mapper('foo', map)
+        mapper = create_mapper('my_root', map)
         expect(mapper.entity_attr?('foo.bar', 'baz')).to be false
       end
 
       it 'returns true when entity exists and attr exists' do
         map = {'foo.bar' => {'id' => 'some entry'}}
-        mapper = create_mapper('foo', map)
+        mapper = create_mapper('my_root', map)
         expect(mapper.entity_attr?('foo.bar', 'id')).to be true
       end
     end
 
-    xcontext 'find' do
+    context 'find' do
       it 'finds an existing entry' do
-        entry = create_entry(default_entry_data)
-        registry << entry
-        expect(registry.find('foo.bar', 'id')).to eq entry
+        entry = 'some entry, object does not matter'
+        map = {'foo.bar' => {'id' => entry}}
+        mapper = create_mapper('my_root', map)
+        expect(mapper.find('foo.bar', 'id')).to eq entry
       end
 
       it 'fails when entry does not exist' do
+        map = {}
+        mapper = create_mapper('my_root', map)
         msg = 'Entity (foo.bar) is not registered'
         expect {
-          registry.find('foo.bar', 'id')
+          mapper.find('foo.bar', 'id')
         }.to raise_error(RuntimeError, msg)
       end
 
       it 'fails when attr does not exist' do
-        entry = create_entry(default_entry_data)
-        registry << entry
+        map = {'foo.bar' => {}}
+        mapper = create_mapper('my_root', map)
         msg = 'Entity (foo.bar) attr (baz) is not registered'
         expect {
-          registry.find('foo.bar', 'baz')
+          mapper.find('foo.bar', 'baz')
         }.to raise_error(RuntimeError, msg)
       end
     end
