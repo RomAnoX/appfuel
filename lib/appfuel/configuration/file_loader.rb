@@ -3,18 +3,31 @@ module Appfuel
     # Handle loading files and parsing them correctly based on their type.
     # The file loader used for loading configuration data into a definition
     module FileLoader
+      attr_writer :file_module, :json_module, :yaml_module
+
+      def file_module
+        @file_module ||= ::File
+      end
+
+      def json_module
+        @json_module || ::JSON
+      end
+
+      def yaml_module
+        @yaml_module ||= YAML
+      end
 
       # @param path [String]
       # @return [Hash]
       def parse_json(path)
-        file = File.read(path)
-        JSON.parse(file)
+        file = file_module.read(path)
+        json_module.parse(file)
       end
 
       # @param path [String]
       # @return [Hash]
       def parse_yaml(path)
-        YAML.load_file(path)
+        yaml_module.load_file(path)
       end
 
       # Load file will search through a configuration's definition file
@@ -30,14 +43,14 @@ module Appfuel
         key   = definition.key
 
         paths.each do |path|
-          ext = File.extname(path).strip.downcase[1..-1]
+          ext = file_module.extname(path).strip.downcase[1..-1]
           parse_method = "parse_#{ext}"
           unless respond_to?(parse_method)
             fail "extension (#{ext}), for (#{key}: #{path}) is not valid, " +
                  "only yaml and json are supported"
           end
 
-          return public_send(parse_method, path) if File.exists?(path)
+          return public_send(parse_method, path) if file_module.exists?(path)
         end
 
         list = paths.join(',')
