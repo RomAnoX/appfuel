@@ -2,7 +2,7 @@ module Appfuel
   module Repository
     class MappingEntry
       attr_reader :domain_name, :domain_attr, :computed_attr, :storage_attr,
-                  :container, :container_key, :storage
+                  :container_name, :container_key
 
       def initialize(data)
         unless data.respond_to?(:to_h)
@@ -32,8 +32,12 @@ module Appfuel
           computed_attr_lambda(data[:computed_attr])
         end
 
-        @container = data[:container]
+        @container_name = data[:container]
         @container_key = "mappings.#{domain_name}.#{domain_attr}"
+      end
+
+      def storage(type)
+        @storage[type]
       end
 
       def storage?(type)

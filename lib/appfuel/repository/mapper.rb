@@ -109,6 +109,7 @@ module Appfuel
       end
 
       # Returns the storage class based on type
+      # mapping foo.bar, db: auth.foo_bar,
       #
       # @raise [RuntimeError] when entity not found
       # @raise [RuntimeError] when attr not found
@@ -119,9 +120,19 @@ module Appfuel
       # @return [Object]
       def storage_class(domain_name, domain_attr, type)
         entry = find(domain_name, attr)
-        name  = entry.persistence[type]
-        key   = "persistence.#{type}.#{name}"
-        Appfuel.app_container(root_name)[key]
+
+        unless entry.storage?(type)
+          fail "No (#{type}) storage has been mapped"
+        end
+
+        container_name = entry.container_name
+        unless container_root_name == container_name
+          fail "You can not access a mapping outside of this container " +
+            "(#{container_root_name}, #{container_name})"
+        end
+        app_container = Appfuel.app_container(entry.container)
+        key = entry.storage(type)
+        app_container[key]
       end
 
       private

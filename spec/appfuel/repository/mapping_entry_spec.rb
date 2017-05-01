@@ -51,7 +51,7 @@ module Appfuel::Repository
 
       it 'assigns the storage classes' do
         entry = create_entry(default_map_data)
-        expect(entry.storage).to eq(default_map_data[:storage])
+        expect(entry.storage(:db)).to eq(default_map_data[:storage][:db])
       end
 
       it 'assigns the storage attribute' do
@@ -71,12 +71,12 @@ module Appfuel::Repository
 
       it 'assigns the container name' do
         entry = create_entry(default_map_data.merge(container: 'foo'))
-        expect(entry.container).to eq('foo')
+        expect(entry.container_name).to eq('foo')
       end
 
       it 'assigns a default value of nil for container' do
         entry = create_entry(default_map_data)
-        expect(entry.container).to eq(nil)
+        expect(entry.container_name).to eq(nil)
       end
     end
 
