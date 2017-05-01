@@ -28,14 +28,6 @@ module Appfuel
       #    ...
       #    end
       #
-      # 5) mapping 'feature.domain' db: true do
-      #       storage :file, path: '/foo/bar/bar, model: foo.bar
-      #    end
-      #
-      # 6) mapping 'feature.domain', db: true do
-      #      storage :file, true
-      #    end
-      #
       # a file model requires the domain_name it represents.
       #
       #   case1 - build a model with default settings
@@ -72,10 +64,6 @@ module Appfuel
       #         memory: 'storage.memory.model'
       #
       def initialize(domain_name, options = {})
-        if options.is_a?(String)
-          options = {db: options}
-        end
-
         fail "options must be a hash" unless options.is_a?(Hash)
 
         @entries        = []
@@ -91,17 +79,46 @@ module Appfuel
         @storage[:db] = translate_storage_key(key)
       end
 
-      def storage(data = nil)
-        return @storage if data.nil?
+      # 5) mapping 'feature.domain' db: true do
+      #    end
+      #
+      # 6) mapping 'feature.domain', db: true do
+      #      storage :db, 'foo.bar'
+      #      storage :file
+      #    end
+      #  storage(type = nil, options = {})
+      #
+      def storage(type = nil, *args)
+        return @storage if type.nil?
+        unless type.respond_to?(:to_sym)
+          fail "Storage type must implement :to_sym"
+        end
+        type = type.to_sym
 
-        assign_default_storage(data) if data.is_a?(Symbol)
-
-        unless data.is_a?(Hash)
-          fail "Storage must be a symbol or a hash :type => 'container_key'"
+        if all_storage_symbols?(*args)
+          args.unshift(type)
+          args.each do |storage_type|
+            @storage[storage_type] = send("initialize_#{storage_type}_storage", true)
+          end
+          return self
         end
 
-        data.each {|type, partial_key| assign_storage(type, partial_key)}
+        args = [true] if args.empty?
 
+        key  = args.shift
+        opts = args.shift
+        data = {type => key}
+        if opts.is_a?(Hash)
+          data.merge!(opts)
+        end
+
+        @storage.merge!(initialize_storage(data))
+        self
+      end
+
+      def all_storage_symbols?(*args)
+        result = args - STORAGE_TYPES
+        result.empty?
       end
 
       def map(name, domain_attr = nil, opts = {})
@@ -124,28 +141,38 @@ module Appfuel
         storage = {}
         if data.key?(:db)
           value = data[:db]
-          if value == true
-            storage[:db] = translate_storage_key('db', domain_name)
-          elsif data.key?(:key_translation) && data[:key_translation] == false
-            storage[:db] = value
-          elsif
-            storage[:db] = translate_storage_key('db', value)
-          end
+          storage[:db] = initialize_db_storage(value, data)
         elsif data.key?(:file)
           value = data[:file]
-          if value == true
-            key = translate_storage_key('file', domain_name)
-            storage[:file] = {
-              model: 'storage.file.model',
-              path: "#{storage_path}/#{key.gsub(/\./,'/')}.yml"
-            }
-          end
+          storage[:file] = initialize_default_storage(value, :file)
         elsif data.key?(:storage) && data[:storage].is_a?(Array)
           data[:storage].each do |type|
-            storage.merge!(initialize_storage(type => true))
+            storage[type] = send("initialize_#{type}_storage", true)
           end
         end
         storage
+      end
+
+      def initialize_db_storage(value, opts = {})
+        case
+        when value == true
+          translate_storage_key(:db, domain_name)
+        when opts.is_a?(Hash) && opts[:key_translation] == false
+          value
+        else
+          translate_storage_key(:db, value)
+        end
+      end
+
+      def initialize_file_storage(value, opts = {})
+        key = translate_storage_key(:file, domain_name)
+        case value
+        when true
+          {
+            model: 'storage.file.model',
+            path: "#{storage_path}/#{key.gsub(/\./,'/')}.yml"
+          }
+        end
       end
 
       def storage_path

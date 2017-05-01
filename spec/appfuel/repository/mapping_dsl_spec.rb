@@ -5,13 +5,19 @@ module Appfuel::Repository
     end
 
     context '#initialize' do
+      it 'fails when options are not a hash' do
+        msg = 'options must be a hash'
+        expect {
+          create_dsl('foo.bar', 'blah')
+        }.to raise_error(RuntimeError, msg)
+      end
 
       it 'creates an empty map' do
-        expect(create_dsl('foo', 'bar').entries).to eq([])
+        expect(create_dsl('foo').entries).to eq([])
       end
 
       it 'assigns the entity name as a string' do
-        expect(create_dsl('foo', 'bar').domain_name).to eq 'foo'
+        expect(create_dsl('foo').domain_name).to eq 'foo'
       end
 
       it 'translate the db model using the global domain_name"' do
@@ -43,7 +49,6 @@ module Appfuel::Repository
         expect(create_dsl('foo.fooish', db: 'foo.bar').storage).to eq(result)
       end
 
-
       it 'translates the db model using a manual key' do
         key = 'fiz.biz.baz.bam'
         result = {
@@ -70,12 +75,92 @@ module Appfuel::Repository
 
         expect(dsl.storage).to eq(result)
       end
+    end
 
-      it 'fails when db name is empty' do
-        msg = 'db can not be empty'
+    context '#storage' do
+      it 'returns the storage hash when type is nil' do
+        dsl = create_dsl('global.foo', db: 'global.bar')
+        result = { db: 'global.storage.db.bar'}
+        expect(dsl.storage).to eq(result)
+      end
+
+      it 'fails when type is not a symbol' do
+        dsl = create_dsl('global.foo')
+        msg = 'Storage type must implement :to_sym'
         expect {
-          create_dsl("foo", '')
+          dsl.storage({foo: 'bar'})
         }.to raise_error(RuntimeError, msg)
+      end
+
+      it 'translate the db model using the global domain_name"' do
+        result = {
+          db: 'global.storage.db.bar'
+        }
+        dsl = create_dsl('global.bar')
+
+        expect(dsl.storage(:db, true).storage).to eq(result)
+      end
+
+
+      it 'translate the db model using the feature domain_name"' do
+        result = {
+          db: 'features.foo.storage.db.bar'
+        }
+        dsl = create_dsl('foo.bar')
+        expect(dsl.storage(:db, true).storage).to eq(result)
+      end
+
+      it 'translates the global db model using the given key' do
+        result = {
+          db: 'global.storage.db.fiz'
+        }
+        dsl = create_dsl('foo.bar')
+        expect(dsl.storage(:db,'global.fiz').storage).to eq(result)
+      end
+
+      it 'translates the feature db model using the given key' do
+        result = {
+          db: 'features.foo.storage.db.bar'
+        }
+        dsl = create_dsl('foo.bar')
+        expect(dsl.storage(:db, 'foo.bar').storage).to eq(result)
+      end
+
+      it 'translates the db model using a manual key' do
+        key = 'fiz.biz.baz.bam'
+        result = {
+          db: key
+        }
+        dsl = create_dsl('foo.bar')
+        options = {key_translation: false }
+        expect(dsl.storage(:db, key, options).storage).to eq(result)
+      end
+
+      it 'translates storage [:db, :file] using default feature keys' do
+        storage_path = '/some/path/to/storage'
+        container = Appfuel.app_container('foo')
+        container.register(:root_path, '/my/root/path')
+        container.register(:storage_path, storage_path)
+
+        result = {
+          db: 'features.foo.storage.db.fooish',
+          file: {
+            model: 'storage.file.model',
+            path: "#{storage_path}/features/foo/storage/file/fooish.yml"
+          }
+        }
+
+        dsl = create_dsl('foo.fooish')
+
+        expect(dsl.storage(:db, :file).storage).to eq(result)
+      end
+
+      it 'translates default db' do
+        result = {
+          db: 'features.foo.storage.db.bar'
+        }
+        dsl = create_dsl('foo.bar')
+        expect(dsl.storage(:db, true).storage).to eq(result)
       end
     end
 
@@ -95,7 +180,7 @@ module Appfuel::Repository
 
       it 'maps a computed property' do
         value = -> {'foo'}
-        dsl = create_dsl('foo', 'bar.baz')
+        dsl = create_dsl('foo', db: 'bar.baz')
         data = {
           domain_name: 'foo',
           domain_attr: 'created_at',
@@ -146,7 +231,7 @@ module Appfuel::Repository
       expect(MappingEntry).to receive(:new).with(inputs)
     end
 
-    def create_dsl(domain_name, options)
+    def create_dsl(domain_name, options = {})
       MappingDsl.new(domain_name, options)
     end
   end
