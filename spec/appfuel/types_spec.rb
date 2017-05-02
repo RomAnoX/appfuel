@@ -19,21 +19,5 @@ module Appfuel
         expect(Dry::Types.container[:fiz]).to eq type
       end
     end
-
-    describe Types::Db do
-      describe '.container' do
-        it 'returns a try container' do
-          expect(Types::Db.container).to be_an_instance_of(Dry::Container)
-        end
-      end
-
-      describe '.register' do
-        it 'registers an object as a db type' do
-          type = double('Some db class')
-          Types::Db.register(:foo, type)
-          expect(Types::Db[:foo]).to eq type
-        end
-      end
-    end
   end
 end
