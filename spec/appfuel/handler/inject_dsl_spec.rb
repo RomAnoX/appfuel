@@ -4,8 +4,7 @@ module Appfuel::Handler
     context '#injections' do
       it 'returns a hash of empty container and domain hashes' do
         dsl = setup_dsl
-        expected = {domains: {}, container: {}}
-        expect(dsl.injections).to eq(expected)
+        expect(dsl.injections).to eq({})
       end
     end
 
@@ -13,56 +12,56 @@ module Appfuel::Handler
       it 'adds a domain injection with no alias' do
         dsl = setup_dsl
         dsl.inject :domain, 'global.user'
-        result = dsl.injections[:domains]
-        expect(result).to eq({'global.user' => nil})
+        result = dsl.injections
+        expect(result).to eq({'global.domains.user' => nil})
       end
 
       it 'adds a domain injection with an alias' do
         dsl = setup_dsl
-        dsl.inject :domain, 'foo.bar', as: 'baz'
-        result = dsl.injections[:domains]
-        expect(result).to eq({'foo.bar' => 'baz'})
+        dsl.inject :domain, 'bar', as: 'baz'
+        result = dsl.injections
+        expect(result).to eq({'features.foo.domains.bar' => 'baz'})
       end
 
       it 'adds a feature command with no alias' do
         dsl = setup_dsl('foo')
         dsl.inject :cmd, 'bar'
-        result = dsl.injections[:container]
+        result = dsl.injections
         expect(result).to eq({'features.foo.commands.bar' => nil})
       end
 
       it 'adds a global feature with an alias' do
         dsl = setup_dsl('foo')
         dsl.inject :cmd, 'global.bar', as: 'baz'
-        result = dsl.injections[:container]
+        result = dsl.injections
         expect(result).to eq({'global.commands.bar' => 'baz'})
       end
 
       it 'adds a feature repo with an alias' do
         dsl = setup_dsl('foo')
         dsl.inject :repo, 'bar', as: 'repo'
-        result = dsl.injections[:container]
+        result = dsl.injections
         expect(result).to eq({'features.foo.repositories.bar' => 'repo'})
       end
 
       it 'adds a global repo with no alias' do
         dsl = setup_dsl('foo')
         dsl.inject :repo, 'global.bar'
-        result = dsl.injections[:container]
+        result = dsl.injections
         expect(result).to eq({'global.repositories.bar' => nil})
       end
 
       it 'adds a feature container item with no alias' do
         dsl = setup_dsl('foo')
         dsl.inject :container, 'baz'
-        result = dsl.injections[:container]
+        result = dsl.injections
         expect(result).to eq({'features.foo.baz' => nil})
       end
 
       it 'adds a global container item with an alias' do
         dsl = setup_dsl('foo')
         dsl.inject :container, 'global.baz'
-        result = dsl.injections[:container]
+        result = dsl.injections
         expect(result).to eq({'baz' => nil})
       end
 

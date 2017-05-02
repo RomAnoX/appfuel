@@ -17,10 +17,7 @@ module Appfuel
       #
       # @return [Hash]
       def injections
-        @injections ||= {
-          domains: {},
-          container: {}
-        }
+        @injections ||= {}
       end
 
       # Dsl to declare a dependency injection. You can inject one of four
@@ -52,42 +49,22 @@ module Appfuel
           fail "inject type must be #{TYPES.join(",")} #{type} given"
         end
 
-        if type == :domain
-          return injections[:domains][key] = opts[:as]
-        end
-
         cat = case type
-              when :repo then 'repositories'
-              when :cmd  then 'commands'
+              when :repo   then 'repositories'
+              when :cmd    then 'commands'
+              when :domain then 'domains'
               else
                 "container"
               end
 
         namespaced_key = convert_to_qualified_container_key(key, cat)
-        injections[:container][namespaced_key] = opts[:as]
+        injections[namespaced_key] = opts[:as]
         nil
       end
 
-      def resolve_dependencies(result = Dry::Container.new)
-        resolve_domain_dependencies(result)
-        resolve_container_dependencies(result)
-        result
-      end
-
-      def resolve_domain_dependencies(container)
-        injections[:domains].each do |key, alias_name|
-          unless Types.key?(key)
-            fail "Could not inject domain (#{key}) not registered in Types"
-          end
-          domain = Types[key]
-          container_key = alias_name || domain.domain_basename
-          container.register(container_key, domain)
-        end
-      end
-
-      def resolve_container_dependencies(container)
+      def resolve_dependencies(container = Dry::Container.new)
         app_container = Appfuel.app_container
-        injections[:container].each do |key, alias_name|
+        injections.each do |key, alias_name|
           unless app_container.key?(key)
             fail "Could not inject (#{key}): not registered in app container"
           end
