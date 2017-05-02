@@ -1,6 +1,6 @@
 module Appfuel
   module Domain
-    class ValueObject < Base
+    class ValueObject < Entity
       enable_value_object
     end
   end

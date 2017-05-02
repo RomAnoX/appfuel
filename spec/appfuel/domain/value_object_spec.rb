@@ -1,11 +1,7 @@
 module Appfuel::Domain
   RSpec.describe ValueObject do
     it 'mixes in Dsl' do
-      expect(ValueObject.ancestors).to include Dsl
-    end
-
-    it 'mixes in base instance behavior' do
-      expect(ValueObject.ancestors).to include Base
+      expect(ValueObject.ancestors).to include Entity
     end
 
     it 'enables value object' do

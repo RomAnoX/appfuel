@@ -179,6 +179,5 @@ end
 
 # Domain Entities
 require "appfuel/domain"
-require "appfuel/pagination"
 
 

@@ -1,7 +1,15 @@
 module Appfuel::Domain
-  RSpec.describe Base do
+  RSpec.describe Entity do
     before(:each) do
       setup(app_name: 'foo')
+    end
+
+    it 'mixes in Dsl' do
+      expect(Entity.ancestors).to include Dsl
+    end
+
+    it 'disables value object' do
+      expect(Entity.value_object?).to be false
     end
 
     context '#initialize' do
@@ -65,8 +73,8 @@ module Appfuel::Domain
     end
 
     def create_domain(class_name = "Foo::Bar::Baz")
-      allow(Base).to receive(:to_s) { class_name }
-      Class.new(Base)
+      allow(Entity).to receive(:to_s) { class_name }
+      Entity
     end
   end
 end
