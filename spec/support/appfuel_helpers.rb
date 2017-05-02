@@ -67,8 +67,24 @@ module AppfuelHelpers
     type(name)[data]
   end
 
+  def criteria_instance_double
+    instance_double(criteria_class)
+  end
+
+  def criteria_class_double
+    class_double(criteria_class)
+  end
+
+  def criteria_class
+    Appfuel::Domain::Criteria
+  end
+
   def create_criteria(domain, opts = {})
-    Appfuel::Domain::Criteria.new(domain, opts)
+    criteria_class.new(domain, opts)
+  end
+
+  def Criteria(domain, opts = {})
+    create_criteria(domain, opts)
   end
 
   def create_pager(data = {})

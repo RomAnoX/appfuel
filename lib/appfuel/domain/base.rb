@@ -9,7 +9,11 @@ module Appfuel
   #   attribute :foo, 'strict.string', default: 'bar', min_size: 3
   #
   module Domain
-    module Base
+    class Base
+      extend Appfuel::Application::ContainerKey
+      extend Appfuel::Application::ContainerClassRegistration
+      extend Dsl
+
       def initialize(inputs = {})
         setup_attributes(inputs)
         enable_undefined

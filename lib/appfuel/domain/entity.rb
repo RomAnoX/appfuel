@@ -1,8 +1,7 @@
 module Appfuel
   module Domain
-    class Entity
-      include Dsl
-      include Base
+    class Entity < Base
+
     end
   end
 end

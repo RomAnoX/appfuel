@@ -191,7 +191,7 @@ module Appfuel::Domain
 
     def setup
       entity = Class.new do
-        include Dsl
+        extend Dsl
       end
 
       entity

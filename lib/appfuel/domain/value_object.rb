@@ -1,8 +1,6 @@
 module Appfuel
   module Domain
-    class ValueObject
-      include Dsl
-      include Base
+    class ValueObject < Base
       enable_value_object
     end
   end

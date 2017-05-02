@@ -187,6 +187,7 @@ module Appfuel::Application
     def setup
       obj = Object.new
       obj.extend(ContainerKey)
+
       obj
     end
   end

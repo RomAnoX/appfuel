@@ -2,46 +2,46 @@ module Appfuel::Domain
   RSpec.describe Expr do
 
     context 'entity' do
-      it 'assigns the entity name' do
+      it 'assigns the domain name' do
         expr = create_expr('foo.bar', 'id', eq: "bar")
-        expect(expr.entity).to eq "foo.bar"
+        expect(expr.domain_name).to eq "foo.bar"
       end
 
       it 'fails when entity is empty' do
-        msg = 'entity name can not be empty'
+        msg = 'domain name can not be empty'
         expect {
           create_expr("", "id", eq: "bar")
         }.to raise_error(RuntimeError, msg)
       end
 
       it 'fails when entity is nil' do
-        msg = 'entity name can not be empty'
+        msg = 'domain name must be a string or implement method :domain_name'
         expect {
           create_expr(nil, "id", eq: "bar")
         }.to raise_error(RuntimeError, msg)
       end
     end
 
-    context 'attr' do
+    context 'domain_attr' do
       it 'assigns the attribute as a string when a symbol is given' do
         expr = create_expr('foo.bar', :foo, eq: "bar")
-        expect(expr.attr).to eq "foo"
+        expect(expr.domain_attr).to eq "foo"
       end
 
-      it 'assigns the attribute as a string when a symbol is given' do
+      it 'assigns the domain attribute as a string when a symbol is given' do
         expr = create_expr('foo.bar', "foo_id", eq: "bar")
-        expect(expr.attr).to eq "foo_id"
+        expect(expr.domain_attr).to eq "foo_id"
       end
 
-      it 'fails when attr is an empty string' do
-        msg = 'attribute can not be empty'
+      it 'fails when domain_attr is an empty string' do
+        msg = 'domain attribute can not be empty'
         expect {
           create_expr('foo.bar', "", eq: "bar")
         }.to raise_error(RuntimeError, msg)
       end
 
-      it 'fails when attr is nil' do
-        msg = 'attribute can not be empty'
+      it 'fails when domain_attr is nil' do
+        msg = 'domain attribute can not be empty'
         expect {
           create_expr('foo.bar', nil, eq: "bar")
         }.to raise_error(RuntimeError, msg)
@@ -100,22 +100,16 @@ module Appfuel::Domain
         expect(expr.op).to eq :like
       end
 
-      it 'assigns a range operator as a symbol' do
-        range = Time.now .. Time.now + 1
-        expr  = create_expr("foo", "created_at", 'range' => range)
-        expect(expr.op).to eq :range
-      end
-
       it 'fails when an unrecognised op is used' do
-        msg = 'op has to be one of [eq,gt,gteq,lt,lteq,in,like,range]'
+        msg = 'op has to be one of [eq,gt,gteq,lt,lteq,in,like,ilike,between]'
         expect {
           create_expr("foo", "name", 'boo' => 'xyz')
         }.to raise_error(RuntimeError, msg)
       end
 
-      it 'knows op is eq when using :not_eq' do
+      it 'knows op is not_eq when using :not_eq' do
         expr = create_expr("foo", "name", not_eq: "bar")
-        expect(expr.op).to eq :eq
+        expect(expr.op).to eq :not_eq
       end
 
       it 'negates the expr when using :not_eq' do
@@ -123,9 +117,9 @@ module Appfuel::Domain
         expect(expr).to be_negated
       end
 
-      it 'knows op is :in when using :not_in' do
+      it 'knows op is :not_in when using :not_in' do
         expr = create_expr("foo", "name", not_in: ["bar"])
-        expect(expr.op).to eq :in
+        expect(expr.op).to eq :not_in
       end
 
       it 'negates the expr when using :not_in' do
@@ -133,9 +127,9 @@ module Appfuel::Domain
         expect(expr).to be_negated
       end
 
-      it 'knows op is :like in when using :not_like' do
+      it 'knows op is :not_like in when using :not_like' do
         expr = create_expr("foo", "name", not_like: "bar")
-        expect(expr.op).to eq :like
+        expect(expr.op).to eq :not_like
       end
 
       it 'negates the expr when using :not_like' do
@@ -143,13 +137,18 @@ module Appfuel::Domain
         expect(expr).to be_negated
       end
 
-      it 'knows op is :range in when using :not_range' do
-        expr = create_expr("foo", "name", not_range: (1..3))
-        expect(expr.op).to eq :range
+      it 'knows op is :between in when using :between' do
+        expr = create_expr("foo", "id", between: [1, 5])
+        expect(expr.op).to eq :between
       end
 
-      it 'negates the expr when using :not_range' do
-        expr = create_expr("foo", "name", not_range: (1..3))
+      it 'knows op is :not_between in when using :not_between' do
+        expr = create_expr("foo", "id", not_between: [1, 5])
+        expect(expr.op).to eq :not_between
+      end
+
+      it 'negates the expr when using :not_between' do
+        expr = create_expr("foo", "name", not_between: "bar")
         expect(expr).to be_negated
       end
     end
@@ -176,13 +175,6 @@ module Appfuel::Domain
         msg = ':in operator must have an array as a value'
         expect {
           create_expr("foo", "name", in: 'abc')
-        }.to raise_error(RuntimeError, msg)
-      end
-
-      it 'fails when range is not a range' do
-        msg = ':range operator must have a range as a value'
-        expect {
-          create_expr("foo", "name", range: 'abc')
         }.to raise_error(RuntimeError, msg)
       end
     end

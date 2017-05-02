@@ -70,6 +70,60 @@ module Appfuel::Domain
       end
     end
 
+    context '#add_param' do
+      let(:criteria) {create_criteria('foo', single: true, error_on_empty: true)}
+
+      it 'returns nil if not param' do
+        expect{ criteria.add_param(nil, nil) }.to raise_error('key should not be nil')
+      end
+
+      it 'returns the value added' do
+        expect(criteria.add_param('my_key', 100)).to eq 100
+      end
+
+      it 'should added value' do
+        value = 99
+        criteria.add_param('my_key', value)
+
+        expect(criteria.params?).to be_truthy
+        expect(criteria.param(:my_key)).to eq value
+        expect(criteria.param?(:my_key)).to be_truthy
+      end
+    end
+
+    context '#filter' do
+      let(:criteria) {create_criteria('foo', single: true, error_on_empty: true)}
+
+      it 'raise an error if the filter is not an Array' do
+        expect{ criteria.filter('foolish value') }.to raise_error(RuntimeError, 'the attribute must be an Array')
+      end
+
+      it 'raise an error if the filters are not Hashes' do
+        expect{ criteria.filter([[3,4],5]) }.to raise_error(RuntimeError, 'filters must be a Hash')
+      end
+
+      it 'return [] if the array is empty' do
+        expect( criteria.filter([]) ).to eq []
+      end
+
+      it 'return a cleaned list of filters' do
+        filters = [
+          {'foo.bar.id': 1},
+          {first_name: 'Sarah', op: :eq, or: true},
+          {last_name: 'Bits', op: :eq, or: true}
+        ]
+
+        criteria_filter = criteria.filter(filters)
+
+        expect(criteria_filter).to_not be_nil
+        expect(criteria_filter).to eq([
+          {'foo.bar.id': 1},
+          {first_name: 'Sarah'},
+          {last_name: 'Bits'}
+        ])
+      end
+    end
+
     context '#feature?' do
       it 'returns true when a feature was given' do
         criteria = create_criteria('foo.bar')
@@ -95,37 +149,42 @@ module Appfuel::Domain
     end
 
     context '#where' do
+      let(:criteria) { create_criteria('foo') }
+
       it 'adds an expr to the list' do
-        criteria = create_criteria('foo')
         criteria.where(:id, eq: 4)
         expect(criteria.exprs.size).to eq 1
       end
 
-      it 'creates an EntityExpr with attr operator and value' do
-        criteria = create_criteria('foo')
+      it 'creates an EntityExpr with domain_attr operator and value' do
         criteria.where(:id, eq: 4)
         result = criteria.exprs.first
         expect(result).to be_a(Hash)
         expect(result.key?(:expr)).to be true
-        expect(result.key?(:op)).to be true
+        expect(result.key?(:relational_op)).to be true
 
         expr = result[:expr]
-        op   = result[:op]
+        op   = result[:relational_op]
 
         expect(op).to eq :and
         expect(expr).to be_an_instance_of(Expr)
-        expect(expr.attr).to eq "id"
+        expect(expr.domain_attr).to eq "id"
         expect(expr.op).to eq :eq
         expect(expr.value).to eq 4
       end
     end
 
     context '#limit' do
+      let(:criteria) { create_criteria('foo') }
+
       it 'adds a limit for the criteria' do
-        criteria = create_criteria('foo')
         criteria.limit(6)
         expect(criteria.limit?).to be true
         expect(criteria.limit).to eq 6
+      end
+
+      it 'fails if the limit is zero' do
+        expect{ criteria.limit(0) }.to raise_error("limit must be an integer gt 0")
       end
     end
 
@@ -133,13 +192,22 @@ module Appfuel::Domain
       it 'adds a order for an attribute defaults to asc' do
         criteria = create_criteria('foo')
         criteria.order_by(:id)
-        expect(criteria.order).to eq({id: :asc})
+        expect(criteria.order.first).to be_an_instance_of(Expr)
+        expr = criteria.order.first
+        expect(expr.domain_name).to eq(criteria.domain_name)
+        expect(expr.domain_attr).to eq('id')
+        expect(expr.value).to eq('ASC')
       end
 
       it 'adds and order by attr that is desc' do
         criteria = create_criteria('foo')
         criteria.order_by(:id, :desc)
-        expect(criteria.order).to eq({id: :desc})
+        expect(criteria.order.first).to be_an_instance_of(Expr)
+
+        expr = criteria.order.first
+        expect(expr.domain_name).to eq(criteria.domain_name)
+        expect(expr.domain_attr).to eq('id')
+        expect(expr.value).to eq('DESC')
       end
     end
 
@@ -153,66 +221,86 @@ module Appfuel::Domain
         first_expr = result.first
         last_expr  = result.last
 
-        expect(first_expr[:op]).to eq :or
+        expect(first_expr[:relational_op]).to eq :and
 
         expr = last_expr[:expr]
-        op   = last_expr[:op]
+        op   = last_expr[:relational_op]
 
-        expect(op).to eq :and
+        expect(op).to eq :or
         expect(expr).to be_an_instance_of(Expr)
-        expect(expr.attr).to eq "id"
+        expect(expr.domain_attr).to eq "id"
         expect(expr.op).to eq :eq
         expect(expr.value).to eq 5
       end
     end
 
     context '#exec' do
+      let(:criteria) {create_criteria('foo')}
+
       it 'there is no exec method name by default' do
-        criteria = create_criteria('foo')
         expect(criteria.exec).to eq nil
       end
 
       it 'determines there is no exec by default' do
-        criteria = create_criteria('foo')
         expect(criteria.exec?).to be false
       end
 
       it 'assigns a method name to be executed by the repo' do
-        criteria = create_criteria('foo')
         criteria.exec :my_method
         expect(criteria.exec).to eq :my_method
       end
 
       it 'determines that the exec has been assigned' do
-        criteria = create_criteria('foo')
         criteria.exec :my_method
         expect(criteria.exec?).to be true
       end
     end
 
-    context '#pager' do
-      it 'assigns a pager to the criteria' do
-        criteria = create_criteria('foo')
-        pager    = create_pager
-        criteria.pager(pager)
-        expect(criteria.pager).to eq pager
+    context '#page' do
+      it 'has a default page determined by the criteria' do
+        criteria = Criteria('foo')
+        expect(criteria.page).to eq(criteria.class::DEFAULT_PAGE)
+      end
+
+      it 'assigns a page value to the criteria for pagination' do
+        criteria = Criteria('foo')
+        criteria.page(11)
+        expect(criteria.page).to eq 11
       end
 
       it 'returns an instance of the criteria to be chained' do
-        criteria = create_criteria('foo')
-        pager    = create_pager
-        expect(criteria.pager(pager)).to eq criteria
-      end
-
-      it 'can initialize with a pager' do
-        pager    = create_pager
-        criteria = create_criteria('foo', pager: pager)
-        expect(criteria.pager).to eq pager
+        criteria = Criteria('foo')
+        expect(criteria.page(22)).to eq criteria
       end
     end
 
-    def create_criteria(name, opts = {})
-      Criteria.new(name, opts)
+    context '#per_page' do
+      it 'has a default per_page determined by the criteria' do
+        criteria = Criteria('foo')
+        expect(criteria.per_page).to eq(criteria.class::DEFAULT_PER_PAGE)
+      end
+
+      it 'assigns a per_page value to the criteria' do
+        criteria = Criteria('foo')
+        criteria.per_page(99)
+        expect(criteria.per_page).to eq 99
+      end
+
+      it 'returns an instance of the criteria to be chained' do
+        criteria = Criteria('foo')
+        expect(criteria.per_page(22)).to eq criteria
+      end
+    end
+
+    context '#each' do
+      let(:criteria) { create_criteria('foo') }
+
+      it 'return enumerator' do
+        filter = [{last_name: 'SirFooish', op: 'like', or: true}, {first_name: 'Bob', op: 'like', or: true}]
+
+        criteria.filter(filter)
+        expect(criteria.each.class).to eq Enumerator
+      end
     end
   end
 end

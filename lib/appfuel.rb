@@ -24,12 +24,7 @@ require "appfuel/request"
 require "appfuel/predicates"
 require "appfuel/validation"
 
-# Domain Entities
-require "appfuel/domain"
-
-
 # Interface for dscribing domain queries
-require "appfuel/pagination"
 
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"
@@ -181,3 +176,9 @@ module Appfuel
     end
   end
 end
+
+# Domain Entities
+require "appfuel/domain"
+require "appfuel/pagination"
+
+
