@@ -85,7 +85,7 @@ module Appfuel::Handler
       obj = Object.new
       obj.extend(InjectDsl)
 
-      obj.define_singleton_method(:feature_key) do
+      obj.define_singleton_method(:container_feature_key) do
         "features.#{feature_key_name}"
       end
 

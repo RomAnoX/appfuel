@@ -36,11 +36,11 @@ require "appfuel/root_module"
 
 require "appfuel/view_model"
 
-require "appfuel/storage"
 require "appfuel/repository"
 require "appfuel/db"
 require "appfuel/db_model"
 require "appfuel/repository_runner"
+require "appfuel/storage"
 
 # callable operations
 require "appfuel/handler"

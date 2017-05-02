@@ -69,8 +69,9 @@ module Appfuel
       end
 
       def resolve_dependencies(result = Dry::Container.new)
-        result = resolve_domain_dependencies(result)
+        resolve_domain_dependencies(result)
         resolve_container_dependencies(result)
+        result
       end
 
       def resolve_domain_dependencies(container)
@@ -82,14 +83,13 @@ module Appfuel
           container_key = alias_name || domain.domain_basename
           container.register(container_key, domain)
         end
-        container
       end
 
       def resolve_container_dependencies(container)
         app_container = Appfuel.app_container
         injections[:container].each do |key, alias_name|
           unless app_container.key?(key)
-            fail "Could not inject (#{key}) not registered in app container"
+            fail "Could not inject (#{key}): not registered in app container"
           end
 
           basename = key.split('.').last
@@ -151,7 +151,7 @@ module Appfuel
       # @return [String] fully qualified namespaced key
       def convert_to_qualified_container_key(key, type_ns)
         parts     = key.to_s.split('.')
-        namespace = "#{feature_key}."
+        namespace = "#{container_feature_key}."
         if parts[0].downcase == 'global'
           namespace = 'global.'
           parts.shift

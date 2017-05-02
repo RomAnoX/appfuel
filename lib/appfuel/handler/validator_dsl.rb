@@ -186,11 +186,14 @@ module Appfuel
         last  = parts.last
         first = parts.first
         case first
-          when 'global'      then "global.validators.#{last}"
-          when 'global-pipe' then "global.validator-pipes.#{last}"
-          when 'pipe'        then "#{feature_key}.validator-pipes.#{last}"
+          when 'global'
+            "global.validators.#{last}"
+          when 'global-pipe'
+            "global.validator-pipes.#{last}"
+          when 'pipe'
+            "#{container_feature_key}.validator-pipes.#{last}"
           else
-            "#{feature_key}.validators.#{first}"
+            "#{container_feature_key}.validators.#{first}"
         end
       end
 
