@@ -42,6 +42,11 @@ module Appfuel
         container
       end
 
+      def handle_repository_mapping(container, params = {})
+        initializer = container[:repository_initializer]
+        initializer.call(container)
+      end
+
       # This will initialize the app by handling configuration and running
       # all the initilizers, which will result in an app container that has
       # registered the config, env, and anything else the initializers
@@ -54,6 +59,8 @@ module Appfuel
         app_name  = params.fetch(:app_name) { Appfuel.default_app_name }
         container = Appfuel.app_container(app_name)
         handle_configuration(container, params)
+        handle_repository_mapping(container, params)
+
         Appfuel.run_initializers('global', container, params[:exclude] || [])
 
         container

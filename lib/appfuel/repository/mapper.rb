@@ -135,6 +135,31 @@ module Appfuel
         app_container[key]
       end
 
+      def entity_value(domain, map_entry)
+        value = resolve_entity_value(domain, map_entry.domain_attr)
+        if map_entry.computed_attr?
+          value = map_entry.compute_attr(domain, value)
+        end
+
+        value = nil if undefined?(value)
+
+        value
+      end
+
+      def undefined?(value)
+        value == Types::Undefined
+      end
+
+      def resolve_entity_value(domain, entity_attr)
+        chain  = entity_attr.split('.')
+        target = domain
+        chain.each do |attr_method|
+          return nil unless target.respond_to?(attr_method)
+          target = target.public_send(attr_method)
+        end
+        target
+      end
+
       private
       def validate_domain(entity_name)
         unless entity?(entity_name)

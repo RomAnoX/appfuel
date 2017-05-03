@@ -22,6 +22,9 @@ module Appfuel
           @response_handler ||= ResponseHandler.new
         end
 
+        def app_container
+          Appfuel.app_container(container_root_name)
+        end
 
         # Run will validate all inputs; returning on input failures, resolving
         # declared dependencies, then delegate to the handlers call method with
@@ -36,8 +39,8 @@ module Appfuel
             return response if response.failure?
             valid_inputs = response.ok
 
-            dependencies = resolve_dependencies(container)
-            handler = self.new(dependencies)
+            resolve_dependencies(container)
+            handler = self.new(container)
             result = handler.call(valid_inputs)
             result = create_response(result) unless response?(result)
           rescue RunError => e
@@ -75,6 +78,35 @@ module Appfuel
 
       def call(inputs, data = {})
         fail "Concrete handlers must implement their own call"
+      end
+
+      def ok(value = nil)
+        self.class.ok(value)
+      end
+
+      def error(*args)
+        self.class.error(*args)
+      end
+
+      def present(name, data, inputs = {})
+        return data if inputs[:raw] == true
+
+        key = qualify_container_key(name, 'presenters')
+        container = self.class.app_container
+        unless container.key?(key)
+          unless data.respond_to?(:to_h)
+            fail "data must implement :to_h for generic presentation"
+          end
+
+          return data.to_h
+        end
+
+        container[key].call(data, inputs)
+      end
+
+      private
+      def qualify_container_key(key, type)
+        self.class.qualify_container_key(key, type)
       end
     end
   end

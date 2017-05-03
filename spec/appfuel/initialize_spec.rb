@@ -122,7 +122,7 @@ module Appfuel
       it 'handles configuration and initializers' do
         app_name  = 'foo'
         params    = {foo: 'bar'}
-        container = build_container
+        container = build_container(repository_initializer: ->(c) {})
         allow(Appfuel).to receive(:default_app_name) { app_name }
         allow(Appfuel).to receive(:app_container).with(app_name) { container }
 

@@ -26,14 +26,14 @@ module Appfuel
     # @param entity_name [String] domain name of the entity we are mapping
     # @param db_class [String] name of the database class used in mapping
     # @return [DbEntityMapper]
-    def mapping(domain_name, options = {}, &block)
+    def self.mapping(domain_name, options = {}, &block)
       dsl = MappingDsl.new(domain_name, options)
       dsl.instance_eval(&block)
 
       dsl.entries.each do |entry|
-        root = entity.container || Appfuel.default_app_name
+        root      = entry.container_name || Appfuel.default_app_name
         container = Appfuel.app_container(root)
-        mappings  = container['mappings']
+        mappings  = container['repository_mappings']
 
         domain_name = entry.domain_name
         mappings[domain_name] = {} unless mappings.key?(domain_name)

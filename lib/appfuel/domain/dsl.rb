@@ -148,9 +148,7 @@ module Appfuel
       end
 
       def build_domain_name
-        parse_class_name.delete_if do |x|
-          ['sp_service', 'appfuel', 'domains'].include?(x)
-        end.join('.')
+        "#{container_feature_name}.#{container_key_basename}"
       end
 
       def generate_code(nbr)

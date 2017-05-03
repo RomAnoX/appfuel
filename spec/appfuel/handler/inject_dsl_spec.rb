@@ -83,6 +83,7 @@ module Appfuel::Handler
     def setup_dsl(feature_key_name = 'foo')
       obj = Object.new
       obj.extend(InjectDsl)
+      obj.extend(Appfuel::Application::ContainerKey)
 
       obj.define_singleton_method(:container_feature_key) do
         "features.#{feature_key_name}"

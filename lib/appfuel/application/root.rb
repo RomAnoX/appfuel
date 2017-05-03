@@ -22,8 +22,6 @@ module Appfuel
         app_container.register(:app_name, app_name)
         framework_container.register(app_name, app_container)
 
-        require 'appfuel/domain'
-
         if params.key?(:on_after_setup)
           handle_after_setup(params[:on_after_setup], app_container)
         end
