@@ -1,8 +1,7 @@
 module Appfuel
   module Repository
     class Base
-      extend Appfuel::Application::ContainerKey
-      extend Appfuel::Application::ContainerClassRegistration
+      include Appfuel::Application::AppContainer
 
       class << self
         attr_writer :mapper
@@ -16,10 +15,6 @@ module Appfuel
 
         def create_mapper(maps = nil)
           Mapper.new(maps)
-        end
-
-        def app_container
-          Appfuel.app_container(container_root_name)
         end
       end
 
@@ -45,22 +40,13 @@ module Appfuel
         unless container.key?(key)
           return ->(data, inputs = {}) {
             hash = mapper.to_entity_hash(domain_name, data)
+
             domain_key = qualify_container_key(domain_name, "domains")
             app_container[domain_key].new(hash)
           }
         end
 
         container[key]
-      end
-
-
-      private
-      def app_container
-        self.class.app_container
-      end
-
-      def qualify_container_key(domain_name, type)
-        self.class.qualify_container_key(domain_name, type)
       end
     end
   end

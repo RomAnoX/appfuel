@@ -3,8 +3,7 @@ module Appfuel
     class Base
       extend ValidatorDsl
       extend InjectDsl
-      extend Appfuel::Application::ContainerKey
-      extend Appfuel::Application::ContainerClassRegistration
+      include Appfuel::Application::AppContainer
 
       # Class level interfaces used by the framwork to register and run
       # handlers
@@ -20,10 +19,6 @@ module Appfuel
 
         def response_handler
           @response_handler ||= ResponseHandler.new
-        end
-
-        def app_container
-          Appfuel.app_container(container_root_name)
         end
 
         # Run will validate all inputs; returning on input failures, resolving
@@ -102,11 +97,6 @@ module Appfuel
         end
 
         container[key].call(data, inputs)
-      end
-
-      private
-      def qualify_container_key(key, type)
-        self.class.qualify_container_key(key, type)
       end
     end
   end
