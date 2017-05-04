@@ -63,7 +63,7 @@ module Appfuel
         #
         # @return string
         def container_root_name
-          @container_root_name ||= container_path.first
+          container_path.first
         end
 
         # All root namespace for anything inside features, use this name. It is
@@ -210,7 +210,6 @@ module Appfuel
       end
 
       # Instance methods
-
       def qualify_container_key(key, type_ns)
         self.class.qualify_container_key(key, type_ns)
       end

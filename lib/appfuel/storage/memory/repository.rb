@@ -19,12 +19,14 @@ module Appfuel
         id = sequence_id
         entity.id = id
         data = to_storage(entity)
-        ap "data for to_storage is"
-        ap data
         items[id] = data
 
 
-        build(entity.domain_name, data, :hash)
+        build(name: entity.domain_name, storage: data)
+      end
+
+      def build(name:, storage:, **inputs)
+        super(type: :memory, name: name, storage: storage,  **inputs)
       end
 
       def sequence_id

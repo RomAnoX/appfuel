@@ -42,5 +42,32 @@ module Appfuel
         entries[entry.domain_attr] = entry
       end
     end
+
+    def self.entity_builder(domain_name, type, opts = {}, &block)
+      fail "entity builder must be used with a block" unless block_given?
+
+      root = opts[:root] || Appfuel.default_app_name
+      repo = create_repo(type, domain_name)
+      repo.class.load_path_from_container_namespace("#{root}.#{domain_name}")
+
+      app_container = Appfuel.app_container(root)
+      category      = "domain_builders.#{type}"
+      builder_key   = repo.qualify_container_key(domain_name, category)
+      app_container.register(builder_key, create_builder(repo, &block))
+    end
+
+    def self.create_repo(type, domain_name)
+      repo_class = "Appfuel::#{type.to_s.classify}::Repository"
+      unless Kernel.const_defined?(repo_class)
+        fail "Could not find #{repo_class} for entity builder #{domain_name}"
+      end
+      Kernel.const_get(repo_class).new
+    end
+
+    def self.create_builder(repo, &block)
+      ->(storage, criteria) {
+        repo.instance_exec(storage, criteria, &block)
+      }
+    end
   end
 end

@@ -26,15 +26,21 @@ module Appfuel
         mapper.to_storage(entity)
       end
 
-      def build(domain_name, storage_interface, type, inputs = {})
-        builder = find_entity_builder(domain_name, type)
-        builder.call(storage_interface, inputs)
+      def to_entity(domain_name, storage)
+        key  = qualify_container_key(domain_name, "domains")
+        hash = mapper.to_entity_hash(domain_name, storage)
+        app_container[key].new(hash)
+      end
+
+      def build(type:, name:, storage:, **inputs)
+        builder = find_entity_builder(type: type, domain_name: name)
+        builder.call(storage, inputs)
       end
 
       # features.membership.presenters.hash.user
       # global.presenters.user
-      def find_entity_builder(domain_name, type)
-        key = qualify_container_key(domain_name, "presenters.#{type}")
+      def find_entity_builder(domain_name:, type:)
+        key = qualify_container_key(domain_name, "domain_builders.#{type}")
 
         container = app_container
         unless container.key?(key)
