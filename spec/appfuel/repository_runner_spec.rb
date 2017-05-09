@@ -19,7 +19,7 @@ module Appfuel
         }.to raise_error(RuntimeError, msg)
       end
 
-      it 'delegates exists to repo.exists? passing the criteria' do
+      xit 'delegates exists to repo.exists? passing the criteria' do
         repo_ns         = 'Foo::Bar'
         runner          = RepositoryRunner.new(repo_ns, criteria_class)
         repo_class_name = 'Foo::Bar::DomainRepository'

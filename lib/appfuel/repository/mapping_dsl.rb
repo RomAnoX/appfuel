@@ -100,6 +100,7 @@ module Appfuel
           args.each do |storage_type|
             @storage[storage_type] = send("initialize_#{storage_type}_storage", true)
           end
+
           return self
         end
 
@@ -188,7 +189,7 @@ module Appfuel
       # global.user
       # global.storage.db.user
       # membership.user
-      # features.membership.storage.{type}.user
+      # features.membership.{type}.user
       def translate_storage_key(type, partial_key)
         fail "#{type} can not be empty" if partial_key.empty?
 
@@ -202,7 +203,7 @@ module Appfuel
       end
 
       def assign_default_storage(type)
-        @storage[type] = "storage.#{type.to_s.underscore}.model"
+        @storage[type] = "#{type.to_s.underscore}.model"
       end
     end
   end

@@ -59,7 +59,7 @@ module Appfuel::Repository
       end
 
       it 'translates storage [:db, :file] using default feature keys' do
-        storage_path = '/some/path/to/storage'
+        storage_path = '/some/path'
         container = Appfuel.app_container('foo')
         container.register(:root_path, '/my/root/path')
         container.register(:storage_path, storage_path)

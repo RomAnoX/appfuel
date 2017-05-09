@@ -37,6 +37,8 @@ module Appfuel
       end
 
       def storage(type)
+        fail "Storage #{type} is not registered" unless storage?(type)
+
         @storage[type]
       end
 

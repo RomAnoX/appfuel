@@ -26,14 +26,11 @@ module Appfuel
       # features.membership.yaml.account
       #
       #
-      class << self
-        self.abstract_class = true
-        extend Appfuel::Application::ContainerKey
-        extend Appfuel::Application::ContainerClassRegistration
-        def self.inherited(klass)
-          super
-          register_container_class(klass)
-        end
+      self.abstract_class = true
+      include Appfuel::Application::AppContainer
+      def self.inherited(klass)
+        super
+        register_container_class(klass)
       end
 
 

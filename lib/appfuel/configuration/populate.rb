@@ -34,7 +34,7 @@ module Appfuel
         config = config.deep_merge(load_env(env_data, self))
         config = config.deep_merge(overrides || {})
 
-        populate_children(children, config) unless children.empty?
+        populate_children(children, config, env_data) unless children.empty?
 
         handle_validation(config)
       end
@@ -54,14 +54,15 @@ module Appfuel
 
       protected
 
-      def populate_children(child_hash, data)
+      def populate_children(child_hash, data, env_data = {})
         child_hash.each do |(def_key, definition)|
+
           data[def_key] ||= {}
           data[def_key] = load_file(definition) if definition.file?
           data[def_key] = definition.defaults.deep_merge(data[def_key])
-
+          data[def_key] = data[def_key].deep_merge(load_env(env_data, definition))
           unless definition.children.empty?
-            populate_children(definition.children, data[def_key])
+            populate_children(definition.children, data[def_key], env_data)
           end
 
           data[def_key] = definition.handle_validation(data[def_key])

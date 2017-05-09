@@ -135,6 +135,27 @@ module Appfuel
         app_container[key]
       end
 
+      def to_entity_hash(domain_name,  data, opts = {})
+        entity_attrs = {}
+        each_entity_attr(domain_name) do |entry|
+          attr_name   = entry.storage_attr
+          domain_attr = entry.domain_attr
+          next unless data.key?(attr_name)
+
+          update_entity_hash(domain_attr, data[attr_name], entity_attrs)
+        end
+
+        entity_attrs
+      end
+
+      def update_entity_hash(domain_attr, value, hash)
+        if domain_attr.include?('.')
+          hash.deep_merge!(create_entity_hash(domain_attr, value))
+        else
+          hash[domain_attr] = value
+        end
+      end
+
       def entity_value(domain, map_entry)
         value = resolve_entity_value(domain, map_entry.domain_attr)
         if map_entry.computed_attr?
@@ -144,6 +165,12 @@ module Appfuel
         value = nil if undefined?(value)
 
         value
+      end
+
+      def create_entity_hash(domain_attr, value)
+        domain_attr.split('.').reverse.inject(value) do |result, nested_attr|
+          {nested_attr => result}
+        end
       end
 
       def undefined?(value)

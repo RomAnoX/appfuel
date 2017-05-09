@@ -22,8 +22,8 @@ module Appfuel
         self.class.mapper
       end
 
-      def to_storage(entity)
-        mapper.to_storage(entity)
+      def to_storage(entity, exclude = [])
+        mapper.to_storage(entity, exclude)
       end
 
       def to_entity(domain_name, storage)
@@ -39,20 +39,33 @@ module Appfuel
 
       # features.membership.presenters.hash.user
       # global.presenters.user
+      #
+      # key => db_model
+      # key => db_model
       def find_entity_builder(domain_name:, type:)
         key = qualify_container_key(domain_name, "domain_builders.#{type}")
 
         container = app_container
         unless container.key?(key)
           return ->(data, inputs = {}) {
-            hash = mapper.to_entity_hash(domain_name, data)
-
-            domain_key = qualify_container_key(domain_name, "domains")
-            app_container[domain_key].new(hash)
+            build_default_entity(domain_name: domain_name, storage: data)
           }
         end
 
         container[key]
+      end
+
+      def build_default_entity(domain_name:, storage:)
+        storage = [storage] unless storage.is_a?(Array)
+
+        storage_attrs = {}
+        storage.each do |model|
+          storage_attrs.merge!(mapper.model_attributes(model))
+        end
+
+        hash = mapper.to_entity_hash(domain_name, storage_attrs)
+        key  = qualify_container_key(domain_name, "domains")
+        app_container[key].new(hash)
       end
     end
   end

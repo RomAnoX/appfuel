@@ -44,6 +44,7 @@ module Types
         fail "Domain must be a Appfuel::Entity or respond to :domain_name"
       end
       name = opts.key?(:as) ? opt[:as] : klass.domain_name
+      p name
       return if key?(name) && self[name] == klass
 
       register(name, klass)

@@ -28,6 +28,7 @@ module Appfuel
         klass.send(:include, klass.equalizer)
 
         register_container_class(klass)
+        Types.register_domain(klass)
       end
 
       def default?

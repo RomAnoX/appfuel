@@ -29,7 +29,7 @@ require "appfuel/validation"
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"
 
-require "appfuel/view_model"
+require "appfuel/presenter"
 
 require "appfuel/repository"
 require "appfuel/db_model"
@@ -173,6 +173,34 @@ module Appfuel
 
       container
     end
+
+    # memberships.user => features.memberships.presenters.user
+    # global.user      => global.presenters.user
+    #
+    # array
+    #   global
+    #   user
+    #
+    # array
+    #   membership
+    #   user
+    def presenter(key, opts = {}, &block)
+      key = expect_container_key(key, 'presenters')
+      container = app_container(root_name | default_app_name)
+
+      container.register(key, '')
+
+    end
+
+    def expand_container_key(key, category)
+      parts = key.to_s.split('.')
+      parts.insert(1, category)
+      if parts.first != 'global'
+        parts.unshift('features')
+      end
+      parts.join('.')
+    end
+
   end
 end
 
