@@ -1,21 +1,17 @@
 sudo: false
 language: ruby
 rvm:
-  - 2.3.3
+- 2.3.3
 before_install: gem install bundler -v 1.13.7
-
 deploy:
+  provider: rubygems
   on:
     tags: true
     all_branches: true
-
-  provider: rubygems
   api_key:
-    secure: Z4sBUqVeIuNJNKxXa+oYDxnfXlVaCAYl3f+8rWm4pKnHpLQYP1M8vj5LM3cmdHtUQiy/085zkvt5C6p2045PZ5sX3rueojoShqfvmNHgr3wYWQ2MZ3oHy3Vl6UJ3JYGoM/2wEclmqWQ49s1Zk4gnNZR4QyNZ/P4SWZ4FmJ9VmlI=
-
+    secure: w9Oj79jtLJn8PcDSyXkF/5xW1x5A29shU7r7wtD2csIx8QbqeBrQthiq5c7P2CaM+pcchnfVdOvSXPZmiS6S3FDGIyqzfPmqAQR1QpyEa32TagQFECvBor4uDNR5Et36PJFT5aJPCu6ijXI9gZqOLXQtl6e8c1HDYIc5MNQ0fy1DDmWqA2xxI+QhuwidStMWrtHd+wHsgoPxGRsFitV8nzmLwbN+0CUCPSKQHY5lMmy51wgF9SicdTFTH0iANaXEhiJbVYGIPsLZmgoWZgcN54Iss34bRN4aLcyewHeZv7Gh1Lh0Tdh7LmasgLJ72my/WGLj/rk26nfQFxPbqU4kwggRCDNGr8NBMdaU+pk8xJFVC+X37KnggIE03PGl49G4PYInsuQotr9sp04UaSqy3lxfZqF2Ux9wL6SY/Is5bxcXMXzdJkedNr2q8Pale4c99sZVCX8/bRFuKeweSxRNT8jnIeYTlFHGhptoPPlZdsNCMKl0WYXn0T9cFrCiWs6SZjwt0BnDrMrLVt5iu8jMaerrL/9S5Lk45P3zX7frmsE1chI8j8utXS8avnIEFqBCedXEGBLugqi5WHy7sP2KjmYGYvi05jLxVB4FNe+oFBRj4syoWV8SRc5xWJq5z6nnBCpSA2m2mCu98A4DaP3xpEktzEGHgaow1/QD6nUVV8Y=
 addons:
   code_climate:
     repo_token: 11e7712330b39d9d748126a0fccccb0dc60f19536ad3d46f2ca484003ff4899c
-
 after_success:
-  - bundle exec codeclimate-test-reporter
+- bundle exec codeclimate-test-reporter
