@@ -7,6 +7,8 @@ before_install: gem install bundler -v 1.13.7
 deploy:
   on:
     tags: true
+    all_branches: true
+
   provider: rubygems
   api_key:
     secure: Z4sBUqVeIuNJNKxXa+oYDxnfXlVaCAYl3f+8rWm4pKnHpLQYP1M8vj5LM3cmdHtUQiy/085zkvt5C6p2045PZ5sX3rueojoShqfvmNHgr3wYWQ2MZ3oHy3Vl6UJ3JYGoM/2wEclmqWQ49s1Zk4gnNZR4QyNZ/P4SWZ4FmJ9VmlI=
