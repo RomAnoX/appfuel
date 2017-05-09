@@ -6,7 +6,7 @@ require 'appfuel/version'
 Gem::Specification.new do |spec|
   spec.name          = "appfuel"
   spec.version       = Appfuel::VERSION
-  spec.version       = "#{s.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
+  spec.version       = "#{spec.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
   spec.authors       = ["Robert Scott-Buccleuch"]
   spec.email         = ["rsb.code@gmail.com"]
 
