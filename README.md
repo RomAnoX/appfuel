@@ -39,11 +39,68 @@ We will cover the basic here, more detailed docs can be found on our [gitbook](h
 ## Architecture
 ![Basic Flow](docs/images/appfuel_basic_flow.png)
 
-## Directory structure
+## Directory Structure, Ruby Namespaces & the Application Container
+This is not required but we assume your are moving your business code behind a `rubygem` and as such you should be following [rubygems guidelines](http://guides.rubygems.org/patterns/). From the gem's `lib` we usually declare the root module as the gem module. For example for a gem named `FooBar` we have a lib director that looks like:
+```
+$ ls
+foo_bar/ foo_bar.rb
+```
+
+We loosely follow the guideline that directories match namespaces, however to try and prevent overly long namespaces where we can, we sometimes break with this guideline.
+
+All Appfuel dependencies are registered into a dependency injection (Inversion of Control IoC) container. There are two general types of dependencies:
+
+1. Classes
+    - `Actions`, `Commands`, `Repositories` & `Domains`
+    - Auto register with container using its ruby namespace with a few rules.
+    - Container Key Rules:
+        - the root namespace is never in the key, it is the name of the container
+        - the module directly under the root is either `global` or `the name of a feature module`
+            - ex) `FooBar::Global::Search` => `global.actions.search`
+            - ex) `FooBar::Users::Search` => `features.users.actions.search`
+
+2. Blocks defined from a DSL
+    - `initializers`, `validators`, `domain builders` & `presenters`
+    - register with container via DSL.
+    - DSL handles registration key
 
 ## Setting Up Appfuel
+In order to use Appfuel we mixin `Appfuel::Application::Root` into our `application root class` and configure it as follows:
 
-## Action Usage
+```ruby
+module FooBar
+  extend Appfuel::Application::Root
+
+  setup_appfuel root: self,
+                root_path: File.dirname(__FILE__),
+                config_definition: Configuration.definition,
+                on_after_setup: ->(_container) {
+                  require_relative 'foo_bar/initializers'
+                }
+
+end
+```
+
+1. Mixin the application root to allow us to use `setup_appfuel` and `call`
+    - `call` with run any action with a route of format `feature/action`
+2. `setup_appfuel` allows `appfuel` configure & initialize your system
+    - `root`: is the root module, its name with be the name of the `app_container`
+    - `root_path`: allows appfuel to auto load features
+    - `config_definition`: is a Dsl that setups configuration data
+    - `on_after_setup`: is a hook that will call your lambda once setup is done
+
+After `setup_appfuel` is called the application container named `foo_bar` is initialized and ready. To retrieve the container from `appfuel`:
+
+```ruby
+Appfuel.app_container('foo_bar')
+```
+
+Since there are no other app container this is also the default container so you can simply call:
+```ruby
+Appfuel.app_container
+```
+This is will return the same container as above.
+
 
 
 ## Development
