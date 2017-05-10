@@ -23,7 +23,14 @@ Or install it yourself as:
 
     $ gem install appfuel
 
-## Usage
+## Overview
+    Appfuel exists for the sole purpose of isolating your business logic into its own gem and exposing a set of interfaces to interact with that logic. Your ruby app (web, console, daemon) would represent its own boundary that simply interacted with your business gem. It would do this by declaring the business gem as dependency it needs to use and treating it like any other gem. We will cover only basic setup and usage, however detailed docs can found on our public [gitbook](https://rsb.gitbooks.io/appfuel/).
+
+## Directory structure
+
+## Setting Up Appfuel
+
+## Action Usage
 
 
 ## Development
