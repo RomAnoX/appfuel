@@ -24,7 +24,20 @@ Or install it yourself as:
     $ gem install appfuel
 
 ## Overview
-    Appfuel exists for the sole purpose of isolating your business logic into its own gem and exposing a set of interfaces to interact with that logic. Your ruby app (web, console, daemon) would represent its own boundary that simply interacted with your business gem. It would do this by declaring the business gem as dependency it needs to use and treating it like any other gem. We will cover only basic setup and usage, however detailed docs can found on our public [gitbook](https://rsb.gitbooks.io/appfuel/).
+Appfuel exists to solve two problems, aligning application boundaries & code scalability.
+
+### Application Boundaries
+We align our application boundaries by isolating our business logic into its own gem and exposing a set of interfaces to interact with that logic. Your ruby app (web, console, daemon) would represent its own boundary that simply interacted with your business gem. It would do this by declaring the business gem as dependency it needs to use and treating it like any other gem. As a result, we establish a standard set of inputs that always deliver a predictable output.
+
+### Code Scalability
+We address the issue of how well code scales by using object oriented design principles, mainly, `single point of responsibility`. This however, creates an illusion, instead of having a small number of very large files, we produce a large number of smaller files. While we have more files, they are simpler to read and mentally reason their intent.
+
+We also tackle complexity using `dependency inversion` where we build all of our dependencies into an application container and rely on the fact that every dependency can be found using a key that will resolve to that particular dependency.
+
+We will cover the basic here, more detailed docs can be found on our [gitbook](https://rsb.gitbooks.io/appfuel/).
+
+## Architecture
+![Basic Flow](docs/images/appfuel_basic_flow.png)
 
 ## Directory structure
 
