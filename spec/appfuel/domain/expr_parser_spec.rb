@@ -173,7 +173,77 @@ module Appfuel::Domain
           parser.number.parse('.2345')
         }.to raise_error(parse_failed_error, msg)
       end
+    end
 
+    context '#string' do
+      it 'parses an empty string' do
+        result = parser.string.parse('""')
+        expect(result).to be_a(Hash)
+        expect(result[:string]).to be_empty
+      end
+
+      it 'parses a string value' do
+        result = parser.string.parse('"hello world"')
+        expect(result).to be_a(Hash)
+        expect(result[:string]).to be_a_slice
+      end
+
+      it 'parses a string value with escape characters' do
+        result = parser.string.parse('"hello\\nworld"')
+        expect(result).to be_a(Hash)
+        expect(result[:string]).to be_a_slice
+      end
+
+      it 'parses a string with many escape characters' do
+        result = parser.string.parse('"hello\\t\\n\\\\\\0world\\n"')
+        expect(result).to be_a(Hash)
+        expect(result[:string]).to be_a_slice
+      end
+
+      it 'parses a string with a single quote' do
+        result = parser.string.parse("\"foo's\"")
+        expect(result).to be_a(Hash)
+        expect(result[:string]).to be_a_slice
+      end
+
+      it 'parses a string with a escaped single quote ' do
+        result = parser.string.parse('"\'"')
+        expect(result).to be_a(Hash)
+        expect(result[:string]).to be_a_slice
+      end
+
+      it 'parses an interpolated string using %Q' do
+        string = '"' + %Q[this is Sirfooish's work] + '"'
+        result = parser.string.parse(string)
+        expect(result).to be_a(Hash)
+        expect(result[:string]).to be_a_slice
+      end
+    end
+
+    context '#boolean' do
+      it 'parses the string "true"' do
+        result = parser.boolean.parse('true')
+        expect(result).to be_a(Hash)
+        expect(result[:boolean]).to be_a_slice
+      end
+
+      it 'parses the string "false"' do
+        result = parser.boolean.parse('false')
+        expect(result).to be_a(Hash)
+        expect(result[:boolean]).to be_a_slice
+      end
+
+      it 'parses the string "TRUE"' do
+        result = parser.boolean.parse('TRUE')
+        expect(result).to be_a(Hash)
+        expect(result[:boolean]).to be_a_slice
+      end
+    end
+
+    context '#value' do
+      ["1234", '"abc"', 'true', 'false'].each do |value_str|
+
+      end
     end
 
     def space_error_msg

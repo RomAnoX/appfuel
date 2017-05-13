@@ -30,6 +30,10 @@ module Appfuel
         ).as(:number)
       end
 
+      rule(:boolean) do
+        (stri("true") | stri('false')).as(:boolean)
+      end
+
       rule(:string) do
         str('"') >> (
           str('\\') >> any | str('"').absent? >> any
@@ -37,7 +41,7 @@ module Appfuel
       end
 
       rule(:value) do
-        string | number | str('true').as(:true) | str('false').as(:false)
+        string | number | boolean
       end
 
       rule(:attr_label) do
@@ -55,19 +59,21 @@ module Appfuel
       end
 
       rule(:expr_attr) do
-        (domain_object_attr | domain_attr | attr_label).as(:expr_attr) >> space?
+        (
+          domain_object_attr | domain_attr | attr_label
+        ).as(:expr_attr) >> space?
       end
 
-      rule(:and_op)     { str('and')  >> space? }
-      rule(:or_op)      { str('or')   >> space? }
+      rule(:and_op)     { stri('and')  >> space? }
+      rule(:or_op)      { stri('or')   >> space? }
       rule(:eq_op)      { str('=')    >> space? }
       rule(:gt_op)      { str('>')    >> space? }
       rule(:gteq_op)    { str('>=')   >> space? }
       rule(:lt_op)      { str('<')    >> space? }
       rule(:lteq_op)    { str('<=')   >> space? }
-      rule(:in_op)      { str('in')   >> space? }
-      rule(:like_op)    { str('like') >> space? }
-      rule(:between_op) { str('between') >> space? }
+      rule(:in_op)      { stri('in')   >> space? }
+      rule(:like_op)    { stri('like') >> space? }
+      rule(:between_op) { stri('between') >> space? }
 
       rule(:eq_expr) do
         expr_attr >> eq_op.as(:op) >> value
@@ -148,6 +154,13 @@ module Appfuel
       end
 
       root(:or_operation)
+
+      def stri(str)
+        key_chars = str.split(//)
+        key_chars.collect! {|char|
+          match["#{char.upcase}#{char.downcase}"]
+        }.reduce(:>>)
+      end
     end
   end
 end
