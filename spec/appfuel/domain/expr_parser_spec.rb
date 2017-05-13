@@ -78,6 +78,49 @@ module Appfuel::Domain
       end
     end
 
+    context '#lparen' do
+      it 'parses a single left parenthesis (' do
+        expect(parser.lparen.parse('(')).to be_a_slice
+      end
+
+      it 'parses a single left parenthesis with a space' do
+        expect(parser.lparen.parse('( ')).to be_a_slice
+      end
+
+      it 'parses a single left parenthesis with multiple spaces' do
+        expect(parser.lparen.parse('(          ')).to be_a_slice
+      end
+
+      it 'fails when not a left parenthesis with or without spaces' do
+        msg = "Failed to match sequence ('(' SPACE?) at line 1 char 1."
+        expect {
+          parser.lparen.parse('abc')
+        }.to raise_error(parse_failed_error, msg)
+      end
+    end
+
+    context '#rparen' do
+      it 'parses a single right parenthesis )' do
+        expect(parser.rparen.parse(')')).to be_a_slice
+      end
+
+      it 'parses a single right parenthesis with a space' do
+        expect(parser.rparen.parse(') ')).to be_a_slice
+      end
+
+      it 'parses a single right parenthesis with multiple spaces' do
+        expect(parser.rparen.parse(')          ')).to be_a_slice
+      end
+
+      it 'fails when not a right parenthesis with or without spaces' do
+        msg = "Failed to match sequence (')' SPACE?) at line 1 char 1."
+        expect {
+          parser.rparen.parse('abc')
+        }.to raise_error(parse_failed_error, msg)
+      end
+    end
+
+
     def space_error_msg
       'Expected at least 1 of \\\\s at line 1 char 1.'
     end
