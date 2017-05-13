@@ -3,11 +3,12 @@ require 'parslet/convenience'
 
 module Appfuel
   module Domain
-    #
-    # feature.domain filter id = 123 and first_name like '%foobar%' or last_name like 'blah'
-    #
-    # attr op value
-    #
+    # A PEG (Parser Expression Grammer) parser for our domain language. This
+    # gives us the ablity to describe the filtering we would like to do when
+    # searching on a given domain entity. The search string is parsed and
+    # transformed into an interface that repositories can use to determine how
+    # to search a given storage interface. The language always represent the
+    # business domain entities and not a storage system.
     #
     class ExprParser < Parslet::Parser
       rule(:space) { match('\s').repeat(1) }
@@ -92,7 +93,6 @@ module Appfuel
         eq_expr | gt_expr | gteq_expr | lt_expr | lteq_expr
       end
 
-      # foo.bar in ('a', 'b', 'c')
       rule(:in_expr) do
         expr_attr >>
         in_op.as(:in_op) >>
@@ -101,7 +101,6 @@ module Appfuel
         str(')')
       end
 
-      # foo.bar between 456 and 123
       rule(:between_expr) do
         expr_attr >> space? >>
         between_op.as(:between_op) >> space? >>
