@@ -1,5 +1,5 @@
 module Appfuel::Application
-  RSpec.describe ContainerKey do
+  RSpec.describe AppContainer do
     context '#parse_list_string' do
       it 'parses a ruby namespace into an array of lower case snakecase' do
         mixin = setup
@@ -185,10 +185,11 @@ module Appfuel::Application
     end
 
     def setup
-      obj = Object.new
-      obj.extend(ContainerKey)
+      klass = Class.new do
+        include AppContainer
+      end
 
-      obj
+      klass
     end
   end
 end

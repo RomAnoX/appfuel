@@ -6,17 +6,20 @@ module Appfuel
     # a database) without knowledge of that storage system. The criteria will
     # always refer to its queries in the domain language for which the repo is
     # responsible for mapping that query to its persistence layer.
+    #
+    # global.user
+    # memberships.user
+    #
     class Criteria
-      include DomainNameParser
-
       DEFAULT_PAGE = 1
       DEFAULT_PER_PAGE = 20
 
-      attr_reader :domain, :domain_name, :feature, :repo_name, :exprs, :order,
-        :exists, :exec, :all
+      attr_reader :domain_key, :feature, :exprs, :order, :exists, :exec, :all
 
       # Parse out the domain into feature, domain, determine the name of the
       # repo this criteria is for and initailize basic settings.
+      # global.user
+      # membership.user
       #
       # @example
       #   SpCore::Domain::Criteria('foo', single: true)
@@ -33,8 +36,8 @@ module Appfuel
       # @param domain [String] fully qualified domain name
       # @param opts   [Hash] options for initializing criteria
       # @return [Criteria]
-      def initialize(domain, opts = {})
-        @feature, @domain, @domain_name = parse_domain_name(domain)
+      def initialize(domain_key, opts = {})
+        @domain_key   = domain_key
         @exists       = nil
         @exprs        = []
         @order        = []
@@ -47,7 +50,6 @@ module Appfuel
         @page         = DEFAULT_PAGE
         @per_page     = DEFAULT_PER_PAGE
         @disable_pagination = opts[:disable_pagination] == true
-        @repo_name    = "#{(opts[:repo] || @domain).classify}Repository"
 
         empty_dataset_is_valid!
         if opts[:error_on_empty] == true
@@ -59,6 +61,8 @@ module Appfuel
         collection
         public_send(:first) if opts[:single] == true || opts[:first] == true
         public_send(:last)  if opts[:last] == true
+
+        @is_global = @domain_key.start_with?('global.')
       end
 
       # Add param to the instantiated criteria
@@ -321,14 +325,14 @@ module Appfuel
       #
       # @return [Boolean]
       def feature?
-        !@feature.nil?
+        !global?
       end
 
       # Used to determin if this criteria belongs to a global domain
       #
       # @return [Boolean]
-      def global_domain?
-        !feature?
+      def global?
+        @is_global
       end
 
       # Determines if a domain exists in this repo
@@ -399,19 +403,6 @@ module Appfuel
       end
 
       private
-      def parse_domain_name(name)
-        if !name.is_a?(String) && !name.respond_to?(:domain_name)
-          fail "domain name must be a string or implement method :domain_name"
-        end
-
-        name = name.domain_name if name.respond_to?(:domain_name)
-        feature, domain = name.split('.', 2)
-        if domain.nil?
-          domain  = feature
-          feature = nil
-        end
-        [feature, domain, name]
-      end
 
       def create_expr(domain_name, domain_attr, value)
         Expr.new(domain_name, domain_attr, value)

@@ -10,8 +10,7 @@ module Appfuel
   #
   module Domain
     class Entity
-      extend Appfuel::Application::ContainerKey
-      extend Appfuel::Application::ContainerClassRegistration
+      include Appfuel::Application::AppContainer
       extend Dsl
 
       def initialize(inputs = {})

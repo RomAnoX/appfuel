@@ -1,5 +1,5 @@
 module Appfuel
-  RSpec.describe RepositoryRunner do
+  RSpec.xdescribe RepositoryRunner do
     context '#new' do
       it 'requires the repo namespace and criteria class' do
         repo_ns  = 'Foo::Bar'

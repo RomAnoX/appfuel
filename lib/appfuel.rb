@@ -32,7 +32,6 @@ require "appfuel/root_module"
 require "appfuel/presenter"
 
 require "appfuel/repository"
-require "appfuel/db_model"
 require "appfuel/repository_runner"
 require "appfuel/storage"
 

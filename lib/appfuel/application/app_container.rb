@@ -135,6 +135,9 @@ module Appfuel
           @container_global_name ||= 'global'
         end
 
+        #
+        #
+        #
         # Convert the injection key to a fully qualified namespaced key that
         # is used to pull an item out of the app container.
         #
@@ -177,7 +180,6 @@ module Appfuel
         #     convert_to_qualified_container_key('global.baz', 'container')
         #
         #     returns 'baz'
-        #
         # @param key [String] partial key to be built into fully qualified key
         # @param type_ns [String] namespace for key
         # @return [String] fully qualified namespaced key

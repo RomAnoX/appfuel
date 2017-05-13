@@ -83,6 +83,16 @@ module Appfuel
         self.class.error(*args)
       end
 
+      def search(repo, domain, options = {})
+        criteria = build_criteria(domain, options)
+        repo = data[repo]
+        repo.search(criteria)
+      end
+
+      def build_criteria(domain, options)
+
+      end
+
       def present(name, data, inputs = {})
         return data if inputs[:raw] == true
 

@@ -1,5 +1,5 @@
 module Appfuel::Domain
-  RSpec.describe Criteria do
+  RSpec.xdescribe Criteria do
     context 'initialize' do
       it 'creates a criteria with a feature name' do
         criteria = create_criteria('foo.bar')
