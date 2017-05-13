@@ -120,6 +120,61 @@ module Appfuel::Domain
       end
     end
 
+    context '#number' do
+      describe 'parsing any digit' do
+        10.times do |nbr|
+          it "parses the digit '#{nbr}'" do
+            result = parser.number.parse(nbr.to_s)
+            expect(result).to be_a(Hash)
+            expect(result[:number]).to be_a_slice
+          end
+        end
+      end
+
+      describe 'parsing any negitive digit' do
+        10.times do |nbr|
+          it "parses the digit '-#{nbr}'" do
+            result = parser.number.parse("-#{nbr}")
+            expect(result).to be_a(Hash)
+            expect(result[:number]).to be_a_slice
+          end
+        end
+      end
+
+      it 'parses a flotaing point number' do
+        result = parser.number.parse('1.2345')
+        expect(result).to be_a(Hash)
+        expect(result[:number]).to be_a_slice
+      end
+
+      it 'parses a negitive floating point number' do
+        result = parser.number.parse('-1.2345')
+        expect(result).to be_a(Hash)
+        expect(result[:number]).to be_a_slice
+      end
+
+      it 'parses a float as 0.1234' do
+        result = parser.number.parse('0.2345')
+        expect(result).to be_a(Hash)
+        expect(result[:number]).to be_a_slice
+      end
+
+      it 'parses a float as -0.1234' do
+        result = parser.number.parse('-0.2345')
+        expect(result).to be_a(Hash)
+        expect(result[:number]).to be_a_slice
+      end
+
+      it 'fails to parse a float in the form of .123' do
+        msg = "Failed to match sequence " +
+              "('-'? ('0' / [1-9] DIGIT{0, }) " +
+              "('.' DIGIT{1, })?) at line 1 char 1."
+        expect {
+          parser.number.parse('.2345')
+        }.to raise_error(parse_failed_error, msg)
+      end
+
+    end
 
     def space_error_msg
       'Expected at least 1 of \\\\s at line 1 char 1.'
