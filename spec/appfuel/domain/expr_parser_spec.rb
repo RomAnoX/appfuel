@@ -241,8 +241,101 @@ module Appfuel::Domain
     end
 
     context '#value' do
-      ["1234", '"abc"', 'true', 'false'].each do |value_str|
+      {
+        "1234"  => :number,
+        '"abc"' => :string,
+        'true'  => :boolean,
+        'false' => :boolean
+      }.each do |value_str, type|
+        it "will parse a #{type} as #{value_str}" do
+          result = parser.value.parse(value_str)
+          expect(result).to be_a(Hash)
+          expect(result[type]).to be_a_slice
+        end
+      end
+    end
 
+    context '#attr_label' do
+      it 'parses a basic attr label like foo' do
+        result = parser.attr_label.parse('foo')
+        expect(result).to be_a(Hash)
+        expect(result[:attr_label]).to be_a_slice
+      end
+
+      it 'parses a snake case label like foo_bar' do
+        result = parser.attr_label.parse('foo_bar')
+        expect(result).to be_a(Hash)
+        expect(result[:attr_label]).to be_a_slice
+      end
+
+      it 'parses an attr label with a number like foo4' do
+        result = parser.attr_label.parse('foo4')
+        expect(result).to be_a(Hash)
+        expect(result[:attr_label]).to be_a_slice
+      end
+
+      it 'fails when attr label container uppercase char' do
+        msg = 'Expected at least 1 of [a-z0-9_] at line 1 char 1.'
+        expect {
+          parser.attr_label.parse('Foo')
+        }.to raise_error(parse_failed_error, msg)
+      end
+
+      it 'fails when attr label has a space' do
+        msg = 'Extra input after last repetition at line 1 char 4.'
+        expect {
+          parser.attr_label.parse('foo bar')
+        }.to raise_error(parse_failed_error, msg)
+      end
+    end
+
+    context '#domain_attr' do
+      it 'parses a basic domain attr like foo.bar' do
+        result = parser.domain_attr.parse('foo.bar')
+        expect(result).to be_a(Hash)
+
+        feature = result[:domain_attr][:feature]
+        expect(feature).to be_a(Hash)
+        expect(feature[:attr_label]).to be_a_slice
+        expect(feature[:attr_label].to_s).to eq('foo')
+
+        domain = result[:domain_attr][:domain]
+        expect(domain).to be_a(Hash)
+        expect(domain[:attr_label]).to be_a_slice
+        expect(domain[:attr_label].to_s).to eq('bar')
+      end
+
+      it 'parses a snake case domain attr like foo_bar.baz_boo' do
+        result = parser.domain_attr.parse('foo_bar.baz_boo')
+        expect(result).to be_a(Hash)
+
+        feature = result[:domain_attr][:feature]
+        expect(feature).to be_a(Hash)
+        expect(feature[:attr_label]).to be_a_slice
+        expect(feature[:attr_label].to_s).to eq('foo_bar')
+
+        domain = result[:domain_attr][:domain]
+        expect(domain).to be_a(Hash)
+        expect(domain[:attr_label]).to be_a_slice
+        expect(domain[:attr_label].to_s).to eq('baz_boo')
+      end
+    end
+
+    context '#domain_object_attr' do
+      it 'parses a basic domain attr object like user.role.id' do
+        result = parser.domain_object_attr.parse('user.role.id')
+        expect(result).to be_a(Hash)
+        list = result[:domain_object]
+
+        expect(list).to be_a(Array)
+        expect(list[0][:attr_label]).to be_a_slice
+        expect(list[0][:attr_label].to_s).to eq('user')
+
+        expect(list[1][:attr_label]).to be_a_slice
+        expect(list[1][:attr_label].to_s).to eq('role')
+
+        expect(list[2][:attr_label]).to be_a_slice
+        expect(list[2][:attr_label].to_s).to eq('id')
       end
     end
 

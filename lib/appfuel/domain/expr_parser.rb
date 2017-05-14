@@ -50,12 +50,14 @@ module Appfuel
 
       rule(:domain_attr) do
         (
-          attr_label.as(:feature) >> str('.') >> attr_label
+          attr_label.as(:feature) >> str('.') >> attr_label.as(:domain)
         ).as(:domain_attr)
       end
 
       rule(:domain_object_attr) do
-        attr_label >> (str('.') >> attr_label).repeat
+        (
+          attr_label >> (str('.') >> attr_label).repeat
+        ).as(:domain_object)
       end
 
       rule(:expr_attr) do
