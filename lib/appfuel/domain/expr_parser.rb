@@ -68,33 +68,34 @@ module Appfuel
 
       rule(:and_op)     { stri('and')  >> space? }
       rule(:or_op)      { stri('or')   >> space? }
+      rule(:in_op)      { stri('in')   >> space? }
+      rule(:like_op)    { stri('like') >> space? }
+      rule(:between_op) { stri('between') >> space? }
+
       rule(:eq_op)      { str('=')    >> space? }
       rule(:gt_op)      { str('>')    >> space? }
       rule(:gteq_op)    { str('>=')   >> space? }
       rule(:lt_op)      { str('<')    >> space? }
       rule(:lteq_op)    { str('<=')   >> space? }
-      rule(:in_op)      { stri('in')   >> space? }
-      rule(:like_op)    { stri('like') >> space? }
-      rule(:between_op) { stri('between') >> space? }
 
       rule(:eq_expr) do
-        expr_attr >> eq_op.as(:op) >> value
+        expr_attr >> eq_op.as(:op) >> value.as(:value)
       end
 
       rule(:gt_expr) do
-        expr_attr >> gt_op >> space? >> number
+        expr_attr >> gt_op.as(:op) >> space? >> number.as(:value)
       end
 
       rule(:gteq_expr) do
-        expr_attr >> gteq_op >> space? >> number
+        expr_attr >> gteq_op.as(:op) >> space? >> number.as(:value)
       end
 
       rule(:lt_expr) do
-        expr_attr >> lt_op >> space? >> number
+        expr_attr >> lt_op.as(:op) >> space? >> number.as(:value)
       end
 
       rule(:lteq_expr) do
-        expr_attr >> lteq_op >> space? >> number
+        expr_attr >> lteq_op.as(:op) >> space? >> number.as(:value)
       end
 
       rule(:relational_expr) do

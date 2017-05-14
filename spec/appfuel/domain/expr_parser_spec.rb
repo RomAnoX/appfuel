@@ -395,6 +395,154 @@ module Appfuel::Domain
       end
     end
 
+    context '#eq_op' do
+      it 'parses the = operator' do
+        result = parser.eq_op.parse('=')
+        expect(result).to be_a_slice
+      end
+    end
+
+    context '#gt_op' do
+      it 'parses the > operator' do
+        result = parser.gt_op.parse('>')
+        expect(result).to be_a_slice
+      end
+    end
+
+    context '#gteq_op' do
+      it 'parses the >= operator' do
+        result = parser.gteq_op.parse('>=')
+        expect(result).to be_a_slice
+      end
+    end
+
+    context '#lt_op' do
+      it 'parses the < operator' do
+        result = parser.lt_op.parse('<')
+        expect(result).to be_a_slice
+      end
+    end
+
+    context '#lteq_op' do
+      it 'parses the <= operator' do
+        result = parser.lteq_op.parse('<=')
+        expect(result).to be_a_slice
+      end
+    end
+
+    context 'expression' do
+      context 'eq_expr' do
+        it 'parses id = 6' do
+          result = parser.eq_expr.parse('id = 6')
+          id     = result[:expr_attr][:domain_object][:attr_label]
+          op     = result[:op]
+          value  = result[:value][:number]
+
+          expect(id).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+
+        it 'parses a domain_object eq expr like user.role.id = 9' do
+          result = parser.eq_expr.parse('user.role.id = 6')
+          attrs  = result[:expr_attr][:domain_object]
+          op     = result[:op]
+          value  = result[:value][:number]
+
+          expect(attrs).to be_an(Array)
+          expect(attrs[0][:attr_label]).to be_a_slice
+          expect(attrs[1][:attr_label]).to be_a_slice
+          expect(attrs[2][:attr_label]).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+      end
+
+      context 'gt_expr' do
+        it 'parses a domain_object eq expr like user.role.id > 9' do
+          result = parser.gt_expr.parse('user.role.id > 9')
+          attrs  = result[:expr_attr][:domain_object]
+          op     = result[:op]
+          value  = result[:value][:number]
+
+          expect(attrs).to be_an(Array)
+          expect(attrs[0][:attr_label]).to be_a_slice
+          expect(attrs[1][:attr_label]).to be_a_slice
+          expect(attrs[2][:attr_label]).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+      end
+
+      context 'gteq_expr' do
+        it 'parses a domain_object eq expr like user.role.id >= 9' do
+          result = parser.gteq_expr.parse('user.role.id >= 9')
+          attrs  = result[:expr_attr][:domain_object]
+          op     = result[:op]
+          value  = result[:value][:number]
+
+          expect(attrs).to be_an(Array)
+          expect(attrs[0][:attr_label]).to be_a_slice
+          expect(attrs[1][:attr_label]).to be_a_slice
+          expect(attrs[2][:attr_label]).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+      end
+
+
+      context 'lteq_expr' do
+        it 'parses a domain_object eq expr like user.role.id <= 9' do
+          result = parser.lteq_expr.parse('user.role.id <= 9')
+          attrs  = result[:expr_attr][:domain_object]
+          op     = result[:op]
+          value  = result[:value][:number]
+
+          expect(attrs).to be_an(Array)
+          expect(attrs[0][:attr_label]).to be_a_slice
+          expect(attrs[1][:attr_label]).to be_a_slice
+          expect(attrs[2][:attr_label]).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+      end
+
+      context 'lt_expr' do
+        it 'parses a domain_object eq expr like user.role.id < 9' do
+          result = parser.lt_expr.parse('user.role.id < 9')
+          attrs  = result[:expr_attr][:domain_object]
+          op     = result[:op]
+          value  = result[:value][:number]
+
+          expect(attrs).to be_an(Array)
+          expect(attrs[0][:attr_label]).to be_a_slice
+          expect(attrs[1][:attr_label]).to be_a_slice
+          expect(attrs[2][:attr_label]).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+      end
+
+      context 'relational_expr' do
+        [
+          "user.role.specific_role.id = 9",
+          "user_id > 9",
+          "user.role.id >= 9",
+          "user.id < 9",
+          "id <= 9"
+        ].each do |expr|
+          it "parses the relational expr #{expr}" do
+            result = parser.relational_expr.parse(expr)
+            expect(result[:expr_attr]).to be_a(Hash)
+            expect(result[:op]).to be_a_slice
+            expect(result[:value]).to be_a(Hash)
+          end
+        end
+
+      end
+    end
+
+
     def space_error_msg
       'Expected at least 1 of \\\\s at line 1 char 1.'
     end
