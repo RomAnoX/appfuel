@@ -339,6 +339,62 @@ module Appfuel::Domain
       end
     end
 
+    context '#expr_attr' do
+      it 'parses an attr_label' do
+        result = parser.expr_attr.parse('user')
+        slice = result[:expr_attr][:domain_object][:attr_label]
+        expect(slice).to be_a_slice
+      end
+
+      it 'parses an attr_label with a space' do
+        result = parser.expr_attr.parse('user  ')
+        slice = result[:expr_attr][:domain_object][:attr_label]
+        expect(slice).to be_a_slice
+        expect(slice.to_s).to eq('user')
+      end
+
+      it 'parses a domain_object_attr' do
+        result = parser.expr_attr.parse('user.role.id')
+        list = result[:expr_attr][:domain_object]
+        expect(list[0][:attr_label]).to be_a_slice
+        expect(list[0][:attr_label].to_s).to eq('user')
+
+        expect(list[1][:attr_label]).to be_a_slice
+        expect(list[1][:attr_label].to_s).to eq('role')
+        expect(list[2][:attr_label]).to be_a_slice
+        expect(list[2][:attr_label].to_s).to eq('id')
+      end
+
+      it 'parses a domain_object_attr with a space' do
+        result = parser.expr_attr.parse('user.role.id ')
+        list = result[:expr_attr][:domain_object]
+        expect(list[0][:attr_label]).to be_a_slice
+        expect(list[1][:attr_label]).to be_a_slice
+        expect(list[2][:attr_label]).to be_a_slice
+      end
+    end
+
+    ['and', 'or', 'like', 'between', 'in'].each do |op|
+      context "##{op}_op" do
+        let(:op_parser) { parser.send("#{op}_op") }
+
+        it "parses the #{op} operator, lowercase" do
+          result = op_parser.parse(op.downcase)
+          expect(result).to be_a_slice
+        end
+
+        it "parses the #{op} operator, uppercase" do
+          result = op_parser.parse(op.upcase)
+          expect(result).to be_a_slice
+        end
+
+        it "parses the #{op} operator, mixed case" do
+          result = op_parser.parse(op.capitalize)
+          expect(result).to be_a_slice
+        end
+      end
+    end
+
     def space_error_msg
       'Expected at least 1 of \\\\s at line 1 char 1.'
     end
