@@ -538,7 +538,42 @@ module Appfuel::Domain
             expect(result[:value]).to be_a(Hash)
           end
         end
+      end
 
+      context 'in_expr' do
+        it 'parses an expression like id IN ("foo", "bar")' do
+          result = parser.in_expr.parse('id IN ("foo", "bar")')
+          attr_label = result[:expr_attr][:domain_object][:attr_label]
+          op    = result[:in_op]
+          value = result[:value]
+
+          expect(attr_label).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_an(Array)
+
+          expect(value[0][:string]).to be_a_slice
+          expect(value[0][:string].to_s).to eq('foo')
+
+          expect(value[1][:string]).to be_a_slice
+          expect(value[1][:string].to_s).to eq('bar')
+        end
+      end
+
+      context 'between_expr' do
+        it 'parses an expression like "id between 3 and 9"' do
+          result = parser.between_expr.parse("id between 3 and 9")
+
+          attr_label = result[:expr_attr][:domain_object][:attr_label]
+          expect(attr_label).to be_a_slice
+
+          expect(result[:between_op]).to be_a_slice
+
+          value = result[:value]
+          expect(value[:lvalue][:number]).to be_a_slice
+          expect(value[:lvalue][:number].to_s).to eq("3")
+          expect(value[:rvalue][:number]).to be_a_slice
+          expect(value[:rvalue][:number].to_s).to eq("9")
+        end
       end
     end
 

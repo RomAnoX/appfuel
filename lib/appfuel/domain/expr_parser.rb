@@ -106,16 +106,18 @@ module Appfuel
         expr_attr >>
         in_op.as(:in_op) >>
         str('(') >> space? >>
-        (value >> (comma >> value).repeat).maybe.as(:list) >> space? >>
+        (value >> (comma >> value).repeat).maybe.as(:value) >> space? >>
         str(')')
       end
 
       rule(:between_expr) do
         expr_attr >> space? >>
         between_op.as(:between_op) >> space? >>
-        value.as(:lvalue) >> space? >>
-        and_op >> space? >>
-        value.as(:rvalue)
+        (
+          value.as(:lvalue) >> space? >>
+          and_op >> space? >>
+          value.as(:rvalue)
+        ).as(:value)
       end
 
       rule(:domain_expr) do
