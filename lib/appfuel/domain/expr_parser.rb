@@ -1,5 +1,6 @@
 require 'parslet'
 require 'parslet/convenience'
+require_relative 'expr_transform'
 
 module Appfuel
   module Domain
@@ -20,28 +21,52 @@ module Appfuel
       rule(:lparen) { str('(') >> space? }
       rule(:rparen) { str(')') >> space? }
 
-      rule(:number) do
-        (
-          str('-').maybe >> (
-            str('0') | (match['1-9'] >> digit.repeat)
-          ) >> (
-            str('.') >> digit.repeat(1)
-          ).maybe
-        ).as(:number)
+      rule(:integer) do
+        (str('-').maybe >> digit >> digit.repeat).as(:integer)
       end
+
+      rule(:float) do
+        (
+          str('-').maybe >> digit.repeat(1) >> str('.') >> digit.repeat(1)
+        ).as(:float)
+      end
+
+      rule(:number) { integer | float }
 
       rule(:boolean) do
         (stri("true") | stri('false')).as(:boolean)
       end
 
+      rule(:string_special) { match['\0\t\n\r"\\\\'] }
+
+      rule(:escaped_special) { str('\\') >> match['0tnr"\\\\'] }
+
       rule(:string) do
-        str('"') >> (
-          str('\\') >> any | str('"').absent? >> any
-        ).repeat.as(:string) >> str('"')
+        str('"') >>
+        ((escaped_special | string_special.absent? >> any).repeat).as(:string) >>
+        str('"')
+      end
+
+      rule(:date) do
+        (
+          digit.repeat(4) >> str('-') >>
+          digit.repeat(2) >> str('-') >>
+          digit.repeat(2)
+        )
+      end
+
+      # 1979-05-27T07:32:00Z
+      rule(:datetime) do
+        (
+          date >> str("T") >>
+          digit.repeat(2) >> str(":") >>
+          digit.repeat(2) >> str(":") >>
+          digit.repeat(2) >> str("Z")
+        ).as(:datetime)
       end
 
       rule(:value) do
-        string | number | boolean
+        string | number | boolean | datetime | date
       end
 
       rule(:attr_label) do
@@ -78,24 +103,28 @@ module Appfuel
       rule(:lt_op)      { str('<')    >> space? }
       rule(:lteq_op)    { str('<=')   >> space? }
 
+      rule(:comparison_value) do
+        number | date | datetime
+      end
+
       rule(:eq_expr) do
         expr_attr >> eq_op.as(:op) >> value.as(:value)
       end
 
       rule(:gt_expr) do
-        expr_attr >> gt_op.as(:op) >> space? >> number.as(:value)
+        expr_attr >> gt_op.as(:op) >> space? >> comparison_value.as(:value)
       end
 
       rule(:gteq_expr) do
-        expr_attr >> gteq_op.as(:op) >> space? >> number.as(:value)
+        expr_attr >> gteq_op.as(:op) >> space? >> comparison_value.as(:value)
       end
 
       rule(:lt_expr) do
-        expr_attr >> lt_op.as(:op) >> space? >> number.as(:value)
+        expr_attr >> lt_op.as(:op) >> space? >> comparison_value.as(:value)
       end
 
       rule(:lteq_expr) do
-        expr_attr >> lteq_op.as(:op) >> space? >> number.as(:value)
+        expr_attr >> lteq_op.as(:op) >> space? >> comparison_value.as(:value)
       end
 
       rule(:relational_expr) do
@@ -104,24 +133,28 @@ module Appfuel
 
       rule(:in_expr) do
         expr_attr >>
-        in_op.as(:in_op) >>
+        in_op.as(:op) >>
         str('(') >> space? >>
         (value >> (comma >> value).repeat).maybe.as(:value) >> space? >>
         str(')')
       end
 
+      rule(:like_expr) do
+        expr_attr >> like_op.as(:op) >> space? >> string.as(:value)
+      end
+
       rule(:between_expr) do
         expr_attr >> space? >>
-        between_op.as(:between_op) >> space? >>
+        between_op.as(:op) >> space? >>
         (
-          value.as(:lvalue) >> space? >>
+          comparison_value.as(:lvalue) >> space? >>
           and_op >> space? >>
-          value.as(:rvalue)
+          comparison_value.as(:rvalue)
         ).as(:value)
       end
 
       rule(:domain_expr) do
-        (relational_expr | between_expr | in_expr) >> space?
+        (relational_expr | like_expr | between_expr | in_expr).as(:domain_expr) >> space?
       end
 
       rule(:primary) do
@@ -142,7 +175,6 @@ module Appfuel
         ).as(:or) | and_operation
       end
 
-      # foo.id = 6 and last_name = "abc"
       rule(:domain_expr_and) do
         (
           domain_expr >>
@@ -150,7 +182,6 @@ module Appfuel
         ).maybe.as(:domain_expr_and)
       end
 
-      # id = 6 or last_name = "foo"
       rule(:domain_expr_or) do
         (
           domain_expr >>

@@ -78,6 +78,37 @@ module Appfuel::Domain
       end
     end
 
+    context '#integer' do
+      it 'parses simple digits' do
+        expect(parser.integer.parse("55")[:integer]).to be_a_slice
+      end
+
+      it 'parsers a negitive integer' do
+        expect(parser.integer.parse("-1")[:integer]).to be_a_slice
+      end
+
+      it 'parses a large positive integer' do
+        expect(parser.integer.parse("1234567897655444")[:integer]).to be_a_slice
+      end
+
+      it 'parses an integer with leading 0s' do
+        expect(parser.integer.parse("0001")[:integer]).to be_a_slice
+      end
+
+      it 'parses a zero' do
+        expect(parser.integer.parse("0")[:integer]).to be_a_slice
+      end
+
+      it 'fails to parse a float' do
+        msg = "Failed to match sequence ('-'? DIGIT DIGIT{0, }) " +
+              "at line 1 char 2."
+
+        expect {
+          parser.integer.parse('1.3')
+        }.to raise_error(parse_failed_error, msg)
+      end
+    end
+
     context '#lparen' do
       it 'parses a single left parenthesis (' do
         expect(parser.lparen.parse('(')).to be_a_slice
@@ -120,57 +151,36 @@ module Appfuel::Domain
       end
     end
 
-    context '#number' do
-      describe 'parsing any digit' do
-        10.times do |nbr|
-          it "parses the digit '#{nbr}'" do
-            result = parser.number.parse(nbr.to_s)
-            expect(result).to be_a(Hash)
-            expect(result[:number]).to be_a_slice
-          end
-        end
-      end
-
-      describe 'parsing any negitive digit' do
-        10.times do |nbr|
-          it "parses the digit '-#{nbr}'" do
-            result = parser.number.parse("-#{nbr}")
-            expect(result).to be_a(Hash)
-            expect(result[:number]).to be_a_slice
-          end
-        end
-      end
-
+    context '#float' do
       it 'parses a flotaing point number' do
-        result = parser.number.parse('1.2345')
+        result = parser.float.parse('1.2345')
         expect(result).to be_a(Hash)
-        expect(result[:number]).to be_a_slice
+        expect(result[:float]).to be_a_slice
       end
 
       it 'parses a negitive floating point number' do
-        result = parser.number.parse('-1.2345')
+        result = parser.float.parse('-1.2345')
         expect(result).to be_a(Hash)
-        expect(result[:number]).to be_a_slice
+        expect(result[:float]).to be_a_slice
       end
 
       it 'parses a float as 0.1234' do
-        result = parser.number.parse('0.2345')
+        result = parser.float.parse('0.2345')
         expect(result).to be_a(Hash)
-        expect(result[:number]).to be_a_slice
+        expect(result[:float]).to be_a_slice
       end
 
       it 'parses a float as -0.1234' do
-        result = parser.number.parse('-0.2345')
+        result = parser.float.parse('-0.2345')
         expect(result).to be_a(Hash)
-        expect(result[:number]).to be_a_slice
+        expect(result[:float]).to be_a_slice
       end
 
       it 'fails to parse a float in the form of .123' do
-        msg = "Failed to match sequence " +
-              "('-'? ('0' / [1-9] DIGIT{0, }) " +
-              "('.' DIGIT{1, })?) at line 1 char 1."
+          msg = "Failed to match sequence ('-'? DIGIT{1, } '.' DIGIT{1, }) " +
+                "at line 1 char 1."
         expect {
-          parser.number.parse('.2345')
+          parser.float.parse('.2345')
         }.to raise_error(parse_failed_error, msg)
       end
     end
@@ -240,9 +250,31 @@ module Appfuel::Domain
       end
     end
 
+    context '#datetime' do
+      it 'parses basic older datetime' do
+        result = parser.datetime.parse('1979-05-27T07:32:00Z')
+        expect(result[:datetime]).to be_a_slice
+      end
+
+      it 'parses basic newer datetime' do
+        result = parser.datetime.parse('2017-02-24T17:26:21Z')
+        expect(result[:datetime]).to be_a_slice
+      end
+
+      it 'fails to parse invalid datatime' do
+        msg = "Failed to match sequence (DATE 'T' DIGIT{2, } ':' DIGIT{2, } " +
+              "':' DIGIT{2, } 'Z') at line 1 char 1."
+        expect {
+          parser.datetime.parse('1979l05-27 07:32:00')
+        }.to raise_error(parse_failed_error, msg)
+      end
+
+    end
+
     context '#value' do
       {
-        "1234"  => :number,
+        "1234"  => :integer,
+        "1.23"  => :float,
         '"abc"' => :string,
         'true'  => :boolean,
         'false' => :boolean
@@ -436,7 +468,7 @@ module Appfuel::Domain
           result = parser.eq_expr.parse('id = 6')
           id     = result[:expr_attr][:domain_object][:attr_label]
           op     = result[:op]
-          value  = result[:value][:number]
+          value  = result[:value][:integer]
 
           expect(id).to be_a_slice
           expect(op).to be_a_slice
@@ -447,7 +479,7 @@ module Appfuel::Domain
           result = parser.eq_expr.parse('user.role.id = 6')
           attrs  = result[:expr_attr][:domain_object]
           op     = result[:op]
-          value  = result[:value][:number]
+          value  = result[:value][:integer]
 
           expect(attrs).to be_an(Array)
           expect(attrs[0][:attr_label]).to be_a_slice
@@ -463,7 +495,7 @@ module Appfuel::Domain
           result = parser.gt_expr.parse('user.role.id > 9')
           attrs  = result[:expr_attr][:domain_object]
           op     = result[:op]
-          value  = result[:value][:number]
+          value  = result[:value][:integer]
 
           expect(attrs).to be_an(Array)
           expect(attrs[0][:attr_label]).to be_a_slice
@@ -479,7 +511,7 @@ module Appfuel::Domain
           result = parser.gteq_expr.parse('user.role.id >= 9')
           attrs  = result[:expr_attr][:domain_object]
           op     = result[:op]
-          value  = result[:value][:number]
+          value  = result[:value][:integer]
 
           expect(attrs).to be_an(Array)
           expect(attrs[0][:attr_label]).to be_a_slice
@@ -496,7 +528,7 @@ module Appfuel::Domain
           result = parser.lteq_expr.parse('user.role.id <= 9')
           attrs  = result[:expr_attr][:domain_object]
           op     = result[:op]
-          value  = result[:value][:number]
+          value  = result[:value][:integer]
 
           expect(attrs).to be_an(Array)
           expect(attrs[0][:attr_label]).to be_a_slice
@@ -512,7 +544,7 @@ module Appfuel::Domain
           result = parser.lt_expr.parse('user.role.id < 9')
           attrs  = result[:expr_attr][:domain_object]
           op     = result[:op]
-          value  = result[:value][:number]
+          value  = result[:value][:integer]
 
           expect(attrs).to be_an(Array)
           expect(attrs[0][:attr_label]).to be_a_slice
@@ -544,7 +576,7 @@ module Appfuel::Domain
         it 'parses an expression like id IN ("foo", "bar")' do
           result = parser.in_expr.parse('id IN ("foo", "bar")')
           attr_label = result[:expr_attr][:domain_object][:attr_label]
-          op    = result[:in_op]
+          op    = result[:op]
           value = result[:value]
 
           expect(attr_label).to be_a_slice
@@ -562,18 +594,31 @@ module Appfuel::Domain
       context 'between_expr' do
         it 'parses an expression like "id between 3 and 9"' do
           result = parser.between_expr.parse("id between 3 and 9")
-
           attr_label = result[:expr_attr][:domain_object][:attr_label]
-          expect(attr_label).to be_a_slice
 
-          expect(result[:between_op]).to be_a_slice
+          expect(attr_label).to be_a_slice
+          expect(result[:op]).to be_a_slice
 
           value = result[:value]
-          expect(value[:lvalue][:number]).to be_a_slice
-          expect(value[:lvalue][:number].to_s).to eq("3")
-          expect(value[:rvalue][:number]).to be_a_slice
-          expect(value[:rvalue][:number].to_s).to eq("9")
+          expect(value[:lvalue][:integer]).to be_a_slice
+          expect(value[:lvalue][:integer].to_s).to eq("3")
+          expect(value[:rvalue][:integer]).to be_a_slice
+          expect(value[:rvalue][:integer].to_s).to eq("9")
         end
+      end
+
+      context 'like_expr' do
+        it 'parses an expression like first_name like "%foo%"' do
+          result = parser.like_expr.parse('first_name like "%foo%"')
+
+          attr_label = result[:expr_attr][:domain_object][:attr_label]
+          value      = result[:value][:string]
+
+          expect(attr_label).to be_a_slice
+          expect(result[:op]).to be_a_slice
+          expect(value).to be_a_slice
+        end
+
       end
     end
 
