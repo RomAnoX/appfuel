@@ -161,7 +161,7 @@ module Appfuel
       end
 
       rule(:primary) do
-        lparen >> or_operation >> rparen | domain_expr
+        lparen >> or_operation >> rparen | domain_expr >> space?
       end
 
       rule(:and_operation) do
