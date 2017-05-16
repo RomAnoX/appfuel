@@ -262,8 +262,11 @@ module Appfuel::Domain
       end
 
       it 'fails to parse invalid datatime' do
-        msg = "Failed to match sequence (DATE 'T' DIGIT{2, } ':' DIGIT{2, } " +
-              "':' DIGIT{2, } 'Z') at line 1 char 1."
+        msg = "Failed to match sequence " +
+              "(DIGIT{4, } '-' DIGIT{2, } '-' DIGIT{2, } " +
+              "'T' DIGIT{2, } ':' DIGIT{2, } ':' DIGIT{2, } 'Z') " +
+              "at line 1 char 5."
+
         expect {
           parser.datetime.parse('1979l05-27 07:32:00')
         }.to raise_error(parse_failed_error, msg)
@@ -351,59 +354,6 @@ module Appfuel::Domain
 
         expect(result[:domain_attr][:attr_label]).to be_a_slice
         expect(result[:domain_attr][:attr_label].to_s).to eq('foo_id')
-      end
-    end
-
-    context '#domain_object_attr' do
-      it 'parses a basic domain attr object like user.role.id' do
-        result = parser.domain_object_attr.parse('user.role.id')
-        expect(result).to be_a(Hash)
-        list = result[:domain_object]
-
-        expect(list).to be_a(Array)
-        expect(list[0][:attr_label]).to be_a_slice
-        expect(list[0][:attr_label].to_s).to eq('user')
-
-        expect(list[1][:attr_label]).to be_a_slice
-        expect(list[1][:attr_label].to_s).to eq('role')
-
-        expect(list[2][:attr_label]).to be_a_slice
-        expect(list[2][:attr_label].to_s).to eq('id')
-      end
-    end
-
-    context '#expr_attr' do
-      it 'parses an attr_label' do
-        result = parser.expr_attr.parse('user')
-        slice = result[:expr_attr][:domain_object][:attr_label]
-        expect(slice).to be_a_slice
-      end
-
-      it 'parses an attr_label with a space' do
-        result = parser.expr_attr.parse('user  ')
-        slice = result[:expr_attr][:domain_object][:attr_label]
-        expect(slice).to be_a_slice
-        expect(slice.to_s).to eq('user')
-      end
-
-      it 'parses a domain_object_attr' do
-        result = parser.expr_attr.parse('user.role.id')
-        list = result[:expr_attr][:domain_object]
-        expect(list[0][:attr_label]).to be_a_slice
-        expect(list[0][:attr_label].to_s).to eq('user')
-
-        expect(list[1][:attr_label]).to be_a_slice
-        expect(list[1][:attr_label].to_s).to eq('role')
-        expect(list[2][:attr_label]).to be_a_slice
-        expect(list[2][:attr_label].to_s).to eq('id')
-      end
-
-      it 'parses a domain_object_attr with a space' do
-        result = parser.expr_attr.parse('user.role.id ')
-        list = result[:expr_attr][:domain_object]
-        expect(list[0][:attr_label]).to be_a_slice
-        expect(list[1][:attr_label]).to be_a_slice
-        expect(list[2][:attr_label]).to be_a_slice
       end
     end
 
@@ -602,7 +552,7 @@ module Appfuel::Domain
       context 'in_expr' do
         it 'parses an expression like id IN ("foo", "bar")' do
           result = parser.in_expr.parse('id IN ("foo", "bar")')
-          attr_label = result[:expr_attr][:domain_object][:attr_label]
+          attr_label = result[:domain_attr][:attr_label]
           op    = result[:op]
           value = result[:value]
 
@@ -621,7 +571,7 @@ module Appfuel::Domain
       context 'between_expr' do
         it 'parses an expression like "id between 3 and 9"' do
           result = parser.between_expr.parse("id between 3 and 9")
-          attr_label = result[:expr_attr][:domain_object][:attr_label]
+          attr_label = result[:domain_attr][:attr_label]
 
           expect(attr_label).to be_a_slice
           expect(result[:op]).to be_a_slice
@@ -638,7 +588,7 @@ module Appfuel::Domain
         it 'parses an expression like first_name like "%foo%"' do
           result = parser.like_expr.parse('first_name like "%foo%"')
 
-          attr_label = result[:expr_attr][:domain_object][:attr_label]
+          attr_label = result[:domain_attr][:attr_label]
           value      = result[:value][:string]
 
           expect(attr_label).to be_a_slice
@@ -647,6 +597,126 @@ module Appfuel::Domain
         end
 
       end
+
+      context 'domain_expr' do
+        it 'parses an eq_expr' do
+          result = parser.domain_expr.parse('first_name = "Fooish"')
+          attr_label = result[:domain_expr][:domain_attr][:attr_label]
+          op         = result[:domain_expr][:op]
+          value      = result[:domain_expr][:value][:string]
+
+          expect(attr_label).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+
+        it 'parses a gt_expr' do
+          result = parser.domain_expr.parse('foo.id > 9')
+
+          foo = result[:domain_expr][:domain_attr][0][:attr_label]
+          id = result[:domain_expr][:domain_attr][1][:attr_label]
+
+          op    = result[:domain_expr][:op]
+          value = result[:domain_expr][:value][:integer]
+
+          expect(foo).to be_a_slice
+          expect(id).to be_a_slice
+          expect(op).to be_a_slice
+          expect(value).to be_a_slice
+        end
+
+        it 'parses a gteq_expr' do
+          result = parser.domain_expr.parse('id >= 9')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+
+        it 'parses a lt_expr' do
+          result = parser.domain_expr.parse('id < 9')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+
+        it 'parses a lteq_expr' do
+          result = parser.domain_expr.parse('date <= 2017-01-01')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:date]).to be_a_slice
+        end
+
+        it 'parses an in_expr' do
+          result = parser.domain_expr.parse('status IN ("a", "b", "c")')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][0][:string]).to be_a_slice
+          expect(result[:domain_expr][:value][1][:string]).to be_a_slice
+          expect(result[:domain_expr][:value][2][:string]).to be_a_slice
+        end
+
+        it 'parses a like_expr' do
+          result = parser.domain_expr.parse('name like "foo"')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:string]).to be_a_slice
+        end
+
+        it 'parses a between_expr' do
+          result = parser.domain_expr.parse('id between 1 and 6')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:lvalue][:integer]).to be_a_slice
+          expect(result[:domain_expr][:value][:rvalue][:integer]).to be_a_slice
+        end
+      end
+
+      context '#primary' do
+        it 'parses a normal domain_expr' do
+          result = parser.primary.parse('id = 6')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+      end
+
+      context '#and_operation' do
+        it 'parses a normal primary' do
+          result = parser.and_operation.parse('id = 6')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+
+        it 'parses two simple expression joined with an and' do
+          result = parser.parse('id = 6 and first_name = "bar"')
+          expect(result[:and]).to be_a(Hash)
+          expect(result[:and][:left][:domain_expr]).to be_a(Hash)
+          expect(result[:and][:right][:domain_expr]).to be_a(Hash)
+        end
+      end
+
+      context '#or_operation' do
+        it 'parses a normal primary' do
+          result = parser.or_operation.parse('id = 6')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+
+      end
+
+      context '#parse' do
+        it 'parses a simple expr' do
+          result = parser.parse('id = 6')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+      end
+
+
+
     end
 
 

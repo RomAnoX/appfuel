@@ -52,13 +52,15 @@ module Appfuel
           digit.repeat(4) >> str('-') >>
           digit.repeat(2) >> str('-') >>
           digit.repeat(2)
-        )
+        ).as(:date)
       end
 
       # 1979-05-27T07:32:00Z
       rule(:datetime) do
         (
-          date >> str("T") >>
+          digit.repeat(4) >> str('-') >>
+          digit.repeat(2) >> str('-') >>
+          digit.repeat(2) >> str("T") >>
           digit.repeat(2) >> str(":") >>
           digit.repeat(2) >> str(":") >>
           digit.repeat(2) >> str("Z")
@@ -75,18 +77,6 @@ module Appfuel
 
       rule(:domain_attr) do
         (attr_label >> (str('.') >> attr_label).repeat).maybe.as(:domain_attr)
-      end
-
-      rule(:domain_object_attr) do
-        (
-          attr_label >> (str('.') >> attr_label).repeat
-        ).as(:domain_object)
-      end
-
-      rule(:expr_attr) do
-        (
-          domain_object_attr | domain_attr | attr_label
-        ).as(:expr_attr) >> space?
       end
 
       rule(:and_op)     { stri('and')  >> space? }
@@ -138,7 +128,7 @@ module Appfuel
       end
 
       rule(:in_expr) do
-        expr_attr >>
+        domain_attr >> space >>
         in_op.as(:op) >>
         str('(') >> space? >>
         (value >> (comma >> value).repeat).maybe.as(:value) >> space? >>
@@ -146,11 +136,13 @@ module Appfuel
       end
 
       rule(:like_expr) do
-        expr_attr >> like_op.as(:op) >> space? >> string.as(:value)
+        domain_attr >> space >>
+        like_op.as(:op) >> space? >>
+        string.as(:value)
       end
 
       rule(:between_expr) do
-        expr_attr >> space? >>
+        domain_attr >> space? >>
         between_op.as(:op) >> space? >>
         (
           comparison_value.as(:lvalue) >> space? >>
@@ -160,7 +152,12 @@ module Appfuel
       end
 
       rule(:domain_expr) do
-        (relational_expr | like_expr | between_expr | in_expr).as(:domain_expr) >> space?
+        (
+          relational_expr |
+          like_expr |
+          between_expr |
+          in_expr
+        ).as(:domain_expr)
       end
 
       rule(:primary) do
@@ -169,30 +166,18 @@ module Appfuel
 
       rule(:and_operation) do
         (
-          primary.as(:left) >> and_op >>
+          primary.as(:left) >> space? >>
+          and_op >>
           and_operation.as(:right)
         ).as(:and) | primary
       end
 
       rule(:or_operation) do
         (
-          and_operation.as(:left) >> or_op >>
+          and_operation.as(:left) >> space >>
+          or_op >>
           or_operation.as(:right)
         ).as(:or) | and_operation
-      end
-
-      rule(:domain_expr_and) do
-        (
-          domain_expr >>
-          ( and_op >> space? >> domain_expr).repeat.maybe
-        ).maybe.as(:domain_expr_and)
-      end
-
-      rule(:domain_expr_or) do
-        (
-          domain_expr >>
-          ( or_op >> space? >> domain_expr).repeat.maybe
-        ).maybe.as(:domain_expr_or)
       end
 
       root(:or_operation)
