@@ -74,9 +74,7 @@ module Appfuel
       end
 
       rule(:domain_attr) do
-        (
-          attr_label.as(:feature) >> str('.') >> attr_label.as(:domain)
-        ).as(:domain_attr)
+        (attr_label >> (str('.') >> attr_label).repeat).maybe.as(:domain_attr)
       end
 
       rule(:domain_object_attr) do
@@ -108,23 +106,31 @@ module Appfuel
       end
 
       rule(:eq_expr) do
-        expr_attr >> eq_op.as(:op) >> value.as(:value)
+        domain_attr >> space? >> eq_op.as(:op) >> value.as(:value)
       end
 
       rule(:gt_expr) do
-        expr_attr >> gt_op.as(:op) >> space? >> comparison_value.as(:value)
+        domain_attr >> space? >>
+        gt_op.as(:op) >> space? >>
+        comparison_value.as(:value)
       end
 
       rule(:gteq_expr) do
-        expr_attr >> gteq_op.as(:op) >> space? >> comparison_value.as(:value)
+        domain_attr >> space? >>
+        gteq_op.as(:op) >> space? >>
+        comparison_value.as(:value)
       end
 
       rule(:lt_expr) do
-        expr_attr >> lt_op.as(:op) >> space? >> comparison_value.as(:value)
+        domain_attr >> space? >>
+        lt_op.as(:op) >> space? >>
+        comparison_value.as(:value)
       end
 
       rule(:lteq_expr) do
-        expr_attr >> lteq_op.as(:op) >> space? >> comparison_value.as(:value)
+        domain_attr >> space?  >>
+        lteq_op.as(:op) >> space? >>
+        comparison_value.as(:value)
       end
 
       rule(:relational_expr) do

@@ -324,32 +324,33 @@ module Appfuel::Domain
     context '#domain_attr' do
       it 'parses a basic domain attr like foo.bar' do
         result = parser.domain_attr.parse('foo.bar')
-        expect(result).to be_a(Hash)
 
-        feature = result[:domain_attr][:feature]
-        expect(feature).to be_a(Hash)
-        expect(feature[:attr_label]).to be_a_slice
-        expect(feature[:attr_label].to_s).to eq('foo')
+        list = result[:domain_attr]
+        expect(list).to be_a(Array)
+        expect(list[0][:attr_label]).to be_a_slice
+        expect(list[0][:attr_label].to_s).to eq('foo')
 
-        domain = result[:domain_attr][:domain]
-        expect(domain).to be_a(Hash)
-        expect(domain[:attr_label]).to be_a_slice
-        expect(domain[:attr_label].to_s).to eq('bar')
+        expect(list[1][:attr_label]).to be_a_slice
+        expect(list[1][:attr_label].to_s).to eq('bar')
       end
 
       it 'parses a snake case domain attr like foo_bar.baz_boo' do
         result = parser.domain_attr.parse('foo_bar.baz_boo')
-        expect(result).to be_a(Hash)
 
-        feature = result[:domain_attr][:feature]
-        expect(feature).to be_a(Hash)
-        expect(feature[:attr_label]).to be_a_slice
-        expect(feature[:attr_label].to_s).to eq('foo_bar')
+        list = result[:domain_attr]
+        expect(list).to be_a(Array)
+        expect(list[0][:attr_label]).to be_a_slice
+        expect(list[0][:attr_label].to_s).to eq('foo_bar')
 
-        domain = result[:domain_attr][:domain]
-        expect(domain).to be_a(Hash)
-        expect(domain[:attr_label]).to be_a_slice
-        expect(domain[:attr_label].to_s).to eq('baz_boo')
+        expect(list[1][:attr_label]).to be_a_slice
+        expect(list[1][:attr_label].to_s).to eq('baz_boo')
+      end
+
+      it 'parse a single domain attr like foo_id' do
+        result = parser.domain_attr.parse('foo_id')
+
+        expect(result[:domain_attr][:attr_label]).to be_a_slice
+        expect(result[:domain_attr][:attr_label].to_s).to eq('foo_id')
       end
     end
 
@@ -466,7 +467,7 @@ module Appfuel::Domain
       context 'eq_expr' do
         it 'parses id = 6' do
           result = parser.eq_expr.parse('id = 6')
-          id     = result[:expr_attr][:domain_object][:attr_label]
+          id     = result[:domain_attr][:attr_label]
           op     = result[:op]
           value  = result[:value][:integer]
 
@@ -477,7 +478,7 @@ module Appfuel::Domain
 
         it 'parses a domain_object eq expr like user.role.id = 9' do
           result = parser.eq_expr.parse('user.role.id = 6')
-          attrs  = result[:expr_attr][:domain_object]
+          attrs  = result[:domain_attr]
           op     = result[:op]
           value  = result[:value][:integer]
 
@@ -491,9 +492,10 @@ module Appfuel::Domain
       end
 
       context 'gt_expr' do
-        it 'parses a domain_object eq expr like user.role.id > 9' do
+        it 'parses a domain_attr eq expr like user.role.id > 9' do
           result = parser.gt_expr.parse('user.role.id > 9')
-          attrs  = result[:expr_attr][:domain_object]
+
+          attrs  = result[:domain_attr]
           op     = result[:op]
           value  = result[:value][:integer]
 
@@ -509,7 +511,7 @@ module Appfuel::Domain
       context 'gteq_expr' do
         it 'parses a domain_object eq expr like user.role.id >= 9' do
           result = parser.gteq_expr.parse('user.role.id >= 9')
-          attrs  = result[:expr_attr][:domain_object]
+          attrs  = result[:domain_attr]
           op     = result[:op]
           value  = result[:value][:integer]
 
@@ -526,7 +528,7 @@ module Appfuel::Domain
       context 'lteq_expr' do
         it 'parses a domain_object eq expr like user.role.id <= 9' do
           result = parser.lteq_expr.parse('user.role.id <= 9')
-          attrs  = result[:expr_attr][:domain_object]
+          attrs  = result[:domain_attr]
           op     = result[:op]
           value  = result[:value][:integer]
 
@@ -542,7 +544,7 @@ module Appfuel::Domain
       context 'lt_expr' do
         it 'parses a domain_object eq expr like user.role.id < 9' do
           result = parser.lt_expr.parse('user.role.id < 9')
-          attrs  = result[:expr_attr][:domain_object]
+          attrs  = result[:domain_attr]
           op     = result[:op]
           value  = result[:value][:integer]
 
@@ -556,19 +558,44 @@ module Appfuel::Domain
       end
 
       context 'relational_expr' do
-        [
-          "user.role.specific_role.id = 9",
-          "user_id > 9",
-          "user.role.id >= 9",
-          "user.id < 9",
-          "id <= 9"
-        ].each do |expr|
-          it "parses the relational expr #{expr}" do
-            result = parser.relational_expr.parse(expr)
-            expect(result[:expr_attr]).to be_a(Hash)
-            expect(result[:op]).to be_a_slice
-            expect(result[:value]).to be_a(Hash)
-          end
+        it "parses the relational expr 'user.role.specific_rile.id = 9'" do
+          expr = "user.role.specific_role.id = 9"
+          result = parser.relational_expr.parse(expr)
+          expect(result[:domain_attr]).to be_a(Array)
+          expect(result[:op]).to be_a_slice
+          expect(result[:value]).to be_a(Hash)
+        end
+
+        it "parses the relational expr 'user_id > 9'" do
+          expr = "user_id > 9"
+          result = parser.relational_expr.parse(expr)
+          expect(result[:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:op]).to be_a_slice
+          expect(result[:value]).to be_a(Hash)
+        end
+
+        it "parses the relational expr 'user.role.id >= 9'" do
+          expr = "user.role.id >= 9"
+          result = parser.relational_expr.parse(expr)
+          expect(result[:domain_attr]).to be_a(Array)
+          expect(result[:op]).to be_a_slice
+          expect(result[:value]).to be_a(Hash)
+        end
+
+        it "parses the relational expr 'user.id < 9'" do
+          expr = "user.id < 9"
+          result = parser.relational_expr.parse(expr)
+          expect(result[:domain_attr]).to be_a(Array)
+          expect(result[:op]).to be_a_slice
+          expect(result[:value]).to be_a(Hash)
+        end
+
+        it "parses the relational expr 'id <= 9'" do
+          expr = "id <= 9"
+          result = parser.relational_expr.parse(expr)
+          expect(result[:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:op]).to be_a_slice
+          expect(result[:value]).to be_a(Hash)
         end
       end
 
