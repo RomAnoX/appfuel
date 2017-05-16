@@ -713,10 +713,39 @@ module Appfuel::Domain
           expect(result[:domain_expr][:op]).to be_a_slice
           expect(result[:domain_expr][:value][:integer]).to be_a_slice
         end
+
+        it 'parses expr1 and expr2 and expr3' do
+          result = parser.parse('id = 6 and id = 5 and id = 4')
+
+          id_6 = result[:and][:left][:domain_expr][:value][:integer]
+          expect(id_6).to be_a_slice
+          expect(id_6.to_s).to eq('6')
+
+          id_5 = result[:and][:right][:and][:left][:domain_expr][:value][:integer]
+          expect(id_5).to be_a_slice
+          expect(id_5.to_s).to eq('5')
+
+          id_4 = result[:and][:right][:and][:right][:domain_expr][:value][:integer]
+          expect(id_4).to be_a_slice
+          expect(id_4.to_s).to eq('4')
+        end
+
+        it 'parses (expr1 and expr2) or expr3' do
+          result = parser.parse('(a = 6 and b = 5) or c = 4')
+
+          a = result[:or][:left][:and][:left][:domain_expr][:value][:integer]
+          b = result[:or][:left][:and][:right][:domain_expr][:value][:integer]
+          c = result[:or][:right][:domain_expr][:value][:integer]
+
+          expect(a).to be_a_slice
+          expect(b).to be_a_slice
+          expect(c).to be_a_slice
+
+          expect(a.to_s).to eq('6')
+          expect(b.to_s).to eq('5')
+          expect(c.to_s).to eq('4')
+        end
       end
-
-
-
     end
 
 

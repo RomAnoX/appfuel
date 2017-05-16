@@ -174,7 +174,7 @@ module Appfuel
 
       rule(:or_operation) do
         (
-          and_operation.as(:left) >> space >>
+          and_operation.as(:left) >> space? >>
           or_op >>
           or_operation.as(:right)
         ).as(:or) | and_operation
