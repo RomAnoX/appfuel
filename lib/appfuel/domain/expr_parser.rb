@@ -21,6 +21,10 @@ module Appfuel
       rule(:lparen) { str('(') >> space? }
       rule(:rparen) { str(')') >> space? }
 
+      rule(:filter_identifier) { stri('filter') }
+      rule(:order_identifier)  { stri('order') }
+      rule(:limit_identifier)  { stri('limit') }
+
       rule(:integer) do
         (str('-').maybe >> digit >> digit.repeat).as(:integer)
       end
@@ -78,6 +82,8 @@ module Appfuel
       rule(:domain_attr) do
         (attr_label >> (str('.') >> attr_label).repeat).maybe.as(:domain_attr)
       end
+
+
 
       rule(:and_op)     { stri('and')  >> space? }
       rule(:or_op)      { stri('or')   >> space? }

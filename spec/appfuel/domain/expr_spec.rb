@@ -1,6 +1,5 @@
 module Appfuel::Domain
   RSpec.describe Expr do
-
     context 'entity' do
       it 'assigns the domain name' do
         expr = create_expr('foo.bar', '=', "some-value")

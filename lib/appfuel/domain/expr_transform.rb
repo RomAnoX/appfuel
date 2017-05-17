@@ -34,28 +34,22 @@ module Appfuel
       end
 
       def self.build_conjunction(op, data)
-        left  = data[:left]
-        right = data[:right]
-
-        if left.key?(:root)
-          left = left[:root]
-        elsif left.key?(:domain_expr)
-          left = left[:domain_expr]
-        elsif left.key?(:and) || left.key?(:or)
-          child_op = left.key?(:and) ? 'and' : 'or'
-          left = build_conjunction(child_op, left)
-        end
-
-        if right.key?(:root)
-          right = right[:root]
-        elsif right.key?(:domain_expr)
-          right = right[:domain_expr]
-        elsif right.key?(:and) || right.key?(:or)
-          child_op = right.key?(:and) ? 'and' : 'or'
-          right = build_conjunction(child_op, right)
-        end
+        left  = build_conjunction_node(data[:left])
+        right = build_conjunction_node(data[:right])
 
         ExprConjunction.new(op, left, right)
+      end
+
+      def self.build_conjunction_node(data)
+        if data.key?(:root)
+          node = data[:root]
+        elsif data.key?(:domain_expr)
+          node = data[:domain_expr]
+        elsif data.key?(:and) || data.key?(:or)
+          op = right.key?(:and) ? 'and' : 'or'
+          node = build_conjunction(op, data)
+        end
+        node
       end
 
       def self.build_domain_attrs(domain_attr)

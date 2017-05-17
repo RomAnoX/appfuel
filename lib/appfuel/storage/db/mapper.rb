@@ -2,6 +2,14 @@ module Appfuel
   module Db
     class Mapper < Appfuel::Repository::Mapper
 
+      def search(domain_name, criteria, opts = {})
+        ap "domain name is #{domain_name}"
+        ap "criteria is "
+        ap criteria
+        ap "options are"
+
+      end
+
       # Determines if an domain entity exists for this key
       #
       # @param key [String, Symbol]
@@ -19,10 +27,9 @@ module Appfuel
       # @param domain_attr [String] attribute of entity
       # @return [DbModel]
       def db_class_key(entity_name, entity_attr)
-        entry = find(entity_name, entity_attr)
-        db_class_key = entry.storage(:db)
-
-        mapp.storage(entity, domain_attr)
+       # entry = find(entity_name, entity_attr)
+       # db_class_key = entry.storage(:db)
+       # mapp.storage(entity, domain_attr)
       end
 
       # Converts an entity expression into a valid active record expresion with

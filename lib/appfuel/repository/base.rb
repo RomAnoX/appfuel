@@ -22,6 +22,20 @@ module Appfuel
         self.class.mapper
       end
 
+      def search(domain_name, filter_str, opts = {})
+        parser = Appfuel::Domain::ExprParser.new
+        tree   = parser.parse(filter_str)
+        ap tree
+        transform = Appfuel::Domain::ExprTransform.new
+        result    = transform.apply(tree)
+        if result.key?(:root)
+          result = result[:root]
+        elsif result.key?(:domain_expr)
+          result = result[:domain_expr]
+        end
+        mapper.search(domain_name, result, opts)
+      end
+
       def to_storage(entity, exclude = [])
         mapper.to_storage(entity, exclude)
       end
