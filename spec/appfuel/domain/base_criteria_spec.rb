@@ -48,6 +48,30 @@ module Appfuel::Domain
       end
     end
 
+    context '#global?' do
+      it 'returns true when domain is a global domain' do
+        criteria = create_base_criteria('global.user')
+        expect(criteria.global?).to be true
+      end
+
+      it 'returns false when domain is a feature domain' do
+        criteria = create_base_criteria('membership.user')
+        expect(criteria.global?).to be false
+      end
+    end
+
+    context '#feature?' do
+      it 'return true when domain belongs to a feature' do
+        criteria = create_base_criteria('membership.user')
+        expect(criteria.feature?).to be true
+      end
+
+      it 'returns false for a global domain' do
+        criteria = create_base_criteria('global.user')
+        expect(criteria.feature?).to be false
+      end
+    end
+
     context '#add_param' do
 
       it 'returns nil if not param' do
