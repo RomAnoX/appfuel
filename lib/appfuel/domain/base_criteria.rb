@@ -79,7 +79,7 @@ module Appfuel
       # @return [Criteria]
       def initialize(domain_name, data = {})
         @feature, @domain_basename, @domain_name = parse_domain_name(domain_name)
-        @setting = data[:settings] || SearchSettings.new(data)
+        @setting = data[:settings] || CriteriaSettings.new(data)
         @exprs   = nil
         @params  = {}
       end

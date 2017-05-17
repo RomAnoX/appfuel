@@ -19,7 +19,7 @@ module Appfuel
     #     transform
     #     search_name
     #
-    class SearchSettings
+    class CriteriaSettings
       DEFAULT_PAGE = 1
       DEFAULT_PER_PAGE = 20
 
@@ -57,7 +57,6 @@ module Appfuel
 
         page(settings[:page] || DEFAULT_PAGE)
         per_page(settings[:per_page] || DEFAULT_PER_PAGE)
-
       end
 
       def disable_pagination?
