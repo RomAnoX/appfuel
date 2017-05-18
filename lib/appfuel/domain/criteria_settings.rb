@@ -47,7 +47,7 @@ module Appfuel
           disable_pagination
         end
 
-        if settings[:single] == true || settings[:first] == true
+        if settings[:first] == true
           first
         elsif settings[:last] == true
           last
@@ -65,14 +65,12 @@ module Appfuel
 
       def enable_pagination
         @disable_pagination = false
+        self
       end
 
       def disable_pagination
         @disable_pagination = true
-      end
-
-      def error_on_empty_dataset?
-        @error_on_empty
+        self
       end
 
       def page(value = nil)
@@ -87,6 +85,10 @@ module Appfuel
         self
       end
 
+      def all?
+        @all
+      end
+
       def all
         @all = true
         disable_first
@@ -94,11 +96,19 @@ module Appfuel
         self
       end
 
+      def first?
+        @first
+      end
+
       def first
         @first = true
         disable_last
         disable_all
         self
+      end
+
+      def last?
+        @last
       end
 
       def last
@@ -123,6 +133,10 @@ module Appfuel
       def empty_dataset_is_valid!
         @error_on_empty = false
         self
+      end
+
+      def error_on_empty_dataset?
+        @error_on_empty
       end
 
       private

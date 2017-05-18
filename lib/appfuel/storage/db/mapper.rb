@@ -3,10 +3,6 @@ module Appfuel
     class Mapper < Appfuel::Repository::Mapper
 
       def search(domain_name, criteria, opts = {})
-        ap "domain name is #{domain_name}"
-        ap "criteria is "
-        ap criteria
-        ap "options are"
 
       end
 
