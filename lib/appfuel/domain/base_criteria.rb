@@ -131,19 +131,27 @@ module Appfuel
 
       private
       def parse_expr(str)
-        if !(settings.parser || settings.parser.respond_to?(:parse))
+        if !(settings.parser && settings.parser.respond_to?(:parse))
           fail "expression parser must implement to :parse"
         end
 
-        if !(settings.transform || settings.transform.respond_to?(:apply))
+        if !(settings.transform && settings.transform.respond_to?(:apply))
           fail "expression transform must implement :apply"
         end
 
-        tree = settings.parser.parse(str)
+        begin
+          tree = settings.parser.parse(str)
+        rescue Parslet::ParseFailed => e
+          msg = "The expression (#{str}) failed to parse"
+          err = RuntimeError.new(msg)
+          err.set_backtrace(e.backtrace)
+          raise err
+        end
+
         result = settings.transform.apply(tree)
         result = result[:domain_expr] || result[:root]
         unless result
-          fail "unable to parse #{str} correctly"
+          fail "unable to parse (#{str}) correctly"
         end
         result
       end

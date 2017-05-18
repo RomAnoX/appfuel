@@ -52,6 +52,52 @@ module Appfuel::Domain
           criteria.filter('features.foo.bar.user.id = 6').filters
         }.to raise_error(msg)
       end
+
+      it 'fails when parser does not implement parse' do
+        criteria = create_criteria('foo.bar', expr_parser: 'blah')
+        msg = "expression parser must implement to :parse"
+        expect {
+          criteria.filter('id = 6')
+        }.to raise_error(msg)
+      end
+
+      it 'fails when transform does not implement apply' do
+        criteria = create_criteria('foo.bar', expr_transform: 'blah')
+        msg = "expression transform must implement :apply"
+        expect {
+          criteria.filter('id = 6')
+        }.to raise_error(msg)
+      end
+
+      it 'fails when it parses incorrectly' do
+        criteria = create_criteria('foo.bar')
+        msg = "The expression (id 6) failed to parse"
+        expect {
+          criteria.filter('id 6')
+        }.to raise_error(msg)
+      end
+
+      it 'fails when parser does not return :domain_expr or :root' do
+        parser = double("some parser")
+        str    = 'id = 6'
+        allow(parser).to receive(:parse).with(str) { {wrong_key: 'foo' } }
+
+        criteria = create_criteria('foo.bar', expr_parser: parser)
+
+        msg = "unable to parse (id = 6) correctly"
+        expect {
+          criteria.filter(str)
+        }.to raise_error(msg)
+      end
+    end
+
+    context '#clear_filters' do
+      it 'resets filters to nil' do
+        criteria = create_criteria('foo.bar')
+        criteria.filter('id = 6').clear_filters
+
+        expect(criteria.filters).to eq(nil)
+      end
     end
 
     def create_criteria(domain_name, settings = {})
