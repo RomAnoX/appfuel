@@ -44,7 +44,19 @@ module Appfuel::Domain
       end
 
       it 'is created with empty expr list' do
-        expect(create_base_criteria('foo').exprs).to eq(nil)
+        expect(create_base_criteria('foo').filters).to eq(nil)
+      end
+
+      it 'defaults settings to CriteriaSettings class' do
+        settings_class = CriteriaSettings
+        criteria = create_base_criteria('foo.bar')
+        expect(criteria.settings).to  be_an_instance_of(settings_class)
+      end
+
+      it 'can assign a manual settings' do
+        settings = 'i am a new settings class'
+        criteria = create_base_criteria('foo.bar', settings: settings)
+        expect(criteria.settings).to eq(settings)
       end
     end
 

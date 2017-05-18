@@ -29,15 +29,37 @@ module Appfuel
       # @return [Criteria]
       def initialize(domain_name, data = {})
         super
-
-        @exprs = nil
-
-        expr(data[:expr]) if data[:filter]
+        expr(data[:expr]) if data[:expr]
       end
 
-      def expr(str)
-        @exprs = parse_expr(str)
+      def filter(str)
+        domain_expr = parse_expr(str)
+        if filters?
+          fail "A filter expression has already been assigned"
+        end
+
+        if domain_expr.conjunction?
+          fail "Only simple domain expressions are allowed for exists criteria"
+        end
+
+        if domain_expr.qualified?
+          fail "Only allows relative domain attributes"
+        end
+
+        @filters = qualify_expr(domain_expr)
         self
+      end
+
+      private
+      def qualify_expr(domain_expr)
+        return domain_expr if domain_expr.qualified?
+        if global?
+          domain_expr.qualify_global(domain_basename)
+          return domain_expr
+        end
+
+        domain_expr.qualify_feature(feature, domain_basename)
+        domain_expr
       end
     end
   end

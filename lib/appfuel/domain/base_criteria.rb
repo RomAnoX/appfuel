@@ -52,7 +52,7 @@ module Appfuel
       include DomainNameParser
 
 
-      attr_reader :domain_basename, :domain_name, :feature, :settings, :exprs
+      attr_reader :domain_basename, :domain_name, :feature, :settings, :filters
 
       # Parse out the domain into feature, domain, determine the name of the
       # repo this criteria is for and initailize basic settings.
@@ -79,9 +79,17 @@ module Appfuel
       # @return [Criteria]
       def initialize(domain_name, data = {})
         @feature, @domain_basename, @domain_name = parse_domain_name(domain_name)
-        @setting = data[:settings] || CriteriaSettings.new(data)
-        @exprs   = nil
-        @params  = {}
+        @settings = data[:settings] || CriteriaSettings.new(data)
+        @filters  = nil
+        @params   = {}
+      end
+
+      def clear_filters
+        @filters = nil
+      end
+
+      def filters?
+        !filters.nil?
       end
 
       def global?
@@ -123,7 +131,7 @@ module Appfuel
 
       private
       def parse_expr(str)
-        if !(settings.parser || settings.parse.respond_to?(:parse))
+        if !(settings.parser || settings.parser.respond_to?(:parse))
           fail "expression parser must implement to :parse"
         end
 

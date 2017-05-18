@@ -7,24 +7,61 @@ module Appfuel
     # ensures that additional information exists. Most importantly we need
     # a fully qualified domain name in the form of "feature.domain".
     class Expr
-      include DomainNameParser
-      OPS = {
-        eq:       '=',
-        gt:       '>',
-        gteq:     '>=',
-        lt:       '<',
-        lteq:     '<=',
-        in:       'in',
-        like:     'like',
-        between:  'between'
-      }
-      attr_reader :domain_attr, :op, :value
+      attr_reader :feature, :domain_basename, :domain_attr, :attr_list, :op, :value
 
-      def initialize(domain_attr, op, value)
-        @domain_attr = parse_attr(domain_attr)
-        @op = op
-        @value = value
-        fail "domain_attr can not be empty" if @domain_attr.empty?
+      def initialize(attr_list, op, value)
+        @attr_list = attr_list
+        @op        = op.to_s.strip
+        @value     = value
+
+        fail "op can not be empty" if @op.empty?
+        fail "attr_list can not be empty" if @attr_list.empty?
+      end
+
+      # id -> attr_only this is the top of the domain -> feature unkown, domain unknown
+      # foo.id ->  attr in an object at the top of the domain - domain unknown
+      # foo.bar.baz.id -> long object chain same as above -> domain unknow
+      # features.foo.id -> qualified feature.domain ->
+      # global.user.id  -> qualified global domain  ->
+      #
+      # attr_list qualified domain with a top level attribute
+      #   0: global || features
+      #   1: membership (name of feature)
+      #   2: user (basename of domain)
+      #   3: id attr of domain
+      #
+      # attr_list qualified domain of a domain with an simple object with an attr
+      #   0: global || features
+      #   1: membership (name of feature)
+      #   2: user (basename of domain)
+      #   3: role object mapped to domain
+      #   4: id attr of role mapped to user (role.id
+      def qualify_feature(feature, domain)
+        fail "this expr is already qualified" if qualified?
+
+        attr_list.unshift(domain)
+        attr_list.unshift(feature)
+        attr_list.unshift('features')
+        self
+      end
+
+      def qualify_global(domain)
+        fail "this expr is already qualified" if qualified?
+        attr_list.unshift(domain)
+        attr_list.unshift('global')
+        self
+      end
+
+      def global?
+        attr_list[0] == 'global'
+      end
+
+      def conjunction?
+        false
+      end
+
+      def qualified?
+        attr_list[0] == 'global' || attr_list[0] == 'features'
       end
 
       def expr_string
@@ -39,20 +76,6 @@ module Appfuel
 
       def to_s
         "#{domain_name}.#{domain_attr} #{OPS[op]} #{value}"
-      end
-
-      private
-      def parse_attr(data)
-        return data if data.is_a?(Array)
-        unless data.is_a?(String)
-          fail "domain attribute must be an array like ['domain', 'id'], " +
-            "or string like (domain.id)"
-        end
-        data.split('.')
-      end
-
-      def supported_op?(op)
-        OPS.keys.include?(op)
       end
     end
   end

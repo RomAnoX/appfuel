@@ -8,6 +8,10 @@ module Appfuel
         @left  = left
         @right = right
       end
+
+      def conjunction?
+        true
+      end
     end
   end
 end
