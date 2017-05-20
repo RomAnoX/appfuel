@@ -22,6 +22,11 @@ module Appfuel
           require "#{container[:features_path]}/#{name}"
         end
 
+        container[:auto_register_classes].each do |klass|
+
+          container.register(klass.container_class_path, klass)
+        end
+
         return false if initialized?(container, feature_key)
 
         Appfuel.run_initializers(feature_key, container)

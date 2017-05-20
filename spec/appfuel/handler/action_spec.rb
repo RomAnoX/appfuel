@@ -2,9 +2,9 @@ module Appfuel::Handler
   RSpec.describe Action do
     context '.inherited' do
       it 'registers a handler in the container' do
-        container = build_container
+        container = build_container(auto_register_classes: [])
         handler = setup(container, 'FooBar::Bar::Biz')
-        expect(container['features.bar.actions.biz']).to eq(handler)
+        expect(container[:auto_register_classes]).to include(handler)
       end
     end
 

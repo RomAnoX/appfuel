@@ -3,6 +3,10 @@ module Appfuel
     class Repository < Appfuel::Repository::Base
 
       class << self
+        def container_class_type
+          "#{super}.memory"
+        end
+
         def create_mapper(maps = nil)
           Mapper.new(maps)
         end

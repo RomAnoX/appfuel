@@ -2,6 +2,9 @@ module Appfuel
   module Handler
     class Action < Base
       class << self
+        def container_class_type
+          'actions'
+        end
 
         # In order to reduce the length of namespaces actions are not required
         # to be inside an Actions namespace, but, it is namespaced with in the

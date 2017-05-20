@@ -43,8 +43,7 @@ module Appfuel
       #
       # @param criteria [Criteria]
       # @return [Boolean]
-      def exists?(criteria)
-        domain_expr = criteria.exists_expr
+      def exists?(domain_expr)
         domain_name = domain_expr.domain_name
         domain_attr = domain_expr.domain_attr
 
@@ -87,9 +86,10 @@ module Appfuel
       # @param expr [SpCore::Domain::Expr]
       # @return [table_name, column] [Array]
       def db_table_column(expr)
-        entry = registry.find(expr.domain_name, expr.domain_attr)
-        db    = registry.db_class_constant(entry.db_class)
-        [db.table_name, entry.db_column]
+        entry = find(expr.domain_name, expr.domain_attr)
+        db    = storage_class_from_entry(entry, :db)
+
+        [db.table_name, entry.storage_attr]
       end
 
       # Build an order by expression for the given db relation based on the

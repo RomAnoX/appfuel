@@ -14,7 +14,7 @@ module Appfuel
         # @param klass [Class] the handler class that is inheriting this
         # @return nil
         def inherited(klass)
-          register_container_class(klass)
+          stage_class_for_registration(klass)
         end
 
         def response_handler

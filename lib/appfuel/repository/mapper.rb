@@ -118,9 +118,12 @@ module Appfuel
       # @param entity [String] name of the entity
       # @param attr [String] name of the attribute
       # @return [Object]
-      def storage_class(domain_name, domain_attr, type)
-        entry = find(domain_name, attr)
+      def storage_class(entity_name, entity_attr, type)
+        entry = find(entity_name, entity_attr)
+        storage_class_from_entry(entry, type)
+      end
 
+      def storage_class_from_entry(entry, type)
         unless entry.storage?(type)
           fail "No (#{type}) storage has been mapped"
         end
@@ -130,7 +133,7 @@ module Appfuel
           fail "You can not access a mapping outside of this container " +
             "(#{container_root_name}, #{container_name})"
         end
-        app_container = Appfuel.app_container(entry.container)
+        app_container = Appfuel.app_container(entry.container_name)
         key = entry.storage(type)
         app_container[key]
       end

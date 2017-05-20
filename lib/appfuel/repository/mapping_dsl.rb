@@ -170,7 +170,7 @@ module Appfuel
         case value
         when true
           {
-            model: 'storage.file.model',
+            model: 'file.model',
             path: "#{storage_path}/#{key.gsub(/\./,'/')}.yml"
           }
         end
@@ -195,7 +195,7 @@ module Appfuel
 
         top, *parts = partial_key.split('.')
         top = "features.#{top}" unless top == 'global'
-        "#{top}.storage.#{type}.#{parts.join('.')}"
+        "#{top}.#{type}.#{parts.join('.')}"
       end
 
       def assign_storage(type, partial_key)

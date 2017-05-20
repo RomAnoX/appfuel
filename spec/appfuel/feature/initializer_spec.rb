@@ -3,6 +3,7 @@ module Appfuel::Feature
     context '.call' do
       it 'setups up container dependencies when no feature key' do
         inputs = {
+          auto_register_classes: [],
           features_path: 'my_root/features'
         }
         container = build_container(inputs)
@@ -20,6 +21,7 @@ module Appfuel::Feature
 
       it 'will not setup dependencies with the feature key exists' do
         inputs = {
+          auto_register_classes: [],
           features_path: 'my_root/features'
         }
         container = build_container(inputs)
@@ -39,6 +41,7 @@ module Appfuel::Feature
 
       it 'will not try to require feature when disable_require is true' do
         inputs = {
+          auto_register_classes: [],
           features_path: 'my_root/features',
         }
         container = build_container(inputs)
@@ -52,6 +55,7 @@ module Appfuel::Feature
 
       it 'will return false if already initialized' do
         inputs = {
+          auto_register_classes: [],
           features_path: 'my_root/features',
         }
         container = build_container(inputs)
@@ -66,6 +70,7 @@ module Appfuel::Feature
 
       it 'returns true when initializers are run' do
         inputs = {
+          auto_register_classes: [],
           features_path: 'my_root/features',
         }
         container = build_container(inputs)

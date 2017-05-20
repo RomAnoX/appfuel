@@ -40,6 +40,7 @@ module Appfuel
         def container_path?
           !@container_path.nil?
         end
+
         # @param list [Array] list of container namespace parts including root
         # @return [Array]
         def container_path=(list)
@@ -113,6 +114,28 @@ module Appfuel
           @container_path.last
         end
 
+        # Allow the concrete class that is using this mixing to change the
+        # key which would otherwise be the lowercase, underscored class name
+        #
+        # @return nil
+        def container_class_key(value = nil)
+          return @container_class_key if value.nil?
+          p "[container-class-key] #{self} => #{value}"
+          @container_class_key = value
+        end
+
+        def container_class_id
+          container_class_key || container_key_basename
+        end
+
+        def container_class_type
+          nil
+        end
+
+        def container_class_path
+          "#{top_container_key}.#{container_class_type}.#{container_class_id}"
+        end
+
         # Fully qualified key, meaning you can access the class this was mixed into
         # if you stored it into the container using this key
         #
@@ -135,8 +158,6 @@ module Appfuel
           @container_global_name ||= 'global'
         end
 
-        #
-        #
         #
         # Convert the injection key to a fully qualified namespaced key that
         # is used to pull an item out of the app container.

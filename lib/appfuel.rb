@@ -29,15 +29,6 @@ require "appfuel/validation"
 # Dependency management for actions, commands and repos
 require "appfuel/root_module"
 
-require "appfuel/presenter"
-
-require "appfuel/repository"
-require "appfuel/repository_runner"
-require "appfuel/storage"
-
-# callable operations
-require "appfuel/handler"
-
 module Appfuel
   # The appfuel top level interface mainly deals with interacting with both
   # the application dependency injection container and the framework di
@@ -205,5 +196,11 @@ end
 
 # Domain Entities
 require "appfuel/domain"
+require "appfuel/presenter"
+require "appfuel/repository"
+require "appfuel/repository_runner"
+require "appfuel/storage"
+require "appfuel/handler"
+
 
 

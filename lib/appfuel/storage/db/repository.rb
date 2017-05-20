@@ -2,8 +2,12 @@ module Appfuel
   module Db
     class Repository < Appfuel::Repository::Base
       class << self
+        def container_class_type
+          "#{super}.db"
+        end
+
         def create_mapper(maps = nil)
-          Mapper.new(maps)
+          Mapper.new(container_root_name, maps)
         end
       end
 

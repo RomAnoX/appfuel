@@ -22,14 +22,14 @@ module Appfuel::Repository
 
       it 'translate the db model using the global domain_name"' do
         result = {
-          db: 'global.storage.db.bar'
+          db: 'global.db.bar'
         }
         expect(create_dsl('global.bar', db: true).storage).to eq(result)
       end
 
       it 'translate the db model using the feature domain_name"' do
         result = {
-          db: 'features.foo.storage.db.bar'
+          db: 'features.foo.db.bar'
         }
         expect(create_dsl('foo.bar', db: true).storage).to eq(result)
       end
@@ -37,14 +37,14 @@ module Appfuel::Repository
 
       it 'translates the global db model using the given key' do
         result = {
-          db: 'global.storage.db.fiz'
+          db: 'global.db.fiz'
         }
         expect(create_dsl('global.bar', db: 'global.fiz').storage).to eq(result)
       end
 
       it 'translates the feature db model using the given key' do
         result = {
-          db: 'features.foo.storage.db.bar'
+          db: 'features.foo.db.bar'
         }
         expect(create_dsl('foo.fooish', db: 'foo.bar').storage).to eq(result)
       end
@@ -65,10 +65,10 @@ module Appfuel::Repository
         container.register(:storage_path, storage_path)
 
         result = {
-          db: 'features.foo.storage.db.fooish',
+          db: 'features.foo.db.fooish',
           file: {
-            model: 'storage.file.model',
-            path: "#{storage_path}/features/foo/storage/file/fooish.yml"
+            model: 'file.model',
+            path: "#{storage_path}/features/foo/file/fooish.yml"
           }
         }
         dsl = create_dsl('foo.fooish', storage: [:db, :file])
@@ -80,7 +80,7 @@ module Appfuel::Repository
     context '#storage' do
       it 'returns the storage hash when type is nil' do
         dsl = create_dsl('global.foo', db: 'global.bar')
-        result = { db: 'global.storage.db.bar'}
+        result = { db: 'global.db.bar'}
         expect(dsl.storage).to eq(result)
       end
 
@@ -94,7 +94,7 @@ module Appfuel::Repository
 
       it 'translate the db model using the global domain_name"' do
         result = {
-          db: 'global.storage.db.bar'
+          db: 'global.db.bar'
         }
         dsl = create_dsl('global.bar')
 
@@ -104,7 +104,7 @@ module Appfuel::Repository
 
       it 'translate the db model using the feature domain_name"' do
         result = {
-          db: 'features.foo.storage.db.bar'
+          db: 'features.foo.db.bar'
         }
         dsl = create_dsl('foo.bar')
         expect(dsl.storage(:db, true).storage).to eq(result)
@@ -112,7 +112,7 @@ module Appfuel::Repository
 
       it 'translates the global db model using the given key' do
         result = {
-          db: 'global.storage.db.fiz'
+          db: 'global.db.fiz'
         }
         dsl = create_dsl('foo.bar')
         expect(dsl.storage(:db,'global.fiz').storage).to eq(result)
@@ -120,7 +120,7 @@ module Appfuel::Repository
 
       it 'translates the feature db model using the given key' do
         result = {
-          db: 'features.foo.storage.db.bar'
+          db: 'features.foo.db.bar'
         }
         dsl = create_dsl('foo.bar')
         expect(dsl.storage(:db, 'foo.bar').storage).to eq(result)
@@ -143,10 +143,10 @@ module Appfuel::Repository
         container.register(:storage_path, storage_path)
 
         result = {
-          db: 'features.foo.storage.db.fooish',
+          db: 'features.foo.db.fooish',
           file: {
-            model: 'storage.file.model',
-            path: "#{storage_path}/features/foo/storage/file/fooish.yml"
+            model: 'file.model',
+            path: "#{storage_path}/features/foo/file/fooish.yml"
           }
         }
 
@@ -157,7 +157,7 @@ module Appfuel::Repository
 
       it 'translates default db' do
         result = {
-          db: 'features.foo.storage.db.bar'
+          db: 'features.foo.db.bar'
         }
         dsl = create_dsl('foo.bar')
         expect(dsl.storage(:db, true).storage).to eq(result)
@@ -170,7 +170,7 @@ module Appfuel::Repository
         data = {
           domain_name: 'foo',
           domain_attr: 'id',
-          storage: {db: 'global.storage.db.bar'},
+          storage: {db: 'global.db.bar'},
           storage_attr: 'bar_id',
           container: "foo" # note setup assign default app name
         }
@@ -184,7 +184,7 @@ module Appfuel::Repository
         data = {
           domain_name: 'foo',
           domain_attr: 'created_at',
-          storage: {db: 'features.bar.storage.db.baz'},
+          storage: {db: 'features.bar.db.baz'},
           storage_attr: 'created_at',
           computed_attr: value,
           container: "foo" # note setup assign default app name
@@ -198,7 +198,7 @@ module Appfuel::Repository
         data = {
           domain_name: 'foo',
           domain_attr: 'blah',
-          storage: {db: 'global.storage.db.bar'},
+          storage: {db: 'global.db.bar'},
           storage_attr: 'bar_blah',
           skip: true,
           container: "foo" # note setup assign default app name
@@ -212,7 +212,7 @@ module Appfuel::Repository
         data = {
           domain_name: 'foo',
           domain_attr: 'blah',
-          storage: {db: 'global.storage.db.bar'},
+          storage: {db: 'global.db.bar'},
           storage_attr: 'bar_blah',
           container: 'fooish'
         }

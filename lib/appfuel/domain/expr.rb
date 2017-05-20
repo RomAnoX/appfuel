@@ -64,6 +64,37 @@ module Appfuel
         attr_list[0] == 'global' || attr_list[0] == 'features'
       end
 
+      def feature
+        index = global? ? 0 : 1
+        attr_list[index]
+      end
+
+      def domain_basename
+        index = global? ? 1 : 2
+        attr_list[index]
+      end
+
+      def domain_name
+        "#{feature}.#{domain_basename}"
+      end
+
+      # global.user.id
+      # features.memberships.user.id
+      # features.membershipes.user.role.id
+      #
+      # id
+      # role.id
+      #
+      #
+      #
+      #
+      #
+      def domain_attr
+        start_range = global? ? 2 : 3
+        end_range   = -1
+        attr_list.slice(start_range .. end_range).join('.')
+      end
+
       def expr_string
         data = yield domain_attr, op
         lvalue   = data[0]
@@ -75,7 +106,14 @@ module Appfuel
       end
 
       def to_s
-        "#{domain_name}.#{domain_attr} #{OPS[op]} #{value}"
+
+        "#{attr_list.join('.')} #{op} #{value}"
+      end
+
+      def validate_as_fully_qualified
+        unless qualified?
+          fail "domain_name requires a fully qualified domain (#{self.to_s})"
+        end
       end
     end
   end

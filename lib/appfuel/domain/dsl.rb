@@ -27,8 +27,12 @@ module Appfuel
         klass.equalizer = Dry::Equalizer.new(*schema.keys)
         klass.send(:include, klass.equalizer)
 
-        register_container_class(klass)
+        stage_class_for_registration(klass)
         Types.register_domain(klass)
+      end
+
+      def container_class_type
+        'domains'
       end
 
       def default?

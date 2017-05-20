@@ -5,8 +5,13 @@ module Appfuel
 
       class << self
         attr_writer :mapper
+
+        def container_class_type
+          'repositories'
+        end
+
         def inherited(klass)
-          register_container_class(klass)
+          stage_class_for_registration(klass)
         end
 
         def mapper
@@ -14,7 +19,7 @@ module Appfuel
         end
 
         def create_mapper(maps = nil)
-          Mapper.new(maps)
+          Mapper.new(container_root_name, maps)
         end
       end
 
@@ -22,18 +27,13 @@ module Appfuel
         self.class.mapper
       end
 
-      def search(domain_name, filter_str, opts = {})
-        parser = Appfuel::Domain::ExprParser.new
-        tree   = parser.parse(filter_str)
-        ap tree
-        transform = Appfuel::Domain::ExprTransform.new
-        result    = transform.apply(tree)
-        if result.key?(:root)
-          result = result[:root]
-        elsif result.key?(:domain_expr)
-          result = result[:domain_expr]
-        end
-        mapper.search(domain_name, result, opts)
+      def search(criteria)
+        mapper.search(criteria)
+      end
+
+      def exists?(criteria)
+        expr = criteria.fiilters
+        mapper.exists?(expr)
       end
 
       def to_storage(entity, exclude = [])

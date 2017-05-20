@@ -26,13 +26,17 @@ module Appfuel
       # features.membership.yaml.account
       #
       #
-      self.abstract_class = true
       include Appfuel::Application::AppContainer
-      def self.inherited(klass)
-        super
-        register_container_class(klass)
+
+      self.abstract_class = true
+
+      def self.container_class_type
+        'db'
       end
 
+      def self.inherited(klass)
+        stage_class_for_registration(klass)
+      end
 
       def entity_attributes
         attributes.symbolize_keys.select {|_,value| !value.nil?}

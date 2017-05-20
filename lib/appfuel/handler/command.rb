@@ -2,6 +2,10 @@ module Appfuel
   module Handler
     class Command < Base
       class << self
+        def container_class_type
+          'commands'
+        end
+
         def resolve_dependencies(results = Dry::Container.new)
 =begin
           super
