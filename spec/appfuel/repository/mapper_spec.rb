@@ -248,6 +248,83 @@ module Appfuel::Repository
       end
     end
 
+    context '#storage_class' do
+      it 'finds the entry then delagates to #storage_class_from_entry' do
+        domain_name = 'bar.baz'
+        domain_attr = 'id'
+        type        = :db
+        entry       = instance_double(MappingEntry)
+        db_class    = 'some active record model'
+        mapper      = create_mapper('foo')
+
+        expect(mapper).to(
+          receive(:find).with(domain_name, domain_attr) { entry }
+        )
+        expect(mapper).to(
+          receive(:storage_class_from_entry).with(entry, type) { db_class }
+        )
+
+        result = mapper.storage_class(domain_name, domain_attr, type)
+        expect(result).to eq(db_class)
+      end
+    end
+
+    context '#undefined?' do
+      it 'returns true when the value given is Types::Undefined' do
+        value  = Types::Undefined
+        mapper = create_mapper('foo')
+        expect(mapper.undefined?(value)).to be(true)
+      end
+
+      it 'returns false when the value given is not Types::Undefined' do
+        value  = 'some value'
+        mapper = create_mapper('foo')
+        expect(mapper.undefined?(value)).to be(false)
+      end
+    end
+
+    context '#resolve_entity_value' do
+      it 'gets the top level attribute of the domain' do
+        value = 123456
+        domain = Object.new
+        domain.define_singleton_method(:id) do
+          value
+        end
+        domain_attr = 'id'
+
+        mapper = create_mapper('foo')
+        expect(mapper.resolve_entity_value(domain, domain_attr)).to eq(value)
+      end
+
+      it 'traverses nested objects to get the value' do
+        value = 123456
+        role = Object.new
+        role.define_singleton_method(:id) do
+          value
+        end
+        user = Object.new
+        user.define_singleton_method(:role) do
+          role
+        end
+        member = Object.new
+        member.define_singleton_method(:user) do
+          user
+        end
+        group = Object.new
+        group.define_singleton_method(:member) do
+          member
+        end
+        domain = Object.new
+        domain.define_singleton_method(:group) do
+          group
+        end
+        domain_attr = 'group.member.user.role.id'
+
+        mapper = create_mapper('foo')
+        expect(mapper.resolve_entity_value(domain, domain_attr)).to eq(value)
+      end
+    end
+
     def default_entry_data(data = {})
       default = {
         domain: 'foo.bar',
