@@ -131,7 +131,7 @@ module Appfuel
         container_name = entry.container_name
         unless container_root_name == container_name
           fail "You can not access a mapping outside of this container " +
-            "(#{container_root_name}, #{container_name})"
+            "(mapper: #{container_root_name}, entry: #{container_name})"
         end
         app_container = Appfuel.app_container(entry.container_name)
         key = entry.storage(type)

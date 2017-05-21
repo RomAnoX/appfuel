@@ -192,8 +192,62 @@ module Appfuel::Repository
         mapper = create_mapper('my_root', map)
         expect(mapper.storage_attr('foo.bar', 'bif')).to eq(attr_value)
       end
-
     end
+
+    context '#storage_class_from_entry' do
+      it 'fails when the storage type is not supported' do
+        entry = instance_double(MappingEntry)
+        type  = :db
+        allow(entry).to receive(:storage?).with(type) { false }
+        mapper = create_mapper('my_root')
+        msg = 'No (db) storage has been mapped'
+        expect {
+          mapper.storage_class_from_entry(entry, type)
+        }.to raise_error(msg)
+      end
+
+      it "fails when the mapper and entry container name's dont match" do
+        type  = :db
+        entry = instance_double(MappingEntry)
+        entry_container_name = 'bar'
+
+        allow(entry).to receive(:storage?).with(type) { true }
+        allow(entry).to(
+          receive(:container_name).with(no_args) { entry_container_name }
+        )
+        mapper = create_mapper('foo')
+        msg = 'You can not access a mapping outside of this container ' +
+              '(mapper: foo, entry: bar)'
+
+        expect {
+          mapper.storage_class_from_entry(entry, type)
+        }.to raise_error(msg)
+      end
+
+      it 'uses the entry storage key to retrieve class from app container' do
+        type      = :db
+        key       = 'features.bar.db.user'
+        entry     = instance_double(MappingEntry)
+        container = double('some container')
+        db_class  = 'some active record model'
+        container_name = 'foo'
+
+        allow(entry).to receive(:storage?).with(type) { true }
+        allow(entry).to receive(:storage).with(type) { key }
+        allow(entry).to(
+          receive(:container_name).with(no_args) { container_name }
+        )
+
+        allow(container).to receive(:[]).with(key) { db_class }
+        allow(Appfuel).to(
+          receive(:app_container).with(container_name) { container }
+        )
+
+        mapper = create_mapper(container_name)
+        expect(mapper.storage_class_from_entry(entry, type)).to eq(db_class)
+      end
+    end
+
     def default_entry_data(data = {})
       default = {
         domain: 'foo.bar',
