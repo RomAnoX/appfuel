@@ -6,26 +6,24 @@ module Appfuel
 
       end
 
-      # Determines if an domain entity exists for this key
+      # Return qualified db column name from entity expression.
       #
-      # @param key [String, Symbol]
-      # @return [Boolean]
-      def entity_mapped?(name)
-        registry.entity?(name)
+      # @param expr [SpCore::Domain::Expr]
+      # @return db column name [String]
+      def qualified_db_column(expr, entry = nil)
+        table_name, column = db_table_column(expr, entry)
+        "#{table_name}.#{column}"
       end
 
-      # Returns the active record model from a map for a given entity
+      # Determine Domain Mapentry and DbModel from entity expression.
       #
-      # @raise [RuntimeError] if entity key does not exist
-      # @raise [RuntimeError] if map key does not exist
-      #
-      # @param entity [String] encoded "feature.entity"
-      # @param domain_attr [String] attribute of entity
-      # @return [DbModel]
-      def db_class_key(entity_name, entity_attr)
-       # entry = find(entity_name, entity_attr)
-       # db_class_key = entry.storage(:db)
-       # mapp.storage(entity, domain_attr)
+      # @param expr [SpCore::Domain::Expr]
+      # @return [table_name, column] [Array]
+      def db_table_column(expr, entry = nil)
+        entry ||= find(expr.domain_name, expr.domain_attr)
+        db  = storage_class_from_entry(entry, :db)
+
+        [db.table_name, entry.storage_attr]
       end
 
       # Converts an entity expression into a valid active record expresion with
@@ -34,8 +32,16 @@ module Appfuel
       # @param expr [Domain::Expr]
       # @param results [Hash]
       # @return [DbExpr] Returns a valid active record expresion
-      def create_db_expr(expr)
-        DbExpr.new(qualified_db_column(expr), expr.op, expr.value)
+      def convert_expr(expr, entry = nil)
+        column = qualified_db_column(expr, entry)
+        op     = expr.op
+        arg    = case exp.op
+                 when 'in', 'not in' then '(?)'
+                 when 'between', 'not between' then '? AND ?'
+                 else
+                   '?'
+                 end
+        ["#{column} #{op} #{arg}", expr.value]
       end
 
       # Validates if a record exists in the table that matches the array with
@@ -47,9 +53,11 @@ module Appfuel
         domain_name = domain_expr.domain_name
         domain_attr = domain_expr.domain_attr
 
-        db_expr     = create_db_expr(domain_expr)
-        db_model    = registry.db_class(domain_name, domain_attr)
-        db_model.exists?([db_expr.string, db_expr.values])
+        entry = find(domain_name, domain_attr)
+        db_expr, values = convert_expr(domain_expr, entry)
+        db = storage_class_from_entry(entry, :db)
+
+        db.exists?([db_expr, values])
       end
 
       # Build a where expression from the mapped db class using the criteria.Ï
@@ -70,26 +78,6 @@ module Appfuel
                       end
         end
         relation
-      end
-
-      # Return qualified db column name from entity expression.
-      #
-      # @param expr [SpCore::Domain::Expr]
-      # @return db column name [String]
-      def qualified_db_column(expr)
-        table_name, column = db_table_column(expr)
-        "#{table_name}.#{column}"
-      end
-
-      # Determine Domain Mapentry and DbModel from entity expression.
-      #
-      # @param expr [SpCore::Domain::Expr]
-      # @return [table_name, column] [Array]
-      def db_table_column(expr)
-        entry = find(expr.domain_name, expr.domain_attr)
-        db    = storage_class_from_entry(entry, :db)
-
-        [db.table_name, entry.storage_attr]
       end
 
       # Build an order by expression for the given db relation based on the
