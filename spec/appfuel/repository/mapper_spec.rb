@@ -325,6 +325,50 @@ module Appfuel::Repository
       end
     end
 
+    context '#create_entity_hash' do
+      it 'creates a basic hash for a non nested attribute' do
+        domain_attr = 'id'
+        value  = 12345
+        hash   = {'id' => value}
+        mapper = create_mapper('foo')
+        expect(mapper.create_entity_hash(domain_attr, value)).to eq(hash)
+      end
+
+      it 'creates a nested hash for an attribute with objects' do
+        domain_attr = 'group.member.user.role.id'
+        value = 12345
+        hash  = {
+          'group' => {
+            'member' => {
+              'user' => {
+                'role' => {
+                  'id' => value
+                }
+              }
+            }
+          }
+        }
+        mapper = create_mapper('foo')
+        expect(mapper.create_entity_hash(domain_attr, value)).to eq(hash)
+      end
+    end
+
+    context '#entity_value' do
+      it 'resolves the entity value' do
+        domain = double('some domain')
+        domain_attr = 'foo.bar.baz.id'
+        entry  = instance_double(MappingEntry)
+        value  = 123
+        mapper = create_mapper('foo')
+        expect(mapper).to(
+          receive(:resolve_entity_value).with(domain, domain_attr) { value }
+        )
+        allow(entry).to receive(:computed_attr?).with(no_args) { false }
+        allow(entry).to receive(:domain_attr).with(no_args) { domain_attr }
+        expect(mapper.entity_value(domain, entry)).to eq(value)
+      end
+    end
+
     def default_entry_data(data = {})
       default = {
         domain: 'foo.bar',
