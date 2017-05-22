@@ -54,7 +54,7 @@ module Appfuel
         !computed_attr.nil?
       end
 
-      def compute_attr(value, domain)
+      def computed_attr(value, domain)
         fail "No lambda assigned to compute value" unless computed_attr?
         @computed_attr.call(value, domain)
       end

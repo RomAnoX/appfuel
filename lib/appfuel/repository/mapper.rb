@@ -162,7 +162,7 @@ module Appfuel
       def entity_value(domain, map_entry)
         value = resolve_entity_value(domain, map_entry.domain_attr)
         if map_entry.computed_attr?
-          value = map_entry.compute_attr(domain, value)
+          value = map_entry.computed_attr(value, domain)
         end
 
         value = nil if undefined?(value)

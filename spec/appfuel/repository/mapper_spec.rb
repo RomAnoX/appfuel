@@ -367,6 +367,43 @@ module Appfuel::Repository
         allow(entry).to receive(:domain_attr).with(no_args) { domain_attr }
         expect(mapper.entity_value(domain, entry)).to eq(value)
       end
+
+      it 'resolves the entity value' do
+        domain = double('some domain')
+        domain_attr = 'foo.bar.baz.id'
+        entry    = instance_double(MappingEntry)
+        value    = 123
+        computed = 'my computed value'
+        mapper   = create_mapper('foo')
+        expect(mapper).to(
+          receive(:resolve_entity_value).with(domain, domain_attr) { value }
+        )
+        allow(entry).to receive(:domain_attr).with(no_args) { domain_attr }
+        allow(entry).to receive(:computed_attr?).with(no_args) { true }
+        allow(entry).to receive(:computed_attr).with(value, domain) { computed }
+        expect(mapper.entity_value(domain, entry)).to eq(computed)
+      end
+    end
+
+    context 'update_entity_hash' do
+      it 'adds a single key value pair when domain attr does not contain "."' do
+        hash   = {}
+        value  = 123
+        attr   = 'id'
+        mapper = create_mapper('foo')
+        mapper.update_entity_hash(attr, value, hash)
+        expect(hash).to eq({attr => value})
+      end
+
+      it 'adds a nested hash when domain attr container "."' do
+        hash   = {}
+        value  = 123
+        attr   = 'foo.bar.baz.id'
+        mapper = create_mapper('foo')
+        result = {'foo' => { 'bar' => {'baz' => { 'id' => value } } } }
+        mapper.update_entity_hash(attr, value, hash)
+        expect(hash).to eq(result)
+      end
     end
 
     def default_entry_data(data = {})
