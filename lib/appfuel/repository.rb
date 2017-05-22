@@ -2,7 +2,6 @@ require_relative 'repository/base'
 require_relative 'repository/mapping_entry'
 require_relative 'repository/mapping_dsl'
 require_relative 'repository/mapper'
-require_relative 'repository/mapping_registry'
 require_relative 'repository/initializer'
 
 module Appfuel
