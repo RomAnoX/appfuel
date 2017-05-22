@@ -143,58 +143,6 @@ module Appfuel
         data
       end
 
-      # Handles entity value by checking if its a computed property,
-      # fetching the value and converting undefined values to nil.
-      #
-      # @param domain [Appfuel::Domain::Entity]
-      # @param map_entry [MappingEntity]
-      # @return the value
-      def entity_value(domain, entry)
-        value = retrieve_entity_value(domain, entry.domain_attr)
-        if entry.computed_attr?
-          value = entry.compute_attr(value)
-        end
-
-        value = nil if undefined?(value)
-
-        value
-      end
-
-      # @params value [mixed]
-      # @return [Boolean]
-      def undefined?(value)
-        value == Types::Undefined
-      end
-
-      # Fetch the value for the entity attribute. When the attribute name
-      # contains a '.' then traverse the dots and call the last attribute
-      # for the value
-      #
-      # @param domain [Appfuel::Domain::Entity]
-      # @param entity_attribute [String]
-      # @return the value
-      def retrieve_entity_value(domain, entity_attr)
-        chain  = entity_attr.split('.')
-        target = domain
-        chain.each do |attr_method|
-          unless target.respond_to?(attr_method)
-            return nil
-          end
-
-          target = target.public_send(attr_method)
-        end
-        target
-      end
-
-      # Create nested hashes from string
-      #
-      # @param domain_attr [String]
-      # @param entity_value [String]
-      # @return [nested hash]
-      def create_entity_hash(domain_attr, entity_value)
-        domain_attr.split('.').reverse.inject(entity_value) { |a,n| {n => a}}
-      end
-
       def model_attributes(relation)
         ap relation
         relation.attributes.select {|_, value| !value.nil?}

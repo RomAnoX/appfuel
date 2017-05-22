@@ -138,7 +138,7 @@ module Appfuel
         app_container[key]
       end
 
-      def to_entity_hash(domain_name,  data, opts = {})
+      def to_entity_hash(domain_name,  data)
         entity_attrs = {}
         each_entity_attr(domain_name) do |entry|
           attr_name   = entry.storage_attr
