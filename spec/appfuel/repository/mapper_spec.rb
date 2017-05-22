@@ -406,6 +406,35 @@ module Appfuel::Repository
       end
     end
 
+    context 'to_entity_hash' do
+      it 'converts a storage hash into a mapped entity hash' do
+        mapping1 = {
+          domain_name: 'foo.bar',
+          domain_attr: 'id',
+          storage: {db: 'some class object'},
+          storage_attr: 'bar_id'
+        }
+        mapping2 = {
+          domain_name: 'foo.bar',
+          domain_attr: 'data.code',
+          storage: {db: 'some class object'},
+          storage_attr: 'bar_code'
+        }
+
+        map = {
+          'foo.bar' => {
+            'id' => create_entry(mapping1),
+            'data.code' => create_entry(mapping2)
+          }
+        }
+
+        mapper = create_mapper('myapp', map)
+
+        data = { 'bar_id'   => 123, 'bar_code' => 'abc' }
+        hash = { 'id' => 123, 'data' => {'code' => 'abc' }}
+        expect(mapper.to_entity_hash('foo.bar', data)).to eq(hash)
+      end
+    end
     def default_entry_data(data = {})
       default = {
         domain: 'foo.bar',

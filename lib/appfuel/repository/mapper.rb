@@ -144,7 +144,6 @@ module Appfuel
           attr_name   = entry.storage_attr
           domain_attr = entry.domain_attr
           next unless data.key?(attr_name)
-
           update_entity_hash(domain_attr, data[attr_name], entity_attrs)
         end
 
