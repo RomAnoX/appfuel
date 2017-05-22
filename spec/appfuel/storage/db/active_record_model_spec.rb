@@ -17,7 +17,7 @@ module Appfuel::Db
     end
 
     context '#domain_attrs' do
-      it 'symobilzes keys all the keys from active record #attributes' do
+      it 'symobilzes keys and removes nils from active record #attributes' do
         container   = build_container(auto_register_classes: [])
         model_class = setup(container, 'FooApp::BarFeature::Db::MyModel')
 
@@ -29,7 +29,7 @@ module Appfuel::Db
 
         model = model_class.new
 
-        attrs = { 'a' => 'a', 'b' => 'b', 'c' => 'c' }
+        attrs = { 'a' => 'a', 'b' => 'b', 'c' => 'c', 'd' => nil, 'e' => nil}
         # we disable active record attributes so we are faking it here
         model.define_singleton_method(:attributes) do
           attrs
