@@ -171,7 +171,7 @@ module Appfuel
         when true
           {
             model: 'file.model',
-            path: "#{storage_path}/#{key.gsub(/\./,'/')}.yml"
+            path: "#{storage_path}/#{key.tr('.', '/')}.yml"
           }
         end
       end
