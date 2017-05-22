@@ -38,7 +38,7 @@ module Appfuel
         stage_class_for_registration(klass)
       end
 
-      def entity_attributes
+      def domain_attrs
         attributes.symbolize_keys.select {|_,value| !value.nil?}
       end
     end
