@@ -165,7 +165,7 @@ module Appfuel
         end
       end
 
-      def initialize_file_storage(value, opts = {})
+      def initialize_file_storage(value)
         key = translate_storage_key(:file, domain_name)
         case value
         when true
