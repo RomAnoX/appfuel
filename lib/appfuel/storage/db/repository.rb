@@ -120,14 +120,6 @@ module Appfuel
         apply_query_conditions(criteria, relation)
       end
 
-      # Factory method to create a pagination result
-      #
-      # @param data [Hash]
-      # @return [SpCore::Pagination::Result]
-      def create_pager_result(data)
-        Appfuel::Pagination::Result.new(data)
-      end
-
       # Factory method to create a domain entity
       #
       # @param domain_name [String]
@@ -201,7 +193,7 @@ module Appfuel
       #
       # @param criteria [SpCore::Criteria]
       # @return [SpCore::Domain::Entity, SpCore::Domain::EntityCollection]
-      def query(criteria)
+      def search(criteria)
         return execute_criteria(criteria) if criteria.exec?
 
         begin

@@ -121,11 +121,6 @@ module Appfuel
         db_expr = create_db_expr(domain_expr)
         relation.where([db_expr.string, db_expr.values])
       end
-
-      def model_attributes(relation)
-        ap relation
-        relation.attributes.select {|_, value| !value.nil?}
-      end
     end
   end
 end

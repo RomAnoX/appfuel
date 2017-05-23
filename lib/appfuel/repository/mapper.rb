@@ -182,7 +182,6 @@ module Appfuel
         data
       end
 
-
       def update_entity_hash(domain_attr, value, hash)
         if domain_attr.include?('.')
           hash.deep_merge!(create_entity_hash(domain_attr, value))

@@ -12,6 +12,16 @@ module Appfuel
       def conjunction?
         true
       end
+
+      def qualify_feature(feature, domain)
+        left.qualify_feature(feature, domain)
+        right.qualify_feature(feature, domain)
+      end
+
+      def qualify_global(domain)
+        left.qualify_global(domain)
+        right.qualify_global(domain)
+      end
     end
   end
 end

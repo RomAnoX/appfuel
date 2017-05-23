@@ -51,16 +51,7 @@ module Appfuel
       end
 
       private
-      def qualify_expr(domain_expr)
-        return domain_expr if domain_expr.qualified?
-        if global?
-          domain_expr.qualify_global(domain_basename)
-          return domain_expr
-        end
 
-        domain_expr.qualify_feature(feature, domain_basename)
-        domain_expr
-      end
     end
   end
 end

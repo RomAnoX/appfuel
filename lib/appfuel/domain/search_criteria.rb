@@ -7,14 +7,7 @@ module Appfuel
     # always refer to its queries in the domain language for which the repo is
     # responsible for mapping that query to its persistence layer.
     #
-    # global.user
-    # memberships.user
-    #
-    # exist: 'foo.bar exists id = 6'
     # search: 'foo.bar filter id = 6 and bar = "foo" order id asc limit 6'
-    #
-    # search:
-    #   domain: 'foo.bar',
     #
     #   filters: 'id = 6 or id = 8 and id = 9'
     #   filters: [
@@ -43,12 +36,7 @@ module Appfuel
     #     parser
     #     transform
     #
-    # exists:
-    #   domain:
-    #   expr:
-    #
-    #
-    class SearchCriteria
+    class SearchCriteria < BaseCriteria
 
       # Parse out the domain into feature, domain, determine the name of the
       # repo this criteria is for and initailize basic settings.
@@ -73,28 +61,24 @@ module Appfuel
       # @param domain [String] fully qualified domain name
       # @param opts   [Hash] options for initializing criteria
       # @return [Criteria]
+      #
+      # @param domain [String] fully qualified domain name
+      # @param opts   [Hash] options for initializing criteria
+      # @return [Criteria]
       def initialize(domain_name, data = {})
-        @feature, @domain, @domain_name = parse_domain_name(domain_name)
-
-        @setting = data[:settings] || SearchSettings.new(data)
-
-        @filters      = nil
-        @limit        = nil
-        @params       = {}
-        @order        = []
-
+        super
+        @limit = nil
+        @order = []
         filter(data[:filter]) if data[:filter]
-        limit(data[:limit])   if data[:limit]
-        order(data[:order])   if data[:order]
       end
 
       def filter(str, op: 'and')
-        filter_exists_interface_failure if exists?
+        expr = parse_expr(str)
+        return false unless expr
 
-        filter = parse_expr(str)
-        return false unless filter
+        expr = qualify_expr(expr)
         if filters?
-          filter = ExprConjunction.new(op, @filters, filter)
+          expr = ExprConjunction.new(op, filters, expr)
         end
 
         @filters = filter

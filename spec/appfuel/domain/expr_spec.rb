@@ -1,8 +1,13 @@
 module Appfuel::Domain
   RSpec.describe Expr do
-    context 'entity' do
-      it 'assigns the attr_list' do
+    context '#initialize' do
+      it 'assigns the domain attr when it is an array' do
         expr = create_expr(["foo","bar"], '=', "some-value")
+        expect(expr.attr_list).to eq(["foo", "bar"])
+      end
+
+      it 'assigns the domain attr when its a string' do
+        expr = create_expr("foo.bar", '=', "some-value")
         expect(expr.attr_list).to eq(["foo", "bar"])
       end
 
@@ -111,6 +116,28 @@ module Appfuel::Domain
       it 'accepts an array when op in "in"' do
         expr = create_expr(["foo"], "in", ['a', 'b', 'c'])
         expect(expr.value).to eq(['a', 'b', 'c'])
+      end
+    end
+
+    context '#validate_as_fully_qualified' do
+      it 'returns true when the domain attr is qualified' do
+        expr = create_expr('global.user.id', '=', 5)
+        expect(expr.validate_as_fully_qualified).to be(true)
+      end
+
+      it 'fails when the domain attr is not qualified' do
+        expr = create_expr('id', '=', 5)
+        msg  = 'expr (id = 5) is not fully qualified, mapping will not work'
+        expect {
+          expr.validate_as_fully_qualified
+        }.to raise_error(msg)
+      end
+    end
+
+    context '#to_s' do
+      it 'prints the expression as a string' do
+        expr = create_expr('id', '=', 5)
+        expect(expr.to_s).to eq("id = 5")
       end
     end
 

@@ -1,16 +1,19 @@
 module Appfuel
   module Domain
     # Domain expressions are used mostly by the criteria to describe filter
-    # conditions. The class represents a basic expression like "id eq 6", the
-    # problem with this expression is that we need additional information in
-    # order to properly map it to something like a db expression. This call
-    # ensures that additional information exists. Most importantly we need
-    # a fully qualified domain name in the form of "feature.domain".
+    # conditions. The class represents a basic expression like "id = 6", the
+    # problem with this expression is that "id" is relative to the domain
+    # represented by the criteria. In order to convert that expression to a
+    # storage expression for a db, that expression must be fully qualified in
+    # the form of "features.feature_name.domain.id = 6" so that the mapper can
+    # correctly map to database attributes. This class  provides the necessary
+    # interfaces to allow a criteria to qualify all of its relative expressions.
+    # It also allows fully qualifed expressions to be used.
     class Expr
       attr_reader :feature, :domain_basename, :domain_attr, :attr_list, :op, :value
 
-      def initialize(attr_list, op, value)
-        @attr_list = attr_list
+      def initialize(domain_attr, op, value)
+        @attr_list = parse_domain_attr(domain_attr)
         @op        = op.to_s.strip
         @value     = value
 
@@ -18,24 +21,6 @@ module Appfuel
         fail "attr_list can not be empty" if @attr_list.empty?
       end
 
-      # id -> attr_only this is the top of the domain -> feature unkown, domain unknown
-      # foo.id ->  attr in an object at the top of the domain - domain unknown
-      # foo.bar.baz.id -> long object chain same as above -> domain unknow
-      # features.foo.id -> qualified feature.domain ->
-      # global.user.id  -> qualified global domain  ->
-      #
-      # attr_list qualified domain with a top level attribute
-      #   0: global || features
-      #   1: membership (name of feature)
-      #   2: user (basename of domain)
-      #   3: id attr of domain
-      #
-      # attr_list qualified domain of a domain with an simple object with an attr
-      #   0: global || features
-      #   1: membership (name of feature)
-      #   2: user (basename of domain)
-      #   3: role object mapped to domain
-      #   4: id attr of role mapped to user (role.id
       def qualify_feature(feature, domain)
         fail "this expr is already qualified" if qualified?
 
@@ -78,42 +63,33 @@ module Appfuel
         "#{feature}.#{domain_basename}"
       end
 
-      # global.user.id
-      # features.memberships.user.id
-      # features.membershipes.user.role.id
-      #
-      # id
-      # role.id
-      #
-      #
-      #
-      #
-      #
       def domain_attr
         start_range = global? ? 2 : 3
         end_range   = -1
         attr_list.slice(start_range .. end_range).join('.')
       end
 
-      def expr_string
-        data = yield domain_attr, op
-        lvalue   = data[0]
-        operator = data[1]
-        rvalue   = data[2]
-
-        operator = "NOT #{operator}" if negated?
-        "#{lvalue} #{operator} #{rvalue}"
-      end
-
       def to_s
-
         "#{attr_list.join('.')} #{op} #{value}"
       end
 
       def validate_as_fully_qualified
         unless qualified?
-          fail "domain_name requires a fully qualified domain (#{self.to_s})"
+          fail "expr (#{to_s}) is not fully qualified, mapping will not work"
         end
+        true
+      end
+
+      private
+
+      def parse_domain_attr(list)
+        list = list.split('.') if list.is_a?(String)
+
+        unless list.is_a?(Array)
+          fail "Domain attribute must be a string in the form of " +
+               "(foo.bar.id) of an array ['foo', 'bar', 'id']"
+        end
+        list
       end
     end
   end
