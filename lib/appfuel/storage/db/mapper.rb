@@ -26,16 +26,17 @@ module Appfuel
         [db.table_name, entry.storage_attr]
       end
 
-      # Converts an entity expression into a valid active record expresion with
-      # string expresion (array canditions) and value(s)
+      # Converts an entity expression into a valid active record expresion
+      # expression.
       #
       # @param expr [Domain::Expr]
-      # @param results [Hash]
-      # @return [DbExpr] Returns a valid active record expresion
+      # @param entry [Repository::MappingEntry] optional
+      # @return [Array] The first index is the expr string using ? for values
+      #                 The second index is the actual value(s)
       def convert_expr(expr, entry = nil)
         column = qualified_db_column(expr, entry)
         op     = expr.op
-        arg    = case exp.op
+        arg    = case expr.op
                  when 'in', 'not in' then '(?)'
                  when 'between', 'not between' then '? AND ?'
                  else
@@ -119,28 +120,6 @@ module Appfuel
       def db_where(domain_expr, relation)
         db_expr = create_db_expr(domain_expr)
         relation.where([db_expr.string, db_expr.values])
-      end
-
-      # Convert the entity into a hash of db tables that represent
-      # that entity. Each table has its own hash of mapped columns.
-      #
-      # @param domain [Appfuel::Domain::Entity]
-      # @param opts [Hash]
-      # @option exclued [Array] list of columns to exclude from mapping
-      #
-      # @return [Hash] each key is a table with a hash of column name/value
-      def to_storage(domain, opts = {})
-        excluded = opts[:exclude] || []
-        data = {}
-        each_entity_attr(domain.domain_name) do |entry|
-          column   = entry.storage_attr
-          db_class = entry.storage(:db)
-          next if excluded.include?(column) || entry.skip?
-
-          data[db_class] = {} unless data.key?(db_class)
-          data[db_class][column] = entity_value(domain, entry)
-        end
-        data
       end
 
       def model_attributes(relation)

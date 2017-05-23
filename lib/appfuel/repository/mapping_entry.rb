@@ -51,7 +51,7 @@ module Appfuel
       end
 
       def computed_attr?
-        !computed_attr.nil?
+        !@computed_attr.nil?
       end
 
       def computed_attr(value, domain)

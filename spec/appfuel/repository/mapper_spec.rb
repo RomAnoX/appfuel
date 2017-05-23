@@ -435,15 +435,61 @@ module Appfuel::Repository
         expect(mapper.to_entity_hash('foo.bar', data)).to eq(hash)
       end
     end
-    def default_entry_data(data = {})
-      default = {
-        domain: 'foo.bar',
-        domain_attr: 'id',
-        storage_class: {db: 'bar'},
-        storage_attr: 'bar_id'
-      }
 
-      default.merge(data)
+
+    context '#to_storage' do
+      it 'converts domain into a storage hash' do
+        domain_name = 'foo.bar'
+        db_key = 'global.db.user'
+        mapping1 = {
+          domain_name: domain_name,
+          domain_attr: 'id',
+          storage: {db: db_key},
+          storage_attr: 'bar_id'
+        }
+        mapping2 = {
+          domain_name: domain_name,
+          domain_attr: 'data.code',
+          storage: {db: db_key},
+          storage_attr: 'bar_code'
+        }
+
+        id   = 123
+        code = 'abc'
+        data = Object.new
+        data.define_singleton_method(:code) do
+          code
+        end
+
+        domain = Object.new
+        domain.define_singleton_method(:id) do
+          id
+        end
+
+        domain.define_singleton_method(:data) do
+          data
+        end
+
+        domain.define_singleton_method(:domain_name) do
+          domain_name
+        end
+
+        map = {
+          'foo.bar' => {
+            'id' => create_entry(mapping1),
+            'data.code' => create_entry(mapping2)
+          }
+        }
+
+        mapper = create_mapper('myapp', map)
+        result = {
+          'global.db.user' => {
+            'bar_id' => id,
+            'bar_code' => code
+          }
+        }
+        expect(mapper.to_storage(domain, :db)).to eq(result)
+      end
     end
 
     def create_entry(data)

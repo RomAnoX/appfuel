@@ -150,6 +150,39 @@ module Appfuel
         entity_attrs
       end
 
+      # Convert the domain into a hash of storage attributes that represent.
+      # Each storage class has its own hash of mapped attributes. A domain
+      # can have more than one storage class.
+      #
+      # @param domain [Appfuel::Domain::Entity]
+      # @param type [Symbol] type of storage :db, :file, :memory etc...
+      # @param opts [Hash]
+      # @option exclued [Array] list of columns to exclude from mapping
+      #
+      # @return [Hash] each key is a storage class with a hash of column
+      #                name/value
+      def to_storage(domain, type, opts = {})
+        unless domain.respond_to?(:domain_name)
+          fail "Domain entity must implement :domain_name"
+        end
+
+        excluded = opts[:exclude] || []
+        data     = {}
+        each_entity_attr(domain.domain_name) do |entry|
+          unless entry.storage?(type)
+            "storage type (#{type}) is not support for (#{domain.domain_name})"
+          end
+          storage_attr  = entry.storage_attr
+          storage_class = entry.storage(type)
+          next if excluded.include?(storage_attr) || entry.skip?
+
+          data[storage_class] = {} unless data.key?(storage_class)
+          data[storage_class][storage_attr] = entity_value(domain, entry)
+        end
+        data
+      end
+
+
       def update_entity_hash(domain_attr, value, hash)
         if domain_attr.include?('.')
           hash.deep_merge!(create_entity_hash(domain_attr, value))
