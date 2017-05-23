@@ -24,6 +24,14 @@ module Appfuel::Domain
           create_expr(["foo"], "","bar")
         }.to raise_error(RuntimeError, msg)
       end
+
+      it 'fails when domain_attr is not a string or array' do
+        msg = "Domain attribute must be a string in the form of " +
+              "(foo.bar.id) or an array ['foo', 'bar', 'id']"
+        expect {
+          create_expr(123, "=","bar")
+        }.to raise_error(msg)
+      end
     end
 
     context '#conjunction' do

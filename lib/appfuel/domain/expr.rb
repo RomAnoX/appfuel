@@ -87,7 +87,7 @@ module Appfuel
 
         unless list.is_a?(Array)
           fail "Domain attribute must be a string in the form of " +
-               "(foo.bar.id) of an array ['foo', 'bar', 'id']"
+               "(foo.bar.id) or an array ['foo', 'bar', 'id']"
         end
         list
       end
