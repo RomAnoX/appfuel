@@ -23,7 +23,7 @@ module Appfuel
         end
 
         container[:auto_register_classes].each do |klass|
-          next unless klass.register?
+          next unless klass.register_class?
           container.register(klass.container_class_path, klass)
         end
 

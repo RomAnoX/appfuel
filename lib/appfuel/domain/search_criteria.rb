@@ -37,7 +37,7 @@ module Appfuel
     #     transform
     #
     class SearchCriteria < BaseCriteria
-
+      attr_reader :order_exprs
       # Parse out the domain into feature, domain, determine the name of the
       # repo this criteria is for and initailize basic settings.
       # global.user
@@ -68,7 +68,7 @@ module Appfuel
       def initialize(domain_name, data = {})
         super
         @limit = nil
-        @order = []
+        @order_exprs = []
         filter(data[:filter]) if data[:filter]
       end
 
@@ -120,7 +120,7 @@ module Appfuel
           unless ['desc', 'asc'].include(dir)
             fail "order array item must have a hash key of desc or asc"
           end
-          @order << {dir => domain_attr}
+          @order_exprs << {dir => domain_attr}
         end
         self
       end
