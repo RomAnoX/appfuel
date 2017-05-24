@@ -81,7 +81,7 @@ module Appfuel
           expr = ExprConjunction.new(op, filters, expr)
         end
 
-        @filters = filter
+        @filters = expr
         self
       end
 

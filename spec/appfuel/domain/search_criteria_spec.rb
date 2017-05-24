@@ -17,6 +17,17 @@ module Appfuel::Domain
       end
     end
 
+    context '#filter' do
+      it 'assigns a basic domain expr for a filter' do
+        criteria = create_criteria('foo.bar')
+        criteria.filter('id = 6')
+        expr = criteria.filters
+        expect(expr).to be_instance_of(Expr)
+        expect(expr.value).to eq(6)
+        expect(expr.op).to eq('=')
+        expect(expr.attr_list).to eq(['features', 'foo', 'bar', 'id'])
+      end
+    end
     def create_criteria(domain_name, settings = {})
       SearchCriteria.new(domain_name, settings)
     end
