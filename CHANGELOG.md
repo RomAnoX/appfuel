@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file. (Pending ap
 # [Unreleased]
 
 # Releases
-## [[0.2.5]](https://github.com/rsb/appfuel/releases/tag/0.2.4) 2017-05-23
+## [[0.2.5]](https://github.com/rsb/appfuel/releases/tag/0.2.5) 2017-05-23
+### Fixed
+- feature initializer has invalid reference `register?`
+- search criteria did not have `order_expr`
+
+### Added
+- tests for search criteria `filter`
+
+## [[0.2.4]](https://github.com/rsb/appfuel/releases/tag/0.2.4) 2017-05-23
 ### Changed
 - `Appfuel::Domain::BaseCriteria` can now qualify `domain exprs`
 - refactored and tested repo mapper
