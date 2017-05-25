@@ -98,39 +98,19 @@ module Appfuel
       #   order: 'foo.bar.id'
       #   order: [
       #     'foo.bar.id',
-      #     {desc: 'foo.bar.id'},
-      #     {asc: 'foo.bar.id'}
+      #     'foo.bar.id asc',
+      #     {'foo.bar.id => 'desc'},
+      #     {'foo.bar.code => 'asc'},
       #   ]
       #
       # membership.user.id
       def order(data)
-        data = [data] if data.is_a?(String)
-        unless data.respond_to?(:each)
-          fail "order must be a string or implement :each"
+        list = OrderExpr.build(data)
+        unless @order_exprs.empty?
+          list = @order_exprs + list
         end
-        data.each do |item|
-          item = transform_order_string(item) if item.is_a?(String)
-
-          if !item.is_a?(Hash)
-            fail "order array must be a list of strings or hashes"
-          end
-
-          dir, domain_attr = item.first
-          dir = dir.to_s.downcase
-          unless ['desc', 'asc'].include(dir)
-            fail "order array item must have a hash key of desc or asc"
-          end
-          @order_exprs << {dir => domain_attr}
-        end
+        @order_exprs = list
         self
-      end
-
-      private
-
-      def transform_order_string(str)
-        str, dir = item.split(' ')
-        dir = 'asc' if dir.nil?
-        {dir.downcase => str}
       end
     end
   end
