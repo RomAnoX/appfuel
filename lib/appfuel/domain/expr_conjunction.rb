@@ -7,6 +7,10 @@ module Appfuel
         @op    = type.to_s.downcase
         @left  = left
         @right = right
+
+        unless ["and", "or"].include?(@op)
+          fail "conjunction operator can only be (and|or)"
+        end
       end
 
       def conjunction?
