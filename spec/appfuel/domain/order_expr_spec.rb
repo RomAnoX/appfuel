@@ -19,6 +19,13 @@ module Appfuel::Domain
         expr = create_expr('foo.bar.id', 'DESC')
         expect(expr.op).to eq('desc')
       end
+
+      it 'fails when op is not asc or desc' do
+        msg = "order direction must be either asc or desc"
+        expect {
+          create_expr('foo.bar.id', 'baz')
+        }.to raise_error(msg)
+      end
     end
 
     context '#to_s' do
@@ -69,6 +76,21 @@ module Appfuel::Domain
         expect(result[0].to_s).to eq('foo.bar.id desc')
         expect(result[1].to_s).to eq('foo.id asc')
         expect(result[2].to_s).to eq('code asc')
+      end
+
+      it 'fails when arg does not implement :each' do
+        msg = "order must be a string or implement :each"
+        expect {
+          order_expr_class.build(nil)
+        }.to raise_error(msg)
+      end
+
+      it 'fails when array items are not a string or a hash' do
+        data = [123, 456]
+        msg = "order array must be a list of strings or hashes"
+        expect {
+          order_expr_class.build(data)
+        }.to raise_error(msg)
       end
     end
 
