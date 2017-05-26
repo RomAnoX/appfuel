@@ -678,6 +678,36 @@ module Appfuel::Domain
           expect(result[:domain_expr][:op]).to be_a_slice
           expect(result[:domain_expr][:value][:integer]).to be_a_slice
         end
+
+        it 'parses parens with one expr' do
+          result = parser.primary.parse('(id = 6)')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+
+        it 'parses a simple and conjunction in parens' do
+          result = parser.primary.parse('(id = 6 and id = 3)')
+          expect(result[:and]).to be_a(Hash)
+          expect(result[:and][:left][:domain_expr]).to be_a(Hash)
+          expect(result[:and][:right][:domain_expr]).to be_a(Hash)
+        end
+
+        it 'parses a simple or conjunction in parens' do
+          result = parser.primary.parse('(id = 6 or id = 3)')
+          expect(result[:or]).to be_a(Hash)
+          expect(result[:or][:left][:domain_expr]).to be_a(Hash)
+          expect(result[:or][:right][:domain_expr]).to be_a(Hash)
+        end
+
+        it 'parses a domain expr with a conjunction in parens' do
+          result = parser.primary.parse('(id = 8 and (id = 6 or id = 3))')
+          expect(result[:and]).to be_a(Hash)
+          expect(result[:and][:left][:domain_expr]).to be_a(Hash)
+          expect(result[:and][:right][:or]).to be_a(Hash)
+          expect(result[:and][:right][:or][:left][:domain_expr]).to be_a(Hash)
+          expect(result[:and][:right][:or][:right][:domain_expr]).to be_a(Hash)
+        end
       end
 
       context '#and_operation' do
@@ -702,6 +732,13 @@ module Appfuel::Domain
           expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
           expect(result[:domain_expr][:op]).to be_a_slice
           expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+
+        it 'parses an or conjunction' do
+          result = parser.or_operation.parse('id = 6 or status = "foo"')
+          expect(result[:or]).to be_a(Hash)
+          expect(result[:or][:left][:domain_expr]).to be_a(Hash)
+          expect(result[:or][:right][:domain_expr]).to be_a(Hash)
         end
 
       end
