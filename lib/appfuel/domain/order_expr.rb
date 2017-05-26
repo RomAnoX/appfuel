@@ -1,8 +1,8 @@
 module Appfuel
   module Domain
-    class OrderExprs < Expr
+    class OrderExpr < Expr
 
-      def self.build(str)
+      def self.build(data)
         data = [data] if data.is_a?(String)
         unless data.respond_to?(:each)
           fail "order must be a string or implement :each"
@@ -20,12 +20,6 @@ module Appfuel
         results
       end
 
-      def self.parse_order_str(str)
-        str, dir = str.split(' ')
-         dir = 'asc' if dir.nil?
-         {str => dir.downcase}
-      end
-
       def initialize(domain_attr, op = 'asc')
         super(domain_attr, op, nil)
         @op = @op.downcase
@@ -36,6 +30,13 @@ module Appfuel
 
       def to_s
         "#{attr_list.join('.')} #{op}"
+      end
+
+      private
+      def self.parse_order_string(str)
+        str, dir = str.split(' ')
+         dir = 'asc' if dir.nil?
+         {str => dir.downcase}
       end
     end
   end
