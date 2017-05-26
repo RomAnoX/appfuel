@@ -170,22 +170,21 @@ module Appfuel
         lparen >> or_operation >> rparen | domain_expr >> space?
       end
 
+
       rule(:and_operation) do
         (
-          primary.as(:left) >> space? >>
-          and_op >>
-          and_operation.as(:right)
+          primary.as(:left) >> and_op >> and_operation.as(:right) >> space?
         ).as(:and) | primary
       end
 
       rule(:or_operation) do
         (
-          and_operation.as(:left) >> space? >>
-          or_op >>
-          or_operation.as(:right)
+          and_operation.as(:left) >> or_op >> or_operation.as(:right)
         ).as(:or) | and_operation
       end
 
+      # rule for domain
+      #
       root(:or_operation)
 
       def stri(str)
@@ -194,6 +193,7 @@ module Appfuel
           match["#{char.upcase}#{char.downcase}"]
         }.reduce(:>>)
       end
+
     end
   end
 end

@@ -1,4 +1,5 @@
 module Appfuel::Domain
+  #  Appfuel::Domain.criteria('users.user filter id = 6')
   RSpec.describe OrderExpr do
     context '#initialize' do
       it 'creates an order expr where the op is "asc" by default' do
