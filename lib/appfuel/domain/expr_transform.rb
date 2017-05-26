@@ -44,10 +44,10 @@ module Appfuel
         if data.key?(:root)
           node = data[:root]
         elsif data.key?(:domain_expr)
-          node = data[:domain_expr]
+          node  = data[:domain_expr]
         elsif data.key?(:and) || data.key?(:or)
-          op = right.key?(:and) ? 'and' : 'or'
-          node = build_conjunction(op, data)
+          op = data.key?(:and) ? :and : :or
+          node = build_conjunction(op, data[op])
         end
         node
       end

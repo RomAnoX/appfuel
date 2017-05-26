@@ -79,6 +79,15 @@ module Appfuel::Domain
         expect(conjunction.left.value).to eq(6)
         expect(conjunction.right.value).to eq("foo")
       end
+
+      it 'transforms multiple conjunctions' do
+        expr = parser.parse('id = 6 or bar = "foo" or status = 1')
+        result = transform.class.build_conjunction_node(expr)
+        expect(result).to be_an_instance_of(ExprConjunction)
+        expect(result.op).to eq('or')
+        expect(result.left[:domain_attr]).to be_a(Hash)
+        expect(result.right).to be_an_instance_of(ExprConjunction)
+      end
     end
 
     def parse_failed_error
