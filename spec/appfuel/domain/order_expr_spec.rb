@@ -36,6 +36,13 @@ module Appfuel::Domain
         expect(result[0].to_s).to eq('foo.bar.id desc')
       end
 
+      it 'builds a basic string with a default direction' do
+        result = order_expr_class.build('foo.bar.id')
+        expect(result).to be_an(Array)
+        expect(result.size).to eq(1)
+        expect(result[0].to_s).to eq('foo.bar.id asc')
+      end
+
       it 'builds an array of strings' do
         data = [
           'foo.bar.id desc',

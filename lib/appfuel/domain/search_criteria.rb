@@ -106,10 +106,10 @@ module Appfuel
       # membership.user.id
       def order(data)
         list = OrderExpr.build(data)
-        unless @order_exprs.empty?
-          list = @order_exprs + list
+        list.each do |expr|
+          @order_exprs << qualify_expr(expr)
         end
-        @order_exprs = list
+
         self
       end
     end
