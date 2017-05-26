@@ -47,15 +47,54 @@ module Appfuel::Domain
       end
     end
 
+    context 'domain_expr' do
+      it 'transforms a domain expr' do
+        expr = parser.parse('id = 6')
+        result = transform.apply(expr)
+        domain_expr = result[:domain_expr]
+        expect(domain_expr).to be_an_instance_of(Expr)
+        expect(domain_expr.value).to eq(6)
+        expect(domain_expr.op).to eq("=")
+        expect(domain_expr.attr_list).to eq(['id'])
+      end
+    end
+
+    context 'conjunction' do
+      it 'transforms an and conjunction' do
+        expr = parser.parse('id = 6 and bar = "foo"')
+        result = transform.apply(expr)
+        conjunction = result[:root]
+        expect(conjunction).to be_an_instance_of(ExprConjunction)
+        expect(conjunction.op).to eq("and")
+        expect(conjunction.left.value).to eq(6)
+        expect(conjunction.right.value).to eq("foo")
+      end
+
+      it 'transforms an or conjunction' do
+        expr = parser.parse('id = 6 or bar = "foo"')
+        result = transform.apply(expr)
+        conjunction = result[:root]
+        expect(conjunction).to be_an_instance_of(ExprConjunction)
+        expect(conjunction.op).to eq("or")
+        expect(conjunction.left.value).to eq(6)
+        expect(conjunction.right.value).to eq("foo")
+      end
+    end
+
     def parse_failed_error
       Parslet::ParseFailed
     end
+
     def be_a_slice
       be_an_instance_of(slice)
     end
 
     def slice
       Parslet::Slice
+    end
+
+    def parser
+      ExprParser.new
     end
 
     def transform

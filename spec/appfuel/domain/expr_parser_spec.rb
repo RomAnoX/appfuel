@@ -782,6 +782,18 @@ module Appfuel::Domain
           expect(b.to_s).to eq('5')
           expect(c.to_s).to eq('4')
         end
+
+        it 'parses expr1 and (expr2 or expr3)' do
+          result = parser.parse('id = 6 and (id = 5 and id = 4)')
+
+          a = result[:and][:left][:domain_expr][:value][:integer]
+          b = result[:and][:right][:and][:left][:domain_expr][:value][:integer]
+          c = result[:and][:right][:and][:right][:domain_expr][:value][:integer]
+
+          expect(a.to_s).to eq('6')
+          expect(b.to_s).to eq('5')
+          expect(c.to_s).to eq('4')
+        end
       end
     end
 
