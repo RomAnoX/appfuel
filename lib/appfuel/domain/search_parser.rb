@@ -29,7 +29,6 @@ module Appfuel
       # order id asc
       # order foo.id asc
       # order foo.id, code desc, foo.bar.id asc
-      #
       rule(:order_by) do
         (
           order_identifier >> space >> space? >>
@@ -41,7 +40,7 @@ module Appfuel
         (
           domain_name.as(:domain) >> space >> space? >>
           filter_identifier >> space >> space? >>
-          or_operation
+          or_operation >> order_by.maybe >> space? >> limit_expr.maybe
         ).as(:search)
       end
 

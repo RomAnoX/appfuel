@@ -154,6 +154,7 @@ module Appfuel::Domain
         expect(list[2][:order_expr][:domain_attr][:attr_label].to_s).to eq('bar')
       end
     end
+
     context 'domain_name' do
       it 'parses a domain_name in the form of "feature.domain"' do
         result = parser.domain_name.parse('foo.bar')
@@ -167,7 +168,25 @@ module Appfuel::Domain
 
     context 'search' do
       it 'parses a search string' do
-        parser.parse('foo.bar filter id = 6')
+        result = parser.parse('foo.bar filter id = 6 order id limit 8')
+        domain = result[:search][:domain]
+        expect(domain[:feature][:attr_label]).to be_a_slice
+        expect(domain[:feature][:attr_label].to_s).to eq('foo')
+        expect(domain[:basename][:attr_label]).to  be_a_slice
+        expect(domain[:basename][:attr_label].to_s).to eq('bar')
+
+        expr = result[:search][:domain_expr]
+        expect(expr[:domain_attr][:attr_label]).to be_a_slice
+        expect(expr[:domain_attr][:attr_label].to_s).to eq('id')
+        expect(expr[:op]).to be_a_slice
+        expect(expr[:op].to_s).to eq('= ')
+        expect(expr[:value][:integer].to_s).to eq('6')
+
+        order = result[:search][:order][:list]
+        expect(order[:order_expr][:domain_attr][:attr_label].to_s).to eq('id')
+
+        limit = result[:search][:limit][:value][:integer]
+        expect(limit.to_s).to eq('8')
       end
     end
 
