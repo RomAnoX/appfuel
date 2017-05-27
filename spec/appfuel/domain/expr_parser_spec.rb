@@ -378,6 +378,31 @@ module Appfuel::Domain
       end
     end
 
+    context 'not in' do
+      it 'parses the operator "not in"' do
+        result = parser.in_op.parse("not in")
+        expect(result).to be_a_slice
+        expect(result.to_s).to eq('not in')
+      end
+    end
+
+    context 'not like' do
+      it 'parses the operator "not like"' do
+        result = parser.like_op.parse("not like")
+        expect(result).to be_a_slice
+        expect(result.to_s).to eq('not like')
+      end
+    end
+
+    context 'not between' do
+      it 'parses the operator "not betwwen"' do
+        result = parser.between_op.parse("not between")
+        expect(result).to be_a_slice
+        expect(result.to_s).to eq('not between')
+      end
+    end
+
+
     context '#eq_op' do
       it 'parses the = operator' do
         result = parser.eq_op.parse('=')
@@ -749,6 +774,13 @@ module Appfuel::Domain
           expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
           expect(result[:domain_expr][:op]).to be_a_slice
           expect(result[:domain_expr][:value][:integer]).to be_a_slice
+        end
+
+        it 'parses "code != "foo"' do
+          result = parser.parse('code != "foo"')
+          expect(result[:domain_expr][:domain_attr][:attr_label]).to be_a_slice
+          expect(result[:domain_expr][:op]).to be_a_slice
+          expect(result[:domain_expr][:value][:string]).to be_a_slice
         end
 
         it 'parses expr1 and expr2 and expr3' do

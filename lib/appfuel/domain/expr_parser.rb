@@ -81,11 +81,11 @@ module Appfuel
 
       rule(:and_op)     { stri('and')  >> space? }
       rule(:or_op)      { stri('or')   >> space? }
-      rule(:in_op)      { stri('in')   >> space? }
-      rule(:like_op)    { stri('like') >> space? }
-      rule(:between_op) { stri('between') >> space? }
+      rule(:in_op)      { (stri('in') | stri('not in'))   >> space? }
+      rule(:like_op)    { (stri('like') | stri('not like'))  >> space? }
+      rule(:between_op) { (stri('between') | stri('not between')) >> space? }
 
-      rule(:eq_op)      { str('=')    >> space? }
+      rule(:eq_op)      { (str('=') | str('!=')) >> space? }
       rule(:gt_op)      { str('>')    >> space? }
       rule(:gteq_op)    { str('>=')   >> space? }
       rule(:lt_op)      { str('<')    >> space? }
