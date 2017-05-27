@@ -11,14 +11,11 @@ module Appfuel::Domain
         expect(criteria.domain_basename).to eq 'bar'
       end
 
-      it 'creates a criteria with only a domain no feature' do
-        criteria = create_base_criteria('bar')
-        expect(criteria.domain_basename).to eq 'bar'
-      end
-
-      it 'returns Types::Undefined for feature that is not defined' do
-        criteria = create_base_criteria('bar')
-        expect(criteria.feature).to eq nil
+      it 'fails when domain_name has no feature or global component' do
+        msg = 'domain names must be in the form of (<feature|global>.domain)'
+        expect {
+          create_base_criteria('bar')
+        }.to raise_error(msg)
       end
 
       it 'returns feature when domain supports :domain_name' do
@@ -44,7 +41,7 @@ module Appfuel::Domain
       end
 
       it 'is created with empty expr list' do
-        expect(create_base_criteria('foo').filters).to eq(nil)
+        expect(create_base_criteria('foo.bar').filters).to eq(nil)
       end
 
       it 'defaults settings to CriteriaSettings class' do

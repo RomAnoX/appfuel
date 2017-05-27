@@ -829,7 +829,6 @@ module Appfuel::Domain
       end
     end
 
-
     def space_error_msg
       'Expected at least 1 of \\\\s at line 1 char 1.'
     end
@@ -837,6 +836,7 @@ module Appfuel::Domain
     def parse_failed_error
       Parslet::ParseFailed
     end
+
     def be_a_slice
       be_an_instance_of(slice)
     end
