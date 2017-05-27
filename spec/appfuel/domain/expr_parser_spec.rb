@@ -797,6 +797,7 @@ module Appfuel::Domain
       end
     end
 
+
     def space_error_msg
       'Expected at least 1 of \\\\s at line 1 char 1.'
     end
