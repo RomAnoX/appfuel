@@ -1,5 +1,5 @@
 module Appfuel::Domain
-  RSpec.describe BaseCriteria do
+  RSpec.describe SearchCriteria do
     context 'initialize' do
       it 'initializes with no expressions when given no args' do
         criteria = create_criteria('foo.bar')
@@ -13,7 +13,7 @@ module Appfuel::Domain
 
       it 'defaults to an empty list of order expressions' do
         criteria = create_criteria('foo.bar')
-        expect(criteria.order_exprs).to eq([])
+        expect(criteria.order_by).to eq([])
       end
     end
 
@@ -79,10 +79,10 @@ module Appfuel::Domain
         criteria = create_criteria('foo.bar')
         result = criteria.order('id asc')
 
-        expect(criteria.order_exprs.size).to eq(1)
+        expect(criteria.order_by.size).to eq(1)
         expect(result).to eq(criteria)
 
-        expr = criteria.order_exprs[0]
+        expr = criteria.order_by[0]
         expect(expr).to be_an_instance_of(OrderExpr)
         expect(expr.qualified?).to be(true)
         expect(expr.to_s).to eq('features.foo.bar.id asc')
@@ -96,15 +96,15 @@ module Appfuel::Domain
         criteria = create_criteria('foo.bar')
         result = criteria.order(data)
 
-        expect(criteria.order_exprs.size).to eq(2)
+        expect(criteria.order_by.size).to eq(2)
         expect(result).to eq(criteria)
 
-        expr1 = criteria.order_exprs[0]
+        expr1 = criteria.order_by[0]
         expect(expr1).to be_an_instance_of(OrderExpr)
         expect(expr1.qualified?).to be(true)
         expect(expr1.to_s).to eq('features.foo.bar.id asc')
 
-        expr2 = criteria.order_exprs[1]
+        expr2 = criteria.order_by[1]
         expect(expr2).to be_an_instance_of(OrderExpr)
         expect(expr2.qualified?).to be(true)
         expect(expr2.to_s).to eq('features.foo.bar.code desc')

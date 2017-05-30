@@ -41,7 +41,9 @@ module Appfuel
       end
 
       def self.build_conjunction_node(data)
-        if data.key?(:root)
+        if data.is_a?(Expr) || data.is_a?(ExprConjunction)
+          node = data
+        elsif data.key?(:root)
           node = data[:root]
         elsif data.key?(:domain_expr)
           node  = data[:domain_expr]

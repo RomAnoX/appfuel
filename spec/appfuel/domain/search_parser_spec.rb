@@ -136,22 +136,19 @@ module Appfuel::Domain
     context 'order_by' do
       it 'parses "order id asc, foo.id desc, bar"' do
         result = parser.order_by.parse('order id asc, foo.id desc, bar')
-        expect(result[:order]).to be_a(Hash)
-
         order = result[:order]
-        expect(order[:list]).to be_a(Array)
+        expect(order).to be_a(Array)
 
-        list = order[:list]
-        expect(list.size).to eq(3)
-        expect(list[0][:order_expr][:domain_attr][:attr_label].to_s).to eq('id')
-        expect(list[0][:order_expr][:order_dir].to_s).to eq('asc')
+        expect(order.size).to eq(3)
+        expect(order[0][:order_expr][:domain_attr][:attr_label].to_s).to eq('id')
+        expect(order[0][:order_expr][:order_dir].to_s).to eq('asc')
 
-        domain_attr = list[1][:order_expr][:domain_attr]
+        domain_attr = order[1][:order_expr][:domain_attr]
         expect(domain_attr[0][:attr_label].to_s).to eq('foo')
         expect(domain_attr[1][:attr_label].to_s).to eq('id')
-        expect(list[1][:order_expr][:order_dir].to_s).to eq('desc')
+        expect(order[1][:order_expr][:order_dir].to_s).to eq('desc')
 
-        expect(list[2][:order_expr][:domain_attr][:attr_label].to_s).to eq('bar')
+        expect(order[2][:order_expr][:domain_attr][:attr_label].to_s).to eq('bar')
       end
     end
 
@@ -175,14 +172,14 @@ module Appfuel::Domain
         expect(domain[:basename][:attr_label]).to  be_a_slice
         expect(domain[:basename][:attr_label].to_s).to eq('bar')
 
-        expr = result[:search][:domain_expr]
+        expr = result[:search][:filters][:domain_expr]
         expect(expr[:domain_attr][:attr_label]).to be_a_slice
         expect(expr[:domain_attr][:attr_label].to_s).to eq('id')
         expect(expr[:op]).to be_a_slice
         expect(expr[:op].to_s).to eq('= ')
         expect(expr[:value][:integer].to_s).to eq('6')
 
-        order = result[:search][:order][:list]
+        order = result[:search][:order]
         expect(order[:order_expr][:domain_attr][:attr_label].to_s).to eq('id')
 
         limit = result[:search][:limit][:value][:integer]

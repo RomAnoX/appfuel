@@ -37,7 +37,32 @@ module Appfuel
     #     transform
     #
     class SearchCriteria < BaseCriteria
-      attr_reader :order_exprs
+      attr_reader :order_by
+
+
+      # domain: String,
+      # filters: Expr | ExprConjunction
+      # order: Array[OrderExpr]
+      # limit: Integer
+      #
+      #
+      def self.build(data)
+        unless data.key?(:domain)
+          fail "search criteria :domain is required"
+        end
+        criteria = self.new(data[:domain])
+
+        criteria.filter_expr(data[:filters])
+        if data.key?(:order)
+          criteria.order_exprs(data[:order])
+        end
+
+        if data.key?(:limit)
+          criteria.limit(data[:limit])
+        end
+        criteria
+      end
+
       # Parse out the domain into feature, domain, determine the name of the
       # repo this criteria is for and initailize basic settings.
       # global.user
@@ -68,21 +93,23 @@ module Appfuel
       def initialize(domain_name, data = {})
         super
         @limit = nil
-        @order_exprs = []
+        @order_by = []
         filter(data[:filter]) if data[:filter]
+      end
+
+      def filter_expr(expr, op: 'and')
+        expr = qualify_expr(expr)
+        if filters?
+          expr = ExprConjunction.new(op, filters, expr)
+        end
+        @filters = expr
+        self
       end
 
       def filter(str, op: 'and')
         expr = parse_expr(str)
         return false unless expr
-
-        expr = qualify_expr(expr)
-        if filters?
-          expr = ExprConjunction.new(op, filters, expr)
-        end
-
-        @filters = expr
-        self
+        filter_expr(expr, op: op)
       end
 
       def limit(nbr = nil)
@@ -105,11 +132,18 @@ module Appfuel
       #
       # membership.user.id
       def order(data)
-        list = OrderExpr.build(data)
-        list.each do |expr|
-          @order_exprs << qualify_expr(expr)
-        end
+       order_exprs(OrderExpr.build(data))
+      end
 
+      def order_expr(expr)
+        @order_by << qualify_expr(expr)
+        self
+      end
+
+      def order_exprs(list)
+        list.each do |expr|
+          order_expr(expr)
+        end
         self
       end
     end

@@ -32,7 +32,7 @@ module Appfuel
       rule(:order_by) do
         (
           order_identifier >> space >> space? >>
-          (order_expr >> (comma >> order_expr).repeat).maybe.as(:list)
+          (order_expr >> (comma >> order_expr).repeat).maybe
         ).as(:order)
       end
 
@@ -40,7 +40,7 @@ module Appfuel
         (
           domain_name.as(:domain) >> space >> space? >>
           filter_identifier >> space >> space? >>
-          or_operation >> order_by.maybe >> space? >> limit_expr.maybe
+          or_operation.as(:filters) >> order_by.maybe >> space? >> limit_expr.maybe
         ).as(:search)
       end
 
