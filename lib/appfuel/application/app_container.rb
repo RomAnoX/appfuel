@@ -120,7 +120,6 @@ module Appfuel
         # @return nil
         def container_class_key(value = nil)
           return @container_class_key if value.nil?
-          p "[container-class-key] #{self} => #{value}"
           @container_class_key = value
         end
 

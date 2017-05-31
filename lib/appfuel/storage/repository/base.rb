@@ -1,32 +1,78 @@
 module Appfuel
   module Repository
-
+    # The generic repository behavior. This represents repo behavior that is
+    # agnostic to any storage system. The following is a definition of this
+    # patter by Martin Fowler:
+    #
+    #   "The repository mediates between the domain and data mapping
+    #    layers using a collection-like interface for accessing domain
+    #    objects."
+    #
+    #    "Conceptually, a Repository encapsulates the set of objects persisted
+    #     in a data store and the operations performed over them, providing a
+    #     more object-oriented view of the persistence layer."
+    #
+    #    https://martinfowler.com/eaaCatalog/repository.html
+    #
+    # While we are not a full repository pattern, we are evolving into it.
+    # All repositories have access to the application container. They register
+    # themselves into the container, as well as handling the cache from the
+    # container.
     class Base
       include Appfuel::Application::AppContainer
 
       class << self
         attr_writer :mapper
 
+        # Used when the concrete class is being registered, to construct
+        # the container key as a path.
+        #
+        # @example features.membership.repositories.user
+        # @example global.repositories.user
+        # @example <feature|global>.<container_class_type>.<class|container_key>
+        #
+        # @return [String]
         def container_class_type
           'repositories'
         end
 
+        # Stage the concrete class that is inheriting this for registration.
+        # The reason we have to stage the registration is to give the code
+        # enough time to mixin the AppContainer functionality needed for
+        # registration. Therefore registration is defered until feature
+        # initialization.
+        #
+        # @param klass [Class] the class inheriting this
+        # @return nil
         def inherited(klass)
           stage_class_for_registration(klass)
+          nil
         end
 
+        # Mapper holds specific knowledge of storage to domain mappings
+        #
+        # @return [Mapper]
         def mapper
           @mapper ||= create_mapper
         end
 
+        # Factory method to create a mapper. Each concrete Repository will
+        # override this.
+        #
+        # @param maps [Hash] the domain to storage mappings
+        # @return [Mapper]
         def create_mapper(maps = nil)
           Mapper.new(container_root_name, maps)
         end
 
+        # A cache of already resolved domain objects
+        #
+        # @return [Hash]
         def cache
           app_container[:repository_cache]
         end
       end
+
 
       def mapper
         self.class.mapper

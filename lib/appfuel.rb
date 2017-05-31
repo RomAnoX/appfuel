@@ -198,7 +198,6 @@ end
 require "appfuel/domain"
 require "appfuel/presenter"
 require "appfuel/storage"
-require "appfuel/storage"
 require "appfuel/handler"
 
 
