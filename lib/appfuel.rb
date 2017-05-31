@@ -197,7 +197,7 @@ end
 # Domain Entities
 require "appfuel/domain"
 require "appfuel/presenter"
-require "appfuel/repository"
+require "appfuel/storage"
 require "appfuel/repository_runner"
 require "appfuel/storage"
 require "appfuel/handler"

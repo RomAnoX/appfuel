@@ -1,5 +1,6 @@
 module Appfuel
   module Repository
+
     class Base
       include Appfuel::Application::AppContainer
 
@@ -21,14 +22,71 @@ module Appfuel
         def create_mapper(maps = nil)
           Mapper.new(container_root_name, maps)
         end
+
+        def cache
+          app_container[:repository_cache]
+        end
       end
 
       def mapper
         self.class.mapper
       end
 
-      def search(criteria)
-        mapper.search(criteria)
+      def execute_query_method(query_method, criteria, settings)
+        unless respond_to?(query_method)
+          fail "Could not excute method #{query_method}"
+        end
+
+        public_send(query_method, criteria, settings)
+      end
+
+      def query_setup(criteria, settings)
+        query_method = "#{criteria.domain_basename}_query"
+        execute_query_method(query_method, criteria, settings)
+      end
+
+      def query(criteria, settings = {})
+        criteria = build_search_criteria(criteria)
+        settings = create_settings(settings)
+
+        if settings.manual_query?
+          query_method = settings.manual_query
+          return execute_query_method(query_method, criteria, settings)
+        end
+
+        begin
+          result = query_setup(criteria, settings)
+          apply_query_conditions(criteria, result, settings)
+          resolve_domains(criteria, results, settings)
+        rescue => e
+          msg = "query failed for #{criteria.domain_name}: " +
+                "#{e.class} #{e.message}"
+          error = RuntimeError.new(msg)
+          error.set_backtrace(e.backtrace)
+          raise error
+        end
+      end
+
+      def apply_query_condition(_result, _criteria, _settings)
+        fail "apply_query_condition must be extended by a concrete repo"
+      end
+
+      def resolve_domains(_result, _criteria, _settings)
+        fail "resolve_domains must be extended by a concrete repo"
+      end
+
+      def build_search_criteria(criteria)
+        return criteria if search_criteria?(criteria)
+        return search_parser.parse(criteria) if criteria.is_a?(String)
+        unless criteria.is_a?(Hash)
+          fail "criteria must be a String, Hash, or " +
+               "Appfuel::Domain::SearchCriteria"
+        end
+        SearchCriteria.build(criteria)
+      end
+
+      def search_criteria?(criteria)
+        criteria.instance_of(Appfuel::Domain::SearchCriteria)
       end
 
       def exists?(criteria)

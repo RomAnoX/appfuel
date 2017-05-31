@@ -111,6 +111,7 @@ module Appfuel
         container.register(:root_path, root_path)
         container.register(:auto_register_classes, [])
         container.register(:repository_mappings, {})
+        container.register(:repository_cache, {})
         container.register(:repository_initializer, repo_initializer)
         container.register(:features_path, "#{root_name}/features")
         container.register(:feature_initializer, feature_initializer)
