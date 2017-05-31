@@ -1,9 +1,9 @@
-module Appfuel
-  RSpec.xdescribe RepositoryRunner do
+module Appfuel::Repository
+  RSpec.xdescribe Runner do
     context '#new' do
       it 'requires the repo namespace and criteria class' do
         repo_ns  = 'Foo::Bar'
-        runner   = RepositoryRunner.new(repo_ns, criteria_class)
+        runner   = Runner.new(repo_ns, criteria_class)
         expect(runner.repo_namespace).to eq(repo_ns)
         expect(runner.criteria_class).to eq(criteria_class)
       end
@@ -12,7 +12,7 @@ module Appfuel
     context '#exists?' do
       it 'fails when repository does not exist' do
         repo_ns  = 'Foo::Bar'
-        runner   = RepositoryRunner.new(repo_ns, criteria_class)
+        runner   = Runner.new(repo_ns, criteria_class)
         msg = 'RepositoryRunner: failed - repo Foo::Bar::DomainRepository not defined'
         expect {
           runner.exists?('domain', id: 123)
@@ -21,7 +21,7 @@ module Appfuel
 
       xit 'delegates exists to repo.exists? passing the criteria' do
         repo_ns         = 'Foo::Bar'
-        runner          = RepositoryRunner.new(repo_ns, criteria_class)
+        runner          = Runner.new(repo_ns, criteria_class)
         repo_class_name = 'Foo::Bar::DomainRepository'
         repo_class      = class_double(Db::Repository)
         repo            = instance_double(Db::Repository)
@@ -46,7 +46,7 @@ module Appfuel
     context '#query' do
       it 'fails when repository does not exist' do
         repo_ns = 'Foo::Bar'
-        runner = RepositoryRunner.new(repo_ns, criteria_class)
+        runner = Runner.new(repo_ns, criteria_class)
         msg = 'RepositoryRunner: failed - repo Foo::Bar::DomainRepository not defined'
 
         criteria = criteria_class.new('domain').where('id', eq: 123)
