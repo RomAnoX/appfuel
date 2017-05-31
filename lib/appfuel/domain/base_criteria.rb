@@ -32,17 +32,6 @@ module Appfuel
     #   ]
     #   limit: 1
     #
-    #   settings:
-    #     page: 1
-    #     per_page: 2
-    #     disable_pagination
-    #     first
-    #     all
-    #     last
-    #     error_on_empty
-    #     parser
-    #     transform
-    #
     # exists:
     #   domain:
     #   expr:
@@ -52,7 +41,7 @@ module Appfuel
       include DomainNameParser
 
 
-      attr_reader :domain_basename, :domain_name, :feature, :settings, :filters
+      attr_reader :domain_basename, :domain_name, :feature, :filters
 
       # Parse out the domain into feature, domain, determine the name of the
       # repo this criteria is for and initailize basic settings.
@@ -79,9 +68,10 @@ module Appfuel
       # @return [Criteria]
       def initialize(domain_name, data = {})
         @feature, @domain_basename, @domain_name = parse_domain_name(domain_name)
-        @settings = data[:settings] || CriteriaSettings.new(data)
-        @filters  = nil
-        @params   = {}
+        @filters   = nil
+        @params    = {}
+        @parser    = data[:expr_parser] || ExprParser.new
+        @transform = data[:expr_transform] || ExprTransform.new
       end
 
       def clear_filters
@@ -130,17 +120,19 @@ module Appfuel
       end
 
       private
+      attr_reader :parser, :transform
+
       def parse_expr(str)
-        if !(settings.parser && settings.parser.respond_to?(:parse))
+        if !(parser && parser.respond_to?(:parse))
           fail "expression parser must implement to :parse"
         end
 
-        if !(settings.transform && settings.transform.respond_to?(:apply))
+        if !(transform && transform.respond_to?(:apply))
           fail "expression transform must implement :apply"
         end
 
         begin
-          tree = settings.parser.parse(str)
+          tree = parser.parse(str)
         rescue Parslet::ParseFailed => e
           msg = "The expression (#{str}) failed to parse"
           err = RuntimeError.new(msg)
@@ -148,7 +140,7 @@ module Appfuel
           raise err
         end
 
-        result = settings.transform.apply(tree)
+        result = transform.apply(tree)
         result = result[:domain_expr] || result[:root]
         unless result
           fail "unable to parse (#{str}) correctly"

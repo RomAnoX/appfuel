@@ -3,7 +3,8 @@ require_relative 'repository/mapping_entry'
 require_relative 'repository/mapping_dsl'
 require_relative 'repository/mapper'
 require_relative 'repository/initializer'
-require_relative 'repository/runner.rb'
+require_relative 'repository/runner'
+require_relative 'repository/settings'
 
 module Appfuel
   module Repository

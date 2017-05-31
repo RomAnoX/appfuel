@@ -1,6 +1,5 @@
 module Appfuel
-  module Domain
-
+  module Repository
     # The Criteria represents the interface between the repositories and actions
     # or commands. The allow you to find entities in the application storage (
     # a database) without knowledge of that storage system. The criteria will
@@ -19,7 +18,7 @@ module Appfuel
     #     transform
     #     search_name
     #
-    class CriteriaSettings
+    class Settings
       DEFAULT_PAGE = 1
       DEFAULT_PER_PAGE = 20
 
@@ -29,8 +28,8 @@ module Appfuel
       # @param opts   [Hash] options for initializing criteria
       # @return [Criteria]
       def initialize(settings = {})
-        @parser     = settings[:expr_parser] || ExprParser.new
-        @transform  = settings[:expr_transform] || ExprTransform.new
+        @parser     = settings[:expr_parser] || Appfuel::Domain::ExprParser.new
+        @transform  = settings[:expr_transform] || Appfuel::Domain::ExprTransform.new
 
 
         empty_dataset_is_valid!

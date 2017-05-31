@@ -24,18 +24,6 @@ module Appfuel
     #     {asc: 'foo.bar.id'}
     #   ]
     #   limit: 1
-    #
-    #   settings:
-    #     page: 1
-    #     per_page: 2
-    #     disable_pagination
-    #     first
-    #     all
-    #     last
-    #     error_on_empty
-    #     parser
-    #     transform
-    #
     class SearchCriteria < BaseCriteria
       attr_reader :order_by
 

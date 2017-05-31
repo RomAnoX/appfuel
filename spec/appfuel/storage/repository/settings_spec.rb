@@ -1,30 +1,30 @@
-module Appfuel::Domain
-  RSpec.describe CriteriaSettings do
+module Appfuel::Repository
+  RSpec.describe Settings do
     context 'constants' do
       it 'derives its default page number from DEFAULT_PAGE' do
-        expect(CriteriaSettings::DEFAULT_PAGE).to eq(1)
+        expect(Settings::DEFAULT_PAGE).to eq(1)
       end
 
       it 'derives its default per page number from DEFAULT_PER_PAGE' do
-        expect(CriteriaSettings::DEFAULT_PER_PAGE).to eq(20)
+        expect(Settings::DEFAULT_PER_PAGE).to eq(20)
       end
     end
 
     context '#initialize' do
       it 'does not require any inputs' do
         expect {
-          CriteriaSettings.new
+          Settings.new
         }.not_to raise_error
       end
 
       context 'defaults' do
         it 'assigns a default parser of ExprParser' do
-          parser = ExprParser
+          parser = Appfuel::Domain::ExprParser
           expect(create_settings.parser).to be_an_instance_of(parser)
         end
 
         it 'assigns a default transform of ExprTransform' do
-          transform = ExprTransform
+          transform = Appfuel::Domain::ExprTransform
           expect(create_settings.transform).to be_an_instance_of(transform)
         end
 
@@ -49,12 +49,12 @@ module Appfuel::Domain
         end
 
         it 'defaults page to be DEFAULT_PAGE' do
-          page = CriteriaSettings::DEFAULT_PAGE
+          page = Settings::DEFAULT_PAGE
           expect(create_settings.page).to eq(page)
         end
 
         it 'defaults page to be DEFAULT_PER_PAGE' do
-          per_page = CriteriaSettings::DEFAULT_PER_PAGE
+          per_page = Settings::DEFAULT_PER_PAGE
           expect(create_settings.per_page).to eq(per_page)
         end
       end
@@ -252,7 +252,7 @@ module Appfuel::Domain
     end
 
     def create_settings(settings = {})
-      CriteriaSettings.new(settings)
+      Settings.new(settings)
     end
   end
 end
