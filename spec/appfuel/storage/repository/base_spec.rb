@@ -68,7 +68,35 @@ module Appfuel::Repository
         result = 'some mapper'
         expect(repo_class).to receive(:mapper).with(no_args) { result }
         expect(repo.mapper).to eq(result)
+      end
+    end
 
+    context '#execute_query_method' do
+      it 'fails when then method is not implemented on the concrete class' do
+        repo = setup.new
+        criteria = 'some criteria'
+        settings = 'some settings'
+        msg = 'Could not execute query method (foo)'
+        expect {
+          repo.execute_query_method('foo', criteria, settings)
+        }.to raise_error(msg)
+      end
+
+      it 'executes the method' do
+        repo = setup.new
+        criteria = 'some criteria'
+        settings = 'some settings'
+        method   = 'foo'
+        mock_results = 'lots of good results'
+        repo.define_singleton_method(:foo) do |_criteria, _settings|
+          mock_results
+        end
+
+        allow(repo).to receive(:respond_to?).with(method) { true }
+
+        allow(repo).to receive(:respond_to?).with(:public_send, true) { true }
+        query_results = repo.execute_query_method(method, criteria, settings)
+        expect(query_results).to eq(mock_results)
       end
     end
 

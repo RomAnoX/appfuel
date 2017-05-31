@@ -74,13 +74,21 @@ module Appfuel
       end
 
 
+      # @return [Mapper]
       def mapper
         self.class.mapper
       end
 
+      # Validate the method exists and call it with the criteria and
+      # settings objects
+      #
+      # @params query_method [String] method to call
+      # @params criteria [SearchCriteria]
+      # @params settings [Settings]
+      # @return DomainCollection
       def execute_query_method(query_method, criteria, settings)
         unless respond_to?(query_method)
-          fail "Could not excute method #{query_method}"
+          fail "Could not execute query method (#{query_method})"
         end
 
         public_send(query_method, criteria, settings)
