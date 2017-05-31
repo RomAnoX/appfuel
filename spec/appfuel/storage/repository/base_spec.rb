@@ -100,6 +100,53 @@ module Appfuel::Repository
       end
     end
 
+    context '#query_setup' do
+      it 'users the criteria to define a query method for the domain' do
+        repo     = setup.new
+        criteria = instance_double(criteria_class)
+        settings = 'some settings object'
+        domain   = 'user'
+        method   = "#{domain}_query"
+        results  = 'some query relation'
+        allow(criteria).to receive(:domain_basename).with(no_args) { domain }
+        expect(repo).to(
+          receive(:execute_query_method).with(method, criteria, settings)
+        ) { results }
+
+        expect(repo.query_setup(criteria, settings)).to eq(results)
+      end
+    end
+
+    context '#apply_query_conditions' do
+      it 'always fails because this is generic repository' do
+        repo     = setup.new
+        relation = 'some query relation'
+        criteria = instance_double(criteria_class)
+        settings = 'some settings object'
+        msg = "must be implemented by a storage specific repository"
+        expect {
+          repo.apply_query_conditions(relation, criteria, settings)
+        }.to raise_error(msg)
+      end
+    end
+
+    context '#resolve_domains' do
+      it 'always fails because this is generic repository' do
+        repo     = setup.new
+        relation = 'some query relation'
+        criteria = instance_double(criteria_class)
+        settings = 'some settings object'
+        msg = "must be implemented by a storage specific repository"
+        expect {
+          repo.resolve_domains(relation, criteria, settings)
+        }.to raise_error(msg)
+      end
+    end
+
+    def criteria_class
+      Appfuel::Domain::SearchCriteria
+    end
+
     def mapper_class
       Mapper
     end

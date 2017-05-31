@@ -94,6 +94,16 @@ module Appfuel
         public_send(query_method, criteria, settings)
       end
 
+      # The first method called in the query life cycle. It setups up the
+      # query method used to return a query relation for the next method
+      # in the life cycle. This query method will return a query relation
+      # produced by the concrete repo for that domain. The relation is specific
+      # to the type of repo, a db repo will return an ActiveRecordRelation for
+      # example.
+      #
+      # @param criteria [SearchCriteria]
+      # @param settings [Settings]
+      # @return [Object] A query relation
       def query_setup(criteria, settings)
         query_method = "#{criteria.domain_basename}_query"
         execute_query_method(query_method, criteria, settings)
@@ -121,12 +131,27 @@ module Appfuel
         end
       end
 
-      def apply_query_condition(_result, _criteria, _settings)
-        fail "apply_query_condition must be extended by a concrete repo"
+      # Query conditions can only be applied by a specific type of repo, like
+      # a database or elastic search repo. Because of this we will fail if
+      # this is not implemented
+      #
+      # @param result [Object] some type of query relation
+      # @param criteria [SearchCriteria]
+      # @param settings [Settings]
+      # @return A query relation
+      def apply_query_conditions(_result, _criteria, _settings)
+        method_not_implemented_error
       end
 
+      # Domain resolution can only be applied by specific repos. Because of
+      # this we fail if is not implmented
+      #
+      # @param result [Object] some type of query relation
+      # @param criteria [SearchCriteria]
+      # @param settings [Settings]
+      # @return A query relation
       def resolve_domains(_result, _criteria, _settings)
-        fail "resolve_domains must be extended by a concrete repo"
+        method_not_implemented_error
       end
 
       def build_search_criteria(criteria)
@@ -192,6 +217,11 @@ module Appfuel
         hash = mapper.to_entity_hash(domain_name, storage_attrs)
         key  = qualify_container_key(domain_name, "domains")
         app_container[key].new(hash)
+      end
+
+      private
+      def method_not_implemented_error
+        fail "must be implemented by a storage specific repository"
       end
     end
   end
