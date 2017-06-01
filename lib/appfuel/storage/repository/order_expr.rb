@@ -3,6 +3,7 @@ module Appfuel
     class OrderExpr < Expr
 
       def self.build(data)
+        return [data] if data.instance_of?(self)
         data = [data] if data.is_a?(String)
         unless data.respond_to?(:each)
           fail "order must be a string or implement :each"
@@ -11,6 +12,11 @@ module Appfuel
         results = []
         data.each do |item|
           item = parse_order_string(item) if item.is_a?(String)
+          if item.instance_of?(self)
+            results << item
+            next
+          end
+
           if !item.is_a?(Hash)
             fail "order array must be a list of strings or hashes"
           end
@@ -20,7 +26,9 @@ module Appfuel
         results
       end
 
-      def initialize(domain_attr, op = 'asc')
+      def initialize(domain_attr, op = nil)
+        op ||= 'asc'
+
         super(domain_attr, op, nil)
         @op = @op.downcase
         unless ['asc', 'desc'].include?(@op)

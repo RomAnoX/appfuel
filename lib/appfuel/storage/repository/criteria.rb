@@ -34,33 +34,50 @@ module Appfuel
     #
     class Criteria
       include Appfuel::Domain::DomainNameParser
-
       attr_reader :domain_basename, :domain_name, :feature, :filters, :order_by
 
 
+      #
+      # 1) Inputs form the SearchTransform.apply
+      #    search:
+      #       domain:   [String],
+      #       filters:  [Expr|ExprConjunction]
+      #       orders:   [OrderExpr|Array[OrderExpr]]
+      #       limit:    [Integer]
+      #
+      # 2) Inputs manually built from a developer
+      #   search:
+      #     domain:   [String],
+      #     filters:  [String|Array[String|Hash]]
+      #     orders:   [String|Array[String|Hash]]
+      #     limit:    [Integer]
+      #
+      #
+      # 3) Inputs as a full search string
+      #   search: [String]
+      #
       # domain: String,
-      # filters: Expr | ExprConjunction
-      # order: Array[OrderExpr]
+      # filters: String | Expr | ExprConjunction
+      # order: String | Array[OrderExpr|String|Hash]
       # limit: Integer
       #
       #
-      def self.build(data)
-        unless data.key?(:domain)
+      def self.build(inputs)
+        unless inputs.key?(:domain)
           fail "search criteria :domain is required"
         end
-        criteria = self.new(data[:domain])
-        criteria.filter_expr(data[:filters])
+        criteria = self.new(inputs[:domain])
+        criteria.filter_expr(inputs[:filters])
 
-        if data.key?(:order)
-          criteria.order_exprs(data[:order])
+        if inputs.key?(:order)
+          criteria.order(inputs[:order])
         end
 
-        if data.key?(:limit)
-          criteria.limit(data[:limit])
+        if inputs.key?(:limit)
+          criteria.limit(inputs[:limit])
         end
         criteria
       end
-
 
       # Parse out the domain into feature, domain, determine the name of the
       # repo this criteria is for and initailize basic settings.
@@ -142,19 +159,67 @@ module Appfuel
         !@params.empty?
       end
 
+      # [
+      #   'id = 6',
+      #   {'name like "foo"' => 'or'},
+      # ]
+      #
+      #
+      def filter_array(list)
+        unless input.respond_to?(:each)
+          fail "input must implement :each, expecting a list"
+        end
+
+        list.each do |item|
+          filter(item)
+        end
+      end
+
+      def filter_string(expr, op: 'and')
+        expr = parse_expr(expr)
+        fail "Could not parse (#{expr}) unkown failure" unless expr
+        filter_expr(expr, op: op)
+        self
+      end
+
+      #
+      # filters: {
+      #  'id = 6' => :and,
+      #  'id = 8' => :and,
+      # }
+      def filter_hash(input)
+        unless input.respond_to?(:each)
+          fail "input must implement :each, expecting a hash"
+        end
+
+        input.each do |expr, op|
+          filter_string(expr, op: op)
+        end
+
+        self
+      end
+
       def filter_expr(expr, op: 'and')
         expr = qualify_expr(expr)
         if filters?
-          expr = ExprConjunction.new(op, filters, expr)
+          expr = expr_conjunction_class.new(op, filters, expr)
         end
         @filters = expr
         self
       end
 
-      def filter(str, op: 'and')
-        expr = parse_expr(str)
-        return false unless expr
-        filter_expr(expr, op: op)
+      def filter(item, op: 'and')
+        case
+        when item.is_a?(Array)  then filter_array(item)
+        when item.is_a?(Hash)   then filter_hash(item)
+        when item.is_a?(String) then filter_string(item, op: op)
+        when item.is_an_instance_of?(expr_class),
+             item.is_an_instance_of?(conjunction_class)
+          filter_expr(item, op: op)
+        else
+          fail "filter could not understand input (#{input})"
+        end
+        self
       end
 
       def limit(nbr = nil)
@@ -194,6 +259,10 @@ module Appfuel
 
       private
       attr_reader :parser, :transform
+
+      def expr_conjunction_class
+        ExprConjunction
+      end
 
       def parse_expr(str)
         if !(parser && parser.respond_to?(:parse))

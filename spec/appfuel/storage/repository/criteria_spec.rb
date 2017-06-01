@@ -201,8 +201,48 @@ module Appfuel::Repository
       end
     end
 
+    context '.build' do
+      it 'builds a criteria from a domain filter(expr), limit and order' do
+        expr = create_expr('id', '=', 4)
+        order_expr = create_order_expr('id')
+
+        search = {
+          domain: 'foo.bar',
+          filters: expr,
+          order: order_expr,
+          limit: 9
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+        expect(criteria.domain_name).to eq('foo.bar')
+        expect(criteria.filters).to eq(expr)
+        expect(criteria.order_by).to eq([order_expr])
+        expect(criteria.limit).to eq(9)
+      end
+    end
+
+    def parser
+      SearchParser.new
+    end
+
+    def transform
+      SearchTransform.new
+    end
+
+    def create_order_expr(domain_attr, dir = nil)
+      OrderExpr.new(domain_attr, dir)
+    end
+
+    def create_expr(domain_attr, op, value)
+      Expr.new(domain_attr, op, value)
+    end
+
+    def criteria_class
+      Criteria
+    end
+
     def create_criteria(domain_name, settings = {})
-      Criteria.new(domain_name, settings)
+      criteria_class.new(domain_name, settings)
     end
   end
 end

@@ -22,7 +22,7 @@ module Appfuel::Repository
       it 'fails when operator is not "and" or "or"' do
         left   = create_expr('id', '=', 9)
         right  = create_expr('id', '=', 8)
-        msg    = "conjunction operator can only be (and|or)"
+        msg    = "Conjunction operator can only be (and|or)"
         expect {
           create_conjunction('bad', left, right)
         }.to raise_error(msg)

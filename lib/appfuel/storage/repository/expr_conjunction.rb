@@ -1,16 +1,13 @@
 module Appfuel
   module Repository
     class ExprConjunction
+      OPERATORS = ['and', 'or'].freeze
       attr_reader :op, :left, :right
 
       def initialize(type, left, right)
-        @op    = type.to_s.downcase
+        @op    = validate_operator(type)
         @left  = left
         @right = right
-
-        unless ["and", "or"].include?(@op)
-          fail "conjunction operator can only be (and|or)"
-        end
       end
 
       def conjunction?
@@ -29,6 +26,15 @@ module Appfuel
       def qualify_global(domain)
         left.qualify_global(domain) unless left.qualified?
         right.qualify_global(domain) unless right.qualified?
+      end
+
+      private
+      def validate_operator(type)
+        type = type.to_s.downcase
+        unless OPERATORS.include?(type)
+          fail "Conjunction operator can only be (and|or)"
+        end
+        type
       end
     end
   end

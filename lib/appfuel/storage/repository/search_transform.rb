@@ -37,10 +37,10 @@ module Appfuel
         orders  = search[:order]
         limit   = search[:limit]
 
-        result = {}
+        filters = filters[:root] if filters.key?(:root)
+        result  = {}
         result[:domain]  = "#{domain[:feature]}.#{domain[:basename]}"
-        result[:filters] = filters[:root]
-
+        result[:filters] = filters
         unless limit.nil?
           result[:limit] = limit[:value]
         end
@@ -49,7 +49,6 @@ module Appfuel
           orders = orders.is_a?(Array) ? orders : [orders]
           result[:order] = orders
         end
-
         {search: Criteria.build(result)}
       end
     end
