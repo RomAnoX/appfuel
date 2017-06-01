@@ -319,7 +319,57 @@ module Appfuel::Repository
         expect(right.value).to eq("fooish")
         expect(right.op).to eq('=')
         expect(right.attr_list).to eq(['features', 'foo', 'bar', 'status'])
+      end
 
+      it 'builds an order array' do
+         search = {
+          domain: 'foo.bar',
+          filters: 'id = 2',
+          order: ['id', 'status asc', 'foo desc']
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+        expect(criteria.order_by.size).to eq(3)
+        order = criteria.order_by
+
+        expect(order[0].op).to eq('asc')
+        expect(order[0].attr_list).to eq(['features', 'foo', 'bar', 'id'])
+
+        expect(order[1].op).to eq('asc')
+        expect(order[1].attr_list).to eq(['features', 'foo', 'bar', 'status'])
+
+        expect(order[2].op).to eq('desc')
+        expect(order[2].attr_list).to eq(['features', 'foo', 'bar', 'foo'])
+      end
+
+      it 'builds an order string' do
+         search = {
+          domain: 'foo.bar',
+          filters: 'id = 2',
+          order: 'id desc'
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+        expect(criteria.order_by.size).to eq(1)
+        order = criteria.order_by
+
+        expect(order[0].op).to eq('desc')
+        expect(order[0].attr_list).to eq(['features', 'foo', 'bar', 'id'])
+      end
+
+      it 'builds an order from order hash' do
+         search = {
+          domain: 'foo.bar',
+          filters: 'id = 2',
+          order: [{'id' => 'desc'}]
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+        expect(criteria.order_by.size).to eq(1)
+        order = criteria.order_by
+
+        expect(order[0].op).to eq('desc')
+        expect(order[0].attr_list).to eq(['features', 'foo', 'bar', 'id'])
       end
     end
 
