@@ -164,8 +164,8 @@ module Appfuel
         Criteria.build(criteria)
       end
 
-      def search_criteria?(criteria)
-        criteria.instance_of(Criteria)
+      def criteria?(value)
+        value.instance_of?(Criteria)
       end
 
       def exists?(criteria)

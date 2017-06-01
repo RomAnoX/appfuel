@@ -143,6 +143,22 @@ module Appfuel::Repository
       end
     end
 
+    context '#criteria?' do
+      it 'returns true when the value is a criteria' do
+        repo     = setup.new
+        criteria = instance_double(criteria_class)
+        allow(criteria).to receive(:instance_of?).with(criteria_class) { true }
+        expect(repo.criteria?(criteria)).to be(true)
+      end
+
+      it 'returns false when the value is not a criteria' do
+        repo     = setup.new
+        criteria = instance_double(criteria_class)
+        allow(criteria).to receive(:instance_of?).with(criteria_class) { false }
+        expect(repo.criteria?(criteria)).to be(false)
+      end
+    end
+
     def criteria_class
       Criteria
     end
