@@ -219,6 +219,108 @@ module Appfuel::Repository
         expect(criteria.order_by).to eq([order_expr])
         expect(criteria.limit).to eq(9)
       end
+
+      it 'builds a criteria that has a conjunction' do
+        expr1 = create_expr('id', '=', 4)
+        expr2 = create_expr('foo', '=', 'bar')
+        expr  = create_conjunction('and', expr1, expr2)
+
+        search = {
+          domain: 'foo.bar',
+          filters: expr,
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+        expect(criteria.domain_name).to eq('foo.bar')
+        expect(criteria.filters).to eq(expr)
+      end
+
+      it 'builds a criteria when the filter is a string expr' do
+        search = {
+          domain: 'foo.bar',
+          filters: 'id = 6',
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+
+        filters  = criteria.filters
+        expect(filters.value).to eq(6)
+        expect(filters.op).to eq('=')
+        expect(filters.attr_list).to eq(['features', 'foo', 'bar', 'id'])
+      end
+
+      it 'builds a criteria when the filter is a conjunction string' do
+        search = {
+          domain: 'foo.bar',
+          filters: 'id = 2 and status = "fooish"',
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+
+        filters  = criteria.filters
+        expect(filters.op).to eq('and')
+        left  = filters.left
+        right =  filters.right
+
+        expect(left.value).to eq(2)
+        expect(left.op).to eq('=')
+        expect(left.attr_list).to eq(['features', 'foo', 'bar', 'id'])
+
+        expect(right.value).to eq("fooish")
+        expect(right.op).to eq('=')
+        expect(right.attr_list).to eq(['features', 'foo', 'bar', 'status'])
+      end
+
+      it 'builds a criteria form a filter hash' do
+         search = {
+          domain: 'foo.bar',
+          filters: {
+            'id = 2' => 'and',
+            'status = "fooish"' => 'and'
+          }
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+
+        filters  = criteria.filters
+        expect(filters.op).to eq('and')
+        left  = filters.left
+        right =  filters.right
+
+        expect(left.value).to eq(2)
+        expect(left.op).to eq('=')
+        expect(left.attr_list).to eq(['features', 'foo', 'bar', 'id'])
+
+        expect(right.value).to eq("fooish")
+        expect(right.op).to eq('=')
+        expect(right.attr_list).to eq(['features', 'foo', 'bar', 'status'])
+      end
+
+      it 'builds for a filter array' do
+         search = {
+          domain: 'foo.bar',
+          filters: [
+            'id = 2',
+            {'status = "fooish"' => 'and'}
+          ]
+        }
+        criteria = criteria_class.build(search)
+        expect(criteria).to be_an_instance_of(criteria_class)
+
+        filters  = criteria.filters
+        expect(filters.op).to eq('and')
+        left  = filters.left
+        right =  filters.right
+
+        expect(left.value).to eq(2)
+        expect(left.op).to eq('=')
+        expect(left.attr_list).to eq(['features', 'foo', 'bar', 'id'])
+
+        expect(right.value).to eq("fooish")
+        expect(right.op).to eq('=')
+        expect(right.attr_list).to eq(['features', 'foo', 'bar', 'status'])
+
+      end
     end
 
     def parser
@@ -235,6 +337,10 @@ module Appfuel::Repository
 
     def create_expr(domain_attr, op, value)
       Expr.new(domain_attr, op, value)
+    end
+
+    def create_conjunction(type, left, right)
+      ExprConjunction.new(type, left, right)
     end
 
     def criteria_class

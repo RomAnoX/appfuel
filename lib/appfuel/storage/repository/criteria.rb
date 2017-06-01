@@ -67,7 +67,7 @@ module Appfuel
           fail "search criteria :domain is required"
         end
         criteria = self.new(inputs[:domain])
-        criteria.filter_expr(inputs[:filters])
+        criteria.filter(inputs[:filters])
 
         if inputs.key?(:order)
           criteria.order(inputs[:order])
@@ -165,12 +165,12 @@ module Appfuel
       # ]
       #
       #
-      def filter_array(list)
+      def filter_array(input)
         unless input.respond_to?(:each)
           fail "input must implement :each, expecting a list"
         end
 
-        list.each do |item|
+        input.each do |item|
           filter(item)
         end
       end
@@ -213,8 +213,8 @@ module Appfuel
         when item.is_a?(Array)  then filter_array(item)
         when item.is_a?(Hash)   then filter_hash(item)
         when item.is_a?(String) then filter_string(item, op: op)
-        when item.is_an_instance_of?(expr_class),
-             item.is_an_instance_of?(conjunction_class)
+        when item.instance_of?(expr_class),
+             item.instance_of?(expr_conjunction_class)
           filter_expr(item, op: op)
         else
           fail "filter could not understand input (#{input})"
@@ -259,6 +259,10 @@ module Appfuel
 
       private
       attr_reader :parser, :transform
+
+      def expr_class
+        Expr
+      end
 
       def expr_conjunction_class
         ExprConjunction
