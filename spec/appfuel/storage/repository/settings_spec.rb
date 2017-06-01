@@ -19,12 +19,11 @@ module Appfuel::Repository
 
       context 'defaults' do
         it 'assigns a default parser of ExprParser' do
-          parser = Appfuel::Domain::ExprParser
-          expect(create_settings.parser).to be_an_instance_of(parser)
+          expect(create_settings.parser).to be_an_instance_of(ExprParser)
         end
 
         it 'assigns a default transform of ExprTransform' do
-          transform = Appfuel::Domain::ExprTransform
+          transform = ExprTransform
           expect(create_settings.transform).to be_an_instance_of(transform)
         end
 

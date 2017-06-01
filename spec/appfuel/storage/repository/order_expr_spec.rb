@@ -1,4 +1,4 @@
-module Appfuel::Domain
+module Appfuel::Repository
   #  Appfuel::Domain.criteria('users.user filter id = 6')
   RSpec.describe OrderExpr do
     context '#initialize' do

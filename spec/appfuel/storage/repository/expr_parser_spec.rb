@@ -1,4 +1,4 @@
-module Appfuel::Domain
+module Appfuel::Repository
   RSpec.describe ExprParser do
     context '#space' do
       it 'parses a single space' do

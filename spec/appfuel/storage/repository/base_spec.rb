@@ -144,7 +144,7 @@ module Appfuel::Repository
     end
 
     def criteria_class
-      Appfuel::Domain::SearchCriteria
+      Criteria
     end
 
     def mapper_class

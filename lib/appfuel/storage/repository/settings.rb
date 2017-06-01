@@ -28,8 +28,8 @@ module Appfuel
       # @param opts   [Hash] options for initializing criteria
       # @return [Criteria]
       def initialize(settings = {})
-        @parser     = settings[:expr_parser] || Appfuel::Domain::ExprParser.new
-        @transform  = settings[:expr_transform] || Appfuel::Domain::ExprTransform.new
+        @parser     = settings[:expr_parser]    || ExprParser.new
+        @transform  = settings[:expr_transform] || ExprTransform.new
 
 
         empty_dataset_is_valid!

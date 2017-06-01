@@ -1,4 +1,4 @@
-module Appfuel::Domain
+module Appfuel::Repository
   RSpec.describe ExprTransform do
 
     context 'values' do

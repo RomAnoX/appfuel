@@ -1,4 +1,4 @@
-module Appfuel::Domain
+module Appfuel::Repository
   RSpec.describe Expr do
     context '#initialize' do
       it 'assigns the domain attr when it is an array' do

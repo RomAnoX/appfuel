@@ -111,7 +111,7 @@ module Appfuel::Db
     end
 
     def create_domain_expr(list, op, value)
-      Appfuel::Domain::Expr.new(list, op, value)
+      Appfuel::Repository::Expr.new(list, op, value)
     end
 
     def create_mapper(app_name, map = {})

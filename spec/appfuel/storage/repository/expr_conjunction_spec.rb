@@ -1,4 +1,4 @@
-module Appfuel::Domain
+module Appfuel::Repository
   RSpec.describe ExprConjunction do
     context '#initialize' do
       it 'creates an "and" conjunction"' do
