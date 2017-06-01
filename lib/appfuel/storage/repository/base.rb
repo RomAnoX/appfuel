@@ -110,8 +110,8 @@ module Appfuel
       end
 
       def query(criteria, settings = {})
-        criteria = build_search_criteria(criteria)
         settings = create_settings(settings)
+        criteria = build_criteria(criteria, settings)
 
         if settings.manual_query?
           query_method = settings.manual_query
@@ -154,18 +154,18 @@ module Appfuel
         method_not_implemented_error
       end
 
-      def build_search_criteria(criteria)
-        return criteria if search_criteria?(criteria)
+      def build_criteria(criteria, settings)
+        return criteria if criteria?(criteria)
         return search_parser.parse(criteria) if criteria.is_a?(String)
         unless criteria.is_a?(Hash)
           fail "criteria must be a String, Hash, or " +
                "Appfuel::Domain::SearchCriteria"
         end
-        SearchCriteria.build(criteria)
+        Criteria.build(criteria)
       end
 
       def search_criteria?(criteria)
-        criteria.instance_of(Appfuel::Domain::SearchCriteria)
+        criteria.instance_of(Criteria)
       end
 
       def exists?(criteria)

@@ -1,5 +1,5 @@
 module Appfuel
-  module Domain
+  module Repository
     class SearchTransform <  ExprTransform
 
 
@@ -50,7 +50,7 @@ module Appfuel
           result[:order] = orders
         end
 
-        {search: SearchCriteria.build(result)}
+        {search: Criteria.build(result)}
       end
     end
   end

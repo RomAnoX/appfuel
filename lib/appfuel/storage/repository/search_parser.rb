@@ -1,5 +1,5 @@
 module Appfuel
-  module Domain
+  module Repository
     class SearchParser < ExprParser
       rule(:filter_identifier) { stri('filter') }
       rule(:order_identifier)  { stri('order') }

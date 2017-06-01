@@ -12,7 +12,9 @@ require_relative 'repository/expr_conjunction'
 require_relative 'repository/order_expr'
 require_relative 'repository/criteria'
 require_relative 'repository/expr_parser'
+require_relative 'repository/search_parser'
 require_relative 'repository/expr_transform'
+require_relative 'repository/search_transform'
 require_relative 'repository/settings'
 
 module Appfuel
