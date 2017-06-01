@@ -270,7 +270,7 @@ module Appfuel
 
       def parse_expr(str)
         if !(parser && parser.respond_to?(:parse))
-          fail "expression parser must implement to :parse"
+          fail "expression parser must implement :parse"
         end
 
         if !(transform && transform.respond_to?(:apply))

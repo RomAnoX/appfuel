@@ -359,7 +359,7 @@ module Appfuel::Repository
 
       it 'builds an order from order hash' do
          search = {
-          domain: 'foo.bar',
+          domain: 'global.bar',
           filters: 'id = 2',
           order: [{'id' => 'desc'}]
         }
@@ -369,7 +369,42 @@ module Appfuel::Repository
         order = criteria.order_by
 
         expect(order[0].op).to eq('desc')
-        expect(order[0].attr_list).to eq(['features', 'foo', 'bar', 'id'])
+        expect(order[0].attr_list).to eq(['global', 'bar', 'id'])
+      end
+    end
+
+    context 'filter' do
+
+      it 'fails when parser does not implement :parse' do
+        parser = 'not a parser'
+        criteria = create_criteria('global.bar', expr_parser: parser)
+        msg = 'expression parser must implement :parse'
+        expect {
+          criteria.filter('foo = 6')
+        }.to raise_error(msg)
+      end
+
+      it 'fails when transform does not implement :apply' do
+        transform = 'not a transform'
+        criteria = create_criteria('global.bar', expr_transform: transform)
+        msg = 'expression transform must implement :apply'
+        expect {
+          criteria.filter('foo = 6')
+        }.to raise_error(msg)
+      end
+
+      it 'fails when parsing fails' do
+        expr = 'id = 6'
+        parser = instance_double(ExprParser)
+        error  = Parslet::ParseFailed.new('bad parse')
+        allow(parser).to receive(:parse).with(expr) {
+          fail error
+        }
+        criteria = create_criteria('global.bar', expr_parser: parser)
+        msg = 'The expression (id = 6) failed to parse'
+        expect {
+          criteria.filter(expr)
+        }.to raise_error(RuntimeError, msg)
       end
     end
 
