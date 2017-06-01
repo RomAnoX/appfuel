@@ -37,7 +37,9 @@ module Appfuel
         orders  = search[:order]
         limit   = search[:limit]
 
-        filters = filters[:root] if filters.key?(:root)
+        if filters.is_a?(Hash) && filters.key?(:root)
+          filters = filters[:root]
+        end
         result  = {}
         result[:domain]  = "#{domain[:feature]}.#{domain[:basename]}"
         result[:filters] = filters

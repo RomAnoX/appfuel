@@ -154,9 +154,25 @@ module Appfuel
         method_not_implemented_error
       end
 
+      # Factory method to create repo settings. This holds things like
+      # pagination details, parser classes etc..
+      #
+      # @params settings [Hash,Settings]
+      # @return Settings
+      def create_settings(settings = {})
+        return settings if settings.instance_of?(Settings)
+        Settings.new(settings)
+      end
+
       def build_criteria(criteria, settings)
         return criteria if criteria?(criteria)
-        return search_parser.parse(criteria) if criteria.is_a?(String)
+
+        if criteria.is_a?(String)
+          tree = settings.parser.parse(criteria)
+          result = settings.transform.apply(tree)
+          return result[:search]
+        end
+
         unless criteria.is_a?(Hash)
           fail "criteria must be a String, Hash, or " +
                "Appfuel::Domain::SearchCriteria"

@@ -19,11 +19,11 @@ module Appfuel::Repository
 
       context 'defaults' do
         it 'assigns a default parser of ExprParser' do
-          expect(create_settings.parser).to be_an_instance_of(ExprParser)
+          expect(create_settings.parser).to be_an_instance_of(SearchParser)
         end
 
         it 'assigns a default transform of ExprTransform' do
-          transform = ExprTransform
+          transform = SearchTransform
           expect(create_settings.transform).to be_an_instance_of(transform)
         end
 
@@ -60,12 +60,12 @@ module Appfuel::Repository
 
       it 'assigns a custom parser' do
         parser = 'i am a custom parser'
-        expect(create_settings(expr_parser: parser).parser).to eq(parser)
+        expect(create_settings(parser: parser).parser).to eq(parser)
       end
 
       it 'assigns a custom transform' do
         transform = 'i am a custom transform'
-        settings = create_settings(expr_transform: transform)
+        settings = create_settings(transform: transform)
         expect(settings.transform).to eq(transform)
       end
 

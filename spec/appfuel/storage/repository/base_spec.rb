@@ -159,12 +159,85 @@ module Appfuel::Repository
       end
     end
 
+    context '#create_settings' do
+      it 'returns the settings object if its a settings object' do
+        settings = create_settings
+        repo     = setup.new
+        expect(repo.create_settings(settings)).to eq(settings)
+      end
+
+      it 'creates settings with an empty hash' do
+        settings = create_settings({})
+        expect(settings).to be_an_instance_of(settings_class)
+      end
+
+      it 'creates a settings object with settings data' do
+        data = { page: 3, per_page: 2 }
+        repo = setup.new
+        settings = repo.create_settings(data)
+        expect(settings).to be_an_instance_of(settings_class)
+        expect(settings.page).to eq(3)
+        expect(settings.per_page).to eq(2)
+      end
+    end
+
+    context '#build_criteria' do
+      it 'returns the criteria when a criteria is given' do
+        settings = instance_double(settings_class)
+        criteria = criteria_class.new('foo.bar')
+        repo = setup.new
+        expect(repo.build_criteria(criteria, settings)).to eq(criteria)
+      end
+
+      it 'builds a criteria from a string' do
+        expr = 'foo.bar filter id = 6'
+        repo = setup.new
+        settings = repo.create_settings
+        criteria = repo.build_criteria(expr, settings)
+        expect(criteria).to be_an_instance_of(criteria_class)
+        expect(criteria.domain_name).to eq('foo.bar')
+
+        expr = criteria.filters
+        expect(expr.to_s).to eq('features.foo.bar.id = 6')
+      end
+
+      it 'builds a criteria form a hash' do
+        data = {
+          domain: 'foo.bar',
+          filters: 'id = 6',
+          order: 'id desc',
+          limit: 6
+        }
+        repo = setup.new
+        settings = repo.create_settings
+        criteria = repo.build_criteria(data, settings)
+        expect(criteria).to be_an_instance_of(criteria_class)
+        expect(criteria.domain_name).to eq('foo.bar')
+
+        expr = criteria.filters
+        expect(expr.to_s).to eq('features.foo.bar.id = 6')
+        order = criteria.order_by
+        expect(order.size).to eq(1)
+        expect(order[0].attr_list).to eq(['features','foo','bar','id'])
+        expect(order[0].op).to eq('desc')
+        expect(criteria.limit).to eq(6)
+      end
+    end
+
     def criteria_class
       Criteria
     end
 
     def mapper_class
       Mapper
+    end
+
+    def settings_class
+      Settings
+    end
+
+    def create_settings(settings = {})
+      settings_class.new(settings)
     end
 
     def setup(container = Dry::Container.new, class_name = "FooApp::Bar::Fiz")
