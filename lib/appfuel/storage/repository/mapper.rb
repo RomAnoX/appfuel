@@ -221,6 +221,10 @@ module Appfuel
         target
       end
 
+      def expr_conjunction?(value)
+        value.instance_of?(ExprConjunction)
+      end
+
       private
       def validate_domain(entity_name)
         unless entity?(entity_name)

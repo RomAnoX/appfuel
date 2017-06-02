@@ -182,7 +182,6 @@ module Appfuel
           match["#{char.upcase}#{char.downcase}"]
         }.reduce(:>>)
       end
-
     end
   end
 end

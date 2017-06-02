@@ -58,17 +58,17 @@ module Appfuel::Db
           allow(mapper).to receive(:qualified_db_column).with(expr, nil) {
             "user.id"
           }
-          expect(mapper.convert_expr(expr)).to eq(['user.id = ?', 6])
+          expect(mapper.convert_expr(expr)).to eq(['user.id = ?', [6]])
         end
 
         it 'passes on the entry to convert_expr' do
           mapper = create_mapper('foo', {})
           entry  = double('some mapping entry')
-
+          values = []
           expr   = create_domain_expr(['global', 'user','id'], '=', 6)
           expect(mapper).to receive(:qualified_db_column).with(expr, entry)
 
-          mapper.convert_expr(expr, entry)
+          mapper.convert_expr(expr, values, entry)
         end
       end
 

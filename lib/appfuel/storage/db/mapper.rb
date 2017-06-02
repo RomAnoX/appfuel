@@ -33,7 +33,11 @@ module Appfuel
       # @param entry [Repository::MappingEntry] optional
       # @return [Array] The first index is the expr string using ? for values
       #                 The second index is the actual value(s)
-      def convert_expr(expr, entry = nil)
+      def convert_expr(expr, values = [], entry = nil)
+        if expr_conjunction?(expr)
+          return convert_conjunction(expr, values, entry)
+        end
+
         column = qualified_db_column(expr, entry)
         op     = expr.op
         arg    = case expr.op
@@ -42,7 +46,15 @@ module Appfuel
                  else
                    '?'
                  end
-        ["#{column} #{op} #{arg}", expr.value]
+
+        values << expr.value
+        ["#{column} #{op} #{arg}", values]
+      end
+
+      def convert_conjunction(expr, values = [], entry = nil)
+        left, values  = convert_expr(expr.left, values, entry)
+        right, values = convert_expr(expr.right, values, entry)
+        ["#{left} #{expr.op} #{right}", values]
       end
 
       # Validates if a record exists in the table that matches the array with
@@ -55,10 +67,10 @@ module Appfuel
         domain_attr = domain_expr.domain_attr
 
         entry = find(domain_name, domain_attr)
-        db_expr, values = convert_expr(domain_expr, entry)
+        db_expr, values = convert_expr(domain_expr, [], entry)
         db = storage_class_from_entry(entry, :db)
 
-        db.exists?([db_expr, values])
+        db.exists?([db_expr, *values])
       end
 
       # Build a where expression from the mapped db class using the criteria.Ï
@@ -67,18 +79,8 @@ module Appfuel
       # @param relation [DbModel, ActiveRecord::Relation]
       # @return [DbModel, ActiveRecord::Relation]
       def where(criteria, relation)
-        unless criteria.where?
-          fail "you must explicitly call :all when criteria has no exprs."
-        end
-
-        criteria.each do |domain_expr, op|
-          relation = if op == :or
-                        relation.or(db_where(domain_expr, relation))
-                      else
-                        db_where(domain_expr, relation)
-                      end
-        end
-        relation
+        conditions, values = convert_expr(criteria.filters)
+        relation.where(conditions, *values)
       end
 
       # Build an order by expression for the given db relation based on the

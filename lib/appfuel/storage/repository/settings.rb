@@ -54,8 +54,20 @@ module Appfuel
           all
         end
 
+        manual_query(settings[:manual_query]) if settings.key?(:manual_query)
+
         page(settings[:page] || DEFAULT_PAGE)
         per_page(settings[:per_page] || DEFAULT_PER_PAGE)
+      end
+
+      def manual_query?
+        !manual_query.nil?
+      end
+
+      def manual_query(value = nil)
+        return @manual_query if value.nil?
+        @manual_query = value
+        self
       end
 
       def disable_pagination?

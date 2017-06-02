@@ -110,7 +110,6 @@ module Appfuel
         @transform = data[:expr_transform] || ExprTransform.new
         @limit     = nil
         @order_by  = []
-
         filter(data[:filters]) if data[:filters]
       end
 

@@ -120,7 +120,7 @@ module Appfuel
 
         begin
           result = query_setup(criteria, settings)
-          apply_query_conditions(criteria, result, settings)
+          handle_query_conditions(criteria, result, settings)
           resolve_domains(criteria, results, settings)
         rescue => e
           msg = "query failed for #{criteria.domain_name}: " +
@@ -164,7 +164,9 @@ module Appfuel
         Settings.new(settings)
       end
 
-      def build_criteria(criteria, settings)
+      def build_criteria(criteria, settings = nil)
+        settings ||= create_settings
+
         return criteria if criteria?(criteria)
 
         if criteria.is_a?(String)
