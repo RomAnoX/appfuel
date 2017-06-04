@@ -120,8 +120,8 @@ module Appfuel
 
         begin
           result = query_setup(criteria, settings)
-          handle_query_conditions(criteria, result, settings)
-          resolve_domains(criteria, results, settings)
+          result = handle_query_conditions(criteria, result, settings)
+          build_domains(criteria, result, settings)
         rescue => e
           msg = "query failed for #{criteria.domain_name}: " +
                 "#{e.class} #{e.message}"
@@ -150,7 +150,7 @@ module Appfuel
       # @param criteria [SearchCriteria]
       # @param settings [Settings]
       # @return A query relation
-      def resolve_domains(_result, _criteria, _settings)
+      def build_domains(_result, _criteria, _settings)
         method_not_implemented_error
       end
 

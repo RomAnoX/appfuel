@@ -428,11 +428,15 @@ module Appfuel::Repository
           }
         }
 
-        mapper = create_mapper('myapp', map)
+        mapper  = create_mapper('myapp', map)
+        data    = { 'bar_id'   => 123, 'bar_code' => 'abc' }
+        mapper.define_singleton_method(:storage_hash) do |_storage|
+          data
+        end
+        storage = double('some storage object')
 
-        data = { 'bar_id'   => 123, 'bar_code' => 'abc' }
         hash = { 'id' => 123, 'data' => {'code' => 'abc' }}
-        expect(mapper.to_entity_hash('foo.bar', data)).to eq(hash)
+        expect(mapper.to_entity_hash('foo.bar', storage)).to eq(hash)
       end
     end
 

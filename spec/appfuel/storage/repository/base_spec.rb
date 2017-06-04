@@ -130,7 +130,7 @@ module Appfuel::Repository
       end
     end
 
-    context '#resolve_domains' do
+    context '#build_domains' do
       it 'always fails because this is generic repository' do
         repo     = setup.new
         relation = 'some query relation'
@@ -138,7 +138,7 @@ module Appfuel::Repository
         settings = 'some settings object'
         msg = "must be implemented by a storage specific repository"
         expect {
-          repo.resolve_domains(relation, criteria, settings)
+          repo.build_domains(relation, criteria, settings)
         }.to raise_error(msg)
       end
     end

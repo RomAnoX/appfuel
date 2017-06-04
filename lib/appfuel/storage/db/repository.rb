@@ -24,7 +24,13 @@ module Appfuel
         build(name: entity.domain_name, storage: db_results, type: :db)
       end
 
+      # when key has no . assume the feature of the repository
+      #
+      #
       def db_class(key)
+        unless key.include?('.')
+          key = "features.#{self.class.container_feature_name}.db.#{key}"
+        end
         app_container[key]
       end
 
@@ -59,10 +65,15 @@ module Appfuel
       # @param criteria [SpCore::Criteria]
       # @param relation [mixed]
       # @return relation
-      def apply_query_conditions(criteria, relation)
-        relation = where(criteria, relation)
-        relation = order(criteria, relation)
-        relation = limit(criteria, relation)
+      def apply_query_conditions(criteria, relation, _settings)
+        ap 'i am applying some query condititions'
+        relation = mapper.where(criteria, relation)
+        ap relation
+        ap 'some where conditions'
+        relation = mapper.order(criteria, relation)
+        ap 'some order condition'
+        relation = mapper.limit(criteria, relation)
+        ap 'some limit condition'
         relation
       end
 
@@ -76,15 +87,57 @@ module Appfuel
           return order(criteria, relation.all)
         end
 
-        apply_query_conditions(criteria, relation)
+        apply_query_conditions(criteria, relation, settings)
       end
 
-      def where(criteria, relation)
+      def handle_empty_relation(criteria, relation, settings)
+        unless relation.respond_to?(:blank?)
+          fail "The database relation invalid, does not implement :blank?"
+        end
+
+        return nil unless relation.blank?
+
+        if criteria.error_on_empty_dataset?
+          return domain_not_found_error(criteria)
+        end
+
+        if criteria.single?
+          return domain_not_found(criteria)
+        end
+      end
+
+      # 1) lookup query id in cache
+      #   if found build collection from cached query ids
+      #
+      # 2) query id not found in cache
+      #   a) assign query id from criteria
+      #   b) find the domain builder for that criteria
+      #   c) loop through each item in the database relation
+      #   d) build an domain from each record in the relation
+      #   e) create cache id from the domain
+      #   f) record cache id into a list that represents query
+      #   g) assign domain into the cache with its cache id
+      #       id is in the cache the its updated *represents a miss
+      #   h) assign the query list into the cache with its query id
+      #
+      def build_domains(criteria, relation, settings)
+        result  = handle_empty_relation(criteria, relation, settings)
+        return result if result
+
+
+        if settings.single?
+          method   = settings.first? ? :first : :last
+          db_model = relation.send(method)
+          builder  = domain_builder(criteria.domain_name)
+          domain   = builder.call(db_model, criteria)
+          ap domain
+        end
 
       end
 
-      def where_conditions(criteria)
-
+      def domain_builder(domain_name)
+        key = qualify_container_key(domain_name, 'domain_builders.db')
+        app_container[key]
       end
 
       private

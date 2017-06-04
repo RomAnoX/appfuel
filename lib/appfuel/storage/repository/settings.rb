@@ -96,6 +96,10 @@ module Appfuel
         self
       end
 
+      def single?
+        first? || last?
+      end
+
       def all?
         @all
       end

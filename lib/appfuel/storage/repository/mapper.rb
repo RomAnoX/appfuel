@@ -138,13 +138,14 @@ module Appfuel
         app_container[key]
       end
 
-      def to_entity_hash(domain_name,  data)
+      def to_entity_hash(domain_name,  storage)
         entity_attrs = {}
+        storage_data = storage_hash(storage)
         each_entity_attr(domain_name) do |entry|
           attr_name   = entry.storage_attr
           domain_attr = entry.domain_attr
-          next unless data.key?(attr_name)
-          update_entity_hash(domain_attr, data[attr_name], entity_attrs)
+          next unless storage_data.key?(attr_name)
+          update_entity_hash(domain_attr, storage_data[attr_name], entity_attrs)
         end
 
         entity_attrs

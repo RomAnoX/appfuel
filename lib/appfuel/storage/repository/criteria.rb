@@ -18,9 +18,7 @@ module Appfuel
     #
     #   filters: 'id = 6 or id = 8 and id = 9'
     #   filters: [
-    #     'id = 6',
-    #     {or: 'id = 8'}
-    #     {and: id = 9'}
+    #     {attr: 'id', op: 'eq', value: 999},
     #   ]
     #
     #   order: 'foo.bar.id asc'
@@ -221,12 +219,20 @@ module Appfuel
         self
       end
 
+      def limit?
+        !@limit.nil?
+      end
+
       def limit(nbr = nil)
         return @limit if nbr.nil?
 
         @limit = Integer(nbr)
         fail "limit must be an integer greater than 0" unless nbr > 0
         self
+      end
+
+      def order?
+        !@order_by.empty?
       end
 
       # order first_name asc, last_name

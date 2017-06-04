@@ -2,10 +2,6 @@ module Appfuel
   module Db
     class Mapper < Appfuel::Repository::Mapper
 
-      def search(domain_name, criteria, opts = {})
-
-      end
-
       # Return qualified db column name from entity expression.
       #
       # @param expr [SpCore::Domain::Expr]
@@ -91,12 +87,19 @@ module Appfuel
       # @return [ActiveRecord::Relation]
       def order(criteria, relation)
         return relation unless criteria.order?
-        criteria.order.each do |expr|
+        order_str = convert_order_exprs(criteria.order_by)
+        relation.order(order_str)
+      end
+
+      def convert_order_exprs(list)
+        str = ''
+        list.each do |expr|
           db_column = qualified_db_column(expr)
-          direction = expr.value
-          relation = relation.order("#{db_column} #{direction}")
+          direction = expr.op
+          str << "#{db_column} #{direction}, "
         end
-        relation
+
+        str.strip.chomp(',')
       end
 
       # Eventhough there is no mapping here we add the interface for
@@ -111,17 +114,8 @@ module Appfuel
         relation.limit(criteria.limit)
       end
 
-      # Map the entity expr to a hash of db_column => value and call
-      # on the relation using that.
-      #
-      # @note this is db library specific and needs to be moved to an adapter
-      #
-      # @param expr [Appfuel::Domain::Expr]
-      # @param relation [ActiveRecord::Relation]
-      # @return [ActiveRecord::Relation]
-      def db_where(domain_expr, relation)
-        db_expr = create_db_expr(domain_expr)
-        relation.where([db_expr.string, db_expr.values])
+      def storage_hash(db_model)
+        db_model.attributes.select {|_, value| !value.nil?}
       end
     end
   end
