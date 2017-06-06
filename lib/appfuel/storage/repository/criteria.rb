@@ -18,7 +18,10 @@ module Appfuel
     #
     #   filters: 'id = 6 or id = 8 and id = 9'
     #   filters: [
-    #     {attr: 'id', op: 'eq', value: 999},
+    #     ['id', 'eq', '6', 'or']
+    #   ]
+    #   filters: [
+    #     {attr: 'id', op: 'eq', value: 999, or: true},
     #   ]
     #
     #   order: 'foo.bar.id asc'

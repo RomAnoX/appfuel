@@ -29,20 +29,14 @@ module Appfuel
         # @param inputs [Hash] inputs to be validated
         # @return [Response]
         def run(inputs = {}, container = Dry::Container.new)
-          begin
-            response = resolve_inputs(inputs)
-            return response if response.failure?
-            valid_inputs = response.ok
+          response = resolve_inputs(inputs)
+          return response if response.failure?
+          valid_inputs = response.ok
 
-            resolve_dependencies(container)
-            handler = self.new(container)
-            result = handler.call(valid_inputs)
-            result = create_response(result) unless response?(result)
-          rescue RunError => e
-            result = e.response
-          rescue StandardError => e
-            result = error(e)
-          end
+          resolve_dependencies(container)
+          handler = self.new(container)
+          result = handler.call(valid_inputs)
+          result = create_response(result) unless response?(result)
 
           result
         end

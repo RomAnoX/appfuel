@@ -21,3 +21,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 ### Added
 - added exists interface to db mapper, will finalize the repo on next release
+
+## [[0.2.6]](https://github.com/rsb/appfuel/releases/tag/0.2.6) 2017-06-6
+
+### Added
+- dispatcher mixin
+
+### Changed
+- moved domain parsing to repository namespace

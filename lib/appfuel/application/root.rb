@@ -1,6 +1,8 @@
 module Appfuel
   module Application
     module Root
+      extend Dispatcher
+
       # Initialize Appfuel by creating an application container for the
       # app represented by the root module passed in. The app container is
       # a dependency injection container that is used thought the app.
@@ -132,10 +134,7 @@ module Appfuel
       def call(route, inputs = {})
         container = Appfuel.app_container
         request   = Request.new(route, inputs)
-
-        container[:feature_initializer].call(request.feature, container)
-        action = container[:action_loader].call(request.namespace, container)
-        action.run(inputs)
+        dispatch(request, container)
       end
     end
   end
