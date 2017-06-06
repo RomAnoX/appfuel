@@ -1,7 +1,7 @@
 module Appfuel
   module Application
     module Root
-      extend Dispatcher
+      include Dispatcher
 
       # Initialize Appfuel by creating an application container for the
       # app represented by the root module passed in. The app container is
@@ -23,6 +23,9 @@ module Appfuel
 
         app_container.register(:app_name, app_name)
         framework_container.register(app_name, app_container)
+
+        initialize = params.fetch(:initialize) { [] }
+        app_container.register('global.initializers.run', initialize)
 
         if params.key?(:on_after_setup)
           handle_after_setup(params[:on_after_setup], app_container)

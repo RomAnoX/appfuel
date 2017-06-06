@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. (Pending ap
 # [Unreleased]
 
 # Releases
+## [[0.2.7]](https://github.com/rsb/appfuel/releases/tag/0.2.6) 2017-06-07
+### Changed
+- Initializers are now stored in the app container and separate runlist
+  determines the order for which they run
+
+## [[0.2.6]](https://github.com/rsb/appfuel/releases/tag/0.2.6) 2017-06-06
+### Added
+- dispatcher mixin
+
+### Changed
+- moved domain parsing to repository namespace
 ## [[0.2.5]](https://github.com/rsb/appfuel/releases/tag/0.2.5) 2017-05-23
 ### Fixed
 - feature initializer has invalid reference `register?`
@@ -21,11 +32,3 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 ### Added
 - added exists interface to db mapper, will finalize the repo on next release
-
-## [[0.2.6]](https://github.com/rsb/appfuel/releases/tag/0.2.6) 2017-06-6
-
-### Added
-- dispatcher mixin
-
-### Changed
-- moved domain parsing to repository namespace

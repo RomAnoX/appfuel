@@ -6,9 +6,9 @@ module Appfuel
         begin
           container[:feature_initializer].call(request.feature, container)
           action = container[:action_loader].call(request.namespace, container)
-          response = action.run(inputs)
+          response = action.run(request.inputs)
         rescue => e
-          handler_error(e, container)
+          handle_error(e, container)
         end
 
         if response.failure?
@@ -18,10 +18,8 @@ module Appfuel
 
       private
       def handle_error(e, container)
-        unless container.key?(:error_handler)
-          return default_error_handling(e, contianer) unless container.key?(:error_handler)
-        end
-
+        p e.message
+        p e.backtrace
       end
 
       def default_error_handling(e, container)

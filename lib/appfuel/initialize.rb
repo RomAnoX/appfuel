@@ -18,9 +18,25 @@ module Appfuel
         end
         top, name = name.split('.')
         top = "features.#{top}" unless top == 'global'
-        namespace = "#{top}.initializers.#{name}"
+        namespace   = "#{top}.initializers.#{name}"
+        container   = Appfuel.app_container(app_name)
+        initializer = Initializer.new(name, envs, &block)
+        container.register(namespace, initializer)
+
+        initializer
+      end
+
+      def runlist(name, list, app_name = nil)
+        namespace = "#{name}.initializers.run"
+        unless name == 'global'
+          namespace = "features.#{namespace}"
+        end
+        list = [list] unless list.is_a?(Array)
+        fail "run list must be [String|Symbol|Array]" unless list.is_a?(Array)
+
         container = Appfuel.app_container(app_name)
-        container.register(namespace, Initializer.new(name, envs, &block))
+        container.register(namespace, list)
+        nil
       end
 
       # Populate configuration definition that is in the container and

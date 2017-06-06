@@ -205,18 +205,5 @@ module Appfuel
         expect(result).to eq(container)
       end
     end
-
-    def setup_container(env, config, initializers)
-      inputs = {
-        app_name: 'my_app',
-        config: config,
-        env: env
-      }
-      container = build_container(inputs)
-      container.namespace('global') do
-        register('initializers', [initializer])
-      end
-      container
-    end
   end
 end
