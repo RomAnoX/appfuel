@@ -2,25 +2,37 @@ module Appfuel
   RSpec.describe Initialize do
     context '.define' do
       it 'adds an initializer into the app containers initializers' do
-        list = []
-        allow(Appfuel).to receive(:resolve).with("global.initializers", nil) {
-          list
-        }
-        Initialize.define("global", "foo") {}
-        expect(list.first).to be_an_instance_of(Initialize::Initializer)
+        container = build_container
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'bar' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
+        Initialize.define("global.foo") {}
+
+        initializer = container['global.initializers.foo']
+        expect(initializer).to be_an_instance_of(Initialize::Initializer)
+        expect(initializer.name).to eq('foo')
       end
 
       it 'appends another initializer on to the first' do
-        list = []
-        list = []
-        allow(Appfuel).to receive(:resolve).with("global.initializers", nil) {
-          list
-        }
-        Initialize.define("global", "foo") {}
-        Initialize.define("global", "bar") {}
+        container = build_container
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'bar' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
 
-        expect(list[0].name).to eq "foo"
-        expect(list[1].name).to eq "bar"
+        Initialize.define("global.foo",) {}
+        Initialize.define("global.bar") {}
+
+        expect(container['global.initializers.foo'].name).to eq('foo')
+        expect(container['global.initializers.bar'].name).to eq('bar')
+      end
+
+      it 'adds a feature initializer' do
+        container = build_container
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'bar' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
+        Initialize.define("memberships.roles") {}
+
+        initializer = container['features.memberships.initializers.roles']
+        expect(initializer).to be_an_instance_of(Initialize::Initializer)
+        expect(initializer.name).to eq('roles')
       end
     end
 

@@ -142,8 +142,10 @@ module Appfuel
       end
       exclude.map! {|item| item.to_s}
 
-      env    = container[:env]
-      config = container[:config]
+      env     = container[:env]
+      config  = container[:config]
+      #runlist = container["#{key}.initializers.run"]
+
       container["#{key}.initializers"].each do |init|
         if !init.env_allowed?(env) || exclude.include?(init.name)
           next

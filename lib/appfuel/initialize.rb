@@ -11,9 +11,16 @@ module Appfuel
       # @param name [String] name of the initializer
       # @param envs [String, Symbol, Array] A env,list of envs this can run in
       # @param app_name [String] name of app for this initializer
-      def define(namespace_key, name, envs = [], app_name = nil, &block)
-        initializers = Appfuel.resolve("#{namespace_key}.initializers", app_name)
-        initializers << Initializer.new(name, envs, &block)
+      def define(name, envs = [], app_name = nil, &block)
+        if !name.is_a?(String) && !name.include?('.')
+          fail "initializer name must be a string in the in the form of " +
+                "([feature|global].initializer_name)"
+        end
+        top, name = name.split('.')
+        top = "features.#{top}" unless top == 'global'
+        namespace = "#{top}.initializers.#{name}"
+        container = Appfuel.app_container(app_name)
+        container.register(namespace, Initializer.new(name, envs, &block))
       end
 
       # Populate configuration definition that is in the container and
