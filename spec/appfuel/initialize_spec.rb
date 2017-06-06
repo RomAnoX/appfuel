@@ -72,38 +72,84 @@ module Appfuel
 
     context 'handle_initializers' do
       it 'runs the only initializer' do
-        initializer = Initialize::Initializer.new(:foo) do |configs, container|
-          container.register(:foo, "foo has been initialized - #{configs[:bar]}")
+        inputs = {
+          app_name: 'my_app',
+          env: 'dev',
+          config: {bar: 'with bar'}
+        }
+
+        container = build_container(inputs)
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'my_app' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
+        Initialize.define('global.foo') do |configs, _container|
+          _container.register(:foo, "foo has been initialized - #{configs[:bar]}")
         end
-        container = setup_container(initializer, 'dev', bar: 'with bar')
+
+        container.register('global.initializers.run', ['foo'])
+
 
         Appfuel.run_initializers('global', container)
         expect(container[:foo]).to eq("foo has been initialized - with bar")
       end
 
       it 'skips initializer when env is not allowed' do
-        initializer = Initialize::Initializer.new(:foo, :qa) do |configs, container|
-          container.register("global", :foo)
+        inputs = {
+          app_name: 'my_app',
+          env: 'dev',
+          config: {bar: 'with bar'}
+        }
+
+        container = build_container(inputs)
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'my_app' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
+        Initialize.define('global.foo', 'qa') do |configs, _container|
+          _container.register(:foo, "this will never happen")
         end
-        container = setup_container(initializer, 'dev', bar: 'some config')
+
+        container.register('global.initializers.run', ['foo'])
+
+        initializer = container['global.initializers.foo']
         expect(initializer).not_to receive(:call)
         Appfuel.run_initializers('global', container)
       end
 
       it 'skips when initializer is excluded, exclude name is a symbol' do
-        initializer = Initialize::Initializer.new(:foo) do |configs, container|
-          container.register(:foo, "bar")
+        inputs = {
+          app_name: 'my_app',
+          env: 'dev',
+          config: {bar: 'with bar'}
+        }
+
+        container = build_container(inputs)
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'my_app' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
+        Initialize.define('global.foo') do |configs, _container|
+          _container.register(:foo, "will never happen")
         end
-        container = setup_container(initializer, 'dev', bar: 'some config')
+
+        container.register('global.initializers.run', ['foo'])
+        initializer = container['global.initializers.foo']
+
         expect(initializer).not_to receive(:call)
         Appfuel.run_initializers("global", container, [:foo])
       end
 
       it 'skips when initializer is excluded, exclude name is a string' do
-        initializer = Initialize::Initializer.new(:foo) do |configs, container|
-          container.register(:foo, "bar")
+        inputs = {
+          app_name: 'my_app',
+          env: 'dev',
+          config: {bar: 'with bar'}
+        }
+
+        container = build_container(inputs)
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'my_app' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
+        Initialize.define('global.foo') do |configs, _container|
+          _container.register(:foo, "will never happen")
         end
-        container = setup_container(initializer, 'dev', bar: 'some config')
+
+        container.register('global.initializers.run', ['foo'])
+        initializer = container['global.initializers.foo']
 
         expect(initializer).not_to receive(:call)
         Appfuel.run_initializers("global", container, ['foo'])
@@ -118,11 +164,20 @@ module Appfuel
       end
 
       it 'handles raised errors' do
-        initializer = Initialize::Initializer.new(:foo) do |configs, container|
+        inputs = {
+          app_name: 'my_app',
+          env: 'dev',
+          config: {bar: 'with bar'}
+        }
+
+        container = build_container(inputs)
+        allow(Appfuel).to receive(:default_app_name).with(no_args) { 'my_app' }
+        allow(Appfuel).to receive(:app_container).with(nil) { container }
+        Initialize.define('global.foo') do |configs, _container|
           fail "I am an error"
         end
 
-        container = setup_container(initializer, 'dev', bar: 'some config')
+        container.register('global.initializers.run', ['foo'])
         msg = '[Appfuel:my_app] Initialization FAILURE - I am an error'
         expect {
           Appfuel.run_initializers("global", container)
@@ -151,7 +206,7 @@ module Appfuel
       end
     end
 
-    def setup_container(initializer, env, config)
+    def setup_container(env, config, initializers)
       inputs = {
         app_name: 'my_app',
         config: config,

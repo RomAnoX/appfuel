@@ -140,13 +140,20 @@ module Appfuel
       unless exclude.is_a?(Array)
         fail ArgumentError, ":exclude must be an array"
       end
+
       exclude.map! {|item| item.to_s}
+      namespace   = "#{key}.initializers"
+      runlist_key = "#{namespace}.run"
+      env         = container['env']
+      config      = container['config']
+      runlist     = container[runlist_key]
+      unless runlist.respond_to?(:each)
+        fail "[initialize] runlist (#{runlist_key}) must implement :each"
+      end
 
-      env     = container[:env]
-      config  = container[:config]
-      #runlist = container["#{key}.initializers.run"]
-
-      container["#{key}.initializers"].each do |init|
+      runlist.each do |initializer_key|
+        initializer_key = "#{namespace}.#{initializer_key}"
+        init = container[initializer_key]
         if !init.env_allowed?(env) || exclude.include?(init.name)
           next
         end
