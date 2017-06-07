@@ -2,7 +2,7 @@ module Appfuel::Configuration
   RSpec.describe DefinitionDsl do
     it 'is created using a key that identifies the config data' do
       definition = create_definition('foo')
-      expect(definition.key).to eq 'foo'
+      expect(definition.key).to eq "foo"
     end
 
     context '#file' do

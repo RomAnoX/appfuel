@@ -25,6 +25,10 @@ module Appfuel
 
         if file?
           config = load_file(self)
+          unless config.is_a?(Hash)
+            fail "[config populate] Failed :load_file did not " +
+              "return a hash (#{file})"
+          end
           config = config[key]
         end
 

@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file. (Pending ap
 # [Unreleased]
 
 # Releases
-## [[0.2.7]](https://github.com/rsb/appfuel/releases/tag/0.2.6) 2017-06-07
+## [[0.2.8]](https://github.com/rsb/appfuel/releases/tag/0.2.8) 2017-06-07
+### Fixed
+- searching configuration definitions with a symbol was failing because key was
+  a string
+
+## [[0.2.7]](https://github.com/rsb/appfuel/releases/tag/0.2.7) 2017-06-07
 ### Changed
 - Initializers are now stored in the app container and separate runlist
   determines the order for which they run

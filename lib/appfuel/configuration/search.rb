@@ -29,6 +29,7 @@ module Appfuel
       # @param terms Array of definition keys
       def find(child_list, terms)
         while term = terms.shift
+          term = term.to_s
           child_list.each do |(definition_key, definition)|
             next unless definition_key == term
             result = if terms.empty?

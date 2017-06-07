@@ -62,7 +62,7 @@ module Appfuel
       # @param key Symbol|String key used config hash
       # @return Definition
       def initialize(key)
-        @key       = key
+        @key       = key.to_s
         @defaults  = {}
         @file      = []
         @validator = nil
@@ -156,7 +156,7 @@ module Appfuel
       end
 
       def delete(name)
-        @children.delete(name)
+        @children.delete(name.to_s)
       end
 
       # Append a definition to this definition's children
