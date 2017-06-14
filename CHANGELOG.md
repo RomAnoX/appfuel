@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.2.10]](https://github.com/rsb/appfuel/releases/tag/0.2.9) 2017-06-14
+### Fixed
+- configuration delete was using string for the key, corrected to symbol
+
 ## [[0.2.9]](https://github.com/rsb/appfuel/releases/tag/0.2.8) 2017-06-14
 ### Changed
 - configuration now resolve to symbols as keys, children included

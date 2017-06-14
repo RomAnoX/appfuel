@@ -156,7 +156,7 @@ module Appfuel
       end
 
       def delete(name)
-        @children.delete(name.to_s)
+        @children.delete(name.to_sym)
       end
 
       # Append a definition to this definition's children
