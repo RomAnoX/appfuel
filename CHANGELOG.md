@@ -3,7 +3,12 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 # [Unreleased]
 
+
 # Releases
+## [[0.2.9]](https://github.com/rsb/appfuel/releases/tag/0.2.8) 2017-06-14
+### Changed
+- configuration now resolve to symbols as keys, children included
+
 ## [[0.2.8]](https://github.com/rsb/appfuel/releases/tag/0.2.8) 2017-06-07
 ### Fixed
 - searching configuration definitions with a symbol was failing because key was
