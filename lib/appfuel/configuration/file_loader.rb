@@ -29,6 +29,7 @@ module Appfuel
       def parse_yaml(path)
         yaml_module.load_file(path)
       end
+      alias_method :parse_yml, :parse_yaml
 
       # Load file will search through a configuration's definition file
       # paths and use the first on that exists. It parse it based on
@@ -40,21 +41,27 @@ module Appfuel
       # @return [Hash]
       def load_file(definition)
         paths = definition.file
-        key   = definition.key
 
         paths.each do |path|
           ext = file_module.extname(path).strip.downcase[1..-1]
           parse_method = "parse_#{ext}"
           unless respond_to?(parse_method)
-            fail "extension (#{ext}), for (#{key}: #{path}) is not valid, " +
-                 "only yaml and json are supported"
+            fail "extension (#{ext}), for (#{definition.key}: #{path}) " +
+                 "is not valid, only yaml and json are supported"
           end
 
-          return public_send(parse_method, path) if file_module.exists?(path)
+          if file_module.exists?(path)
+            config = public_send(parse_method, path)
+            unless config.is_a?(Hash)
+              fail "[config #{parse_method}] config must be a hash"
+            end
+            config.deep_symbolize_keys!
+            return config[definition.key]
+          end
         end
 
         list = paths.join(',')
-        fail "none of :#{key} config files exist at (#{list})"
+        fail "none of :#{definition.key} config files exist at (#{list})"
       end
     end
   end

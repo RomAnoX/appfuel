@@ -25,15 +25,11 @@ module Appfuel
 
         if file?
           config = load_file(self)
-          unless config.is_a?(Hash)
-            fail "[config populate] Failed :load_file did not " +
-              "return a hash (#{file})"
-          end
+        else
           config = config[key]
         end
 
         config ||= {}
-
         config = defaults.deep_merge(config)
         config = config.deep_merge(load_env(env_data, self))
         config = config.deep_merge(overrides || {})
@@ -60,9 +56,10 @@ module Appfuel
 
       def populate_children(child_hash, data, env_data = {})
         child_hash.each do |(def_key, definition)|
-
+          if definition.file?
+            data[def_key] = load_file(definition)
+          end
           data[def_key] ||= {}
-          data[def_key] = load_file(definition) if definition.file?
           data[def_key] = definition.defaults.deep_merge(data[def_key])
           data[def_key] = data[def_key].deep_merge(load_env(env_data, definition))
           unless definition.children.empty?

@@ -43,7 +43,7 @@ module Appfuel::Configuration
         allow(File).to receive(:exists?).with('/some-file.yaml') { true }
 
         loader = setup
-        expect(loader).to receive(:parse_yaml).with('/some-file.yaml').once
+        expect(loader).to receive(:parse_yaml).with('/some-file.yaml').once { {} }
 
         loader.load_file(definition)
       end
@@ -51,7 +51,7 @@ module Appfuel::Configuration
       it 'returns :parse_yaml delegated results' do
         definition = double(DefinitionDsl)
         paths  = ['/some-file.yaml']
-        key    = 'foo'
+        key    = :foo
         result = {some: 'result'}
         allow(definition).to receive(:file).with(no_args) { paths }
         allow(definition).to receive(:key).with(no_args) { key }
@@ -59,7 +59,7 @@ module Appfuel::Configuration
 
         loader = setup
         allow(loader).to receive(:parse_yaml).with('/some-file.yaml').once {
-          result
+          {"foo" => result}
         }
 
         expect(loader.load_file(definition)).to eq result
@@ -68,13 +68,13 @@ module Appfuel::Configuration
       it 'delegates to :parse_json when file is a json file' do
         definition = double(DefinitionDsl)
         paths = ['/some-file.json']
-        key   = 'foo'
+        key   = :foo
         allow(definition).to receive(:file).with(no_args) { paths }
         allow(definition).to receive(:key).with(no_args) { key }
         allow(File).to receive(:exists?).with('/some-file.json') { true }
 
         loader = setup
-        expect(loader).to receive(:parse_json).with('/some-file.json').once
+        expect(loader).to receive(:parse_json).with('/some-file.json').once { {} }
 
         loader.load_file(definition)
       end
@@ -82,7 +82,7 @@ module Appfuel::Configuration
       it 'returns :parse_json delegated results' do
         definition = double(DefinitionDsl)
         paths  = ['/some-file.json']
-        key    = 'foo'
+        key    = :foo
         result = {some: 'result'}
         allow(definition).to receive(:file).with(no_args) { paths }
         allow(definition).to receive(:key).with(no_args) { key }
@@ -90,7 +90,7 @@ module Appfuel::Configuration
 
         loader = setup
         allow(loader).to receive(:parse_json).with('/some-file.json').once {
-          result
+          {"foo" => result}
         }
 
         expect(loader.load_file(definition)).to eq result

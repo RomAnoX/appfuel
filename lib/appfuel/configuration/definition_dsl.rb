@@ -62,7 +62,7 @@ module Appfuel
       # @param key Symbol|String key used config hash
       # @return Definition
       def initialize(key)
-        @key       = key.to_s
+        @key       = key.to_sym
         @defaults  = {}
         @file      = []
         @validator = nil

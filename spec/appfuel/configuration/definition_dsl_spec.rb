@@ -2,7 +2,7 @@ module Appfuel::Configuration
   RSpec.describe DefinitionDsl do
     it 'is created using a key that identifies the config data' do
       definition = create_definition('foo')
-      expect(definition.key).to eq "foo"
+      expect(definition.key).to eq :foo
     end
 
     context '#file' do
@@ -112,7 +112,7 @@ module Appfuel::Configuration
         my_defaults = {a: 'a', b: 'b', c: 'c'}
         path        = '/blah.yaml'
         settings    = {'foo' => {a: 'x', c: 'y', f: 'h'}}
-        definition     = create_definition('foo')
+        definition  = create_definition('foo')
 
         definition.file path
         definition.defaults my_defaults
@@ -167,6 +167,10 @@ module Appfuel::Configuration
         }.to raise_error(RuntimeError, error)
       end
 
+      it 'throws an error when the load yaml does not return a hash' do
+
+      end
+
       it 'overrides config file' do
         path      = 'override/file.yaml'
         overrides = { config_file:  path }
@@ -211,30 +215,35 @@ module Appfuel::Configuration
       end
 
       it 'loads children definition from file' do
-        bar  = {path: '/tmp/foo.yaml', hash: {'buz' => 'buz'}}
-        bos  = {path: '/tmp/bos.yaml', hash: {'bos' => 'bos'}}
+        bar =  {'bar' => {'buz' => 'abc'}}
+        bos  = {bos: {'fiz' => '123'}}
 
         definition = create_definition 'foo'
         definition.define 'bar' do
-          file bar[:path]
+          file '/tmp/bar.yml'
 
           define 'bos' do
-            file bos[:path]
+            file '/tmp/bos.yml'
           end
         end
 
-        allow(File).to receive(:exists?).with('/tmp/foo.yaml').and_return(true)
-        allow(YAML).to receive(:load_file).with('/tmp/foo.yaml').and_return(bar[:hash])
+        allow(File).to receive(:exists?).with('/tmp/bar.yml') { true }
+        allow(YAML).to receive(:load_file).with('/tmp/bar.yml') { bar }
 
-        allow(File).to receive(:exists?).with(bos[:path]).and_return(true)
-        allow(YAML).to receive(:load_file).with(bos[:path]).and_return(bos[:hash])
+        allow(File).to receive(:exists?).with('/tmp/bos.yml') { true }
+        allow(YAML).to receive(:load_file).with('/tmp/bos.yml') { bos }
 
-        result = definition.populate
+        result = definition.populate(config: {foo: {bam: 'splat'}})
         expected = {
-          'bar' => bar[:hash].merge({
-            'bos' => bos[:hash]
-          })
+          bam: 'splat',
+          bar: {
+            buz: 'abc',
+            bos: {
+              fiz: '123'
+            }
+          }
         }
+
         expect(result).to eq(expected)
       end
 
@@ -245,9 +254,25 @@ module Appfuel::Configuration
           file path
         end
 
-        allow(File).to receive(:exists?).with(path).and_return(false)
+        allow(File).to receive(:exists?).with(path) { false }
 
         error = "none of :bar config files exist at (#{path})"
+        expect {
+          definition.populate(config: {foo: {}})
+        }.to raise_error(error)
+      end
+
+      it 'fails when yml file does not return a hash' do
+        path       = 'foo.yaml'
+        settings   = 'this is not right'
+        definition = create_definition('foo')
+        definition.file(path)
+
+
+        allow(File).to receive(:exists?).with(path).and_return(true)
+        allow(YAML).to receive(:load_file).with(path) { settings }
+
+        error = "[config parse_yaml] config must be a hash"
         expect {
           definition.populate
         }.to raise_error(error)

@@ -146,7 +146,12 @@ module Appfuel
       runlist_key = "#{namespace}.run"
       env         = container['env']
       config      = container['config']
-      runlist     = container[runlist_key]
+
+      runlist = []
+      if container.key?(runlist_key)
+        runlist = container[runlist_key]
+      end
+
       unless runlist.respond_to?(:each)
         fail "[initialize] runlist (#{runlist_key}) must implement :each"
       end
