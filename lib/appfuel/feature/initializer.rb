@@ -13,13 +13,20 @@ module Appfuel
       # @return [Boolean]
       def call(name, container)
         name = name.to_s.underscore
-        feature_key = "features.#{name}"
+        feature_key  = "features.#{name}"
+        return false if initialized?(container, feature_key)
+
         unless container.key?(feature_key)
           Appfuel.setup_container_dependencies(feature_key, container)
         end
 
         unless require_feature_disabled?(container, feature_key)
-          require "#{container[:features_path]}/#{name}"
+          feature_path = "#{container[:features_path]}/#{name}"
+          begin
+            require feature_path
+          rescue LoadError => _e
+            raise "[#{feature_key} initialize] could not load #{feature_path}"
+          end
         end
 
         container[:auto_register_classes].each do |klass|
@@ -27,7 +34,6 @@ module Appfuel
           container.register(klass.container_class_path, klass)
         end
 
-        return false if initialized?(container, feature_key)
 
         Appfuel.run_initializers(feature_key, container)
         true

@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.2.11]](https://github.com/rsb/appfuel/releases/tag/0.2.9) 2017-06-15
+### Changed
+- Adding error handling to dispatching. Errors are converted to responses
+
 ## [[0.2.10]](https://github.com/rsb/appfuel/releases/tag/0.2.9) 2017-06-14
 ### Fixed
 - configuration delete was using string for the key, corrected to symbol

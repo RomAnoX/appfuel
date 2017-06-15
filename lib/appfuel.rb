@@ -142,10 +142,15 @@ module Appfuel
       end
 
       exclude.map! {|item| item.to_s}
-      namespace   = "#{key}.initializers"
-      runlist_key = "#{namespace}.run"
-      env         = container['env']
-      config      = container['config']
+      namespace    = "#{key}.initializers"
+      finished_key = "#{key}.initialized"
+      runlist_key  = "#{namespace}.run"
+      env          = container['env']
+      config       = container['config']
+
+      if container.key?(finished_key) && container[finished_key] == true
+        return false
+      end
 
       runlist = []
       if container.key?(runlist_key)
@@ -173,7 +178,7 @@ module Appfuel
           raise error
         end
       end
-      container.register("#{key}.initialized", true)
+      container.register(finished_key, true)
 
       container
     end
