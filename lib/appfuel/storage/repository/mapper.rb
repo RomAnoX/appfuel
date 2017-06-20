@@ -151,6 +151,11 @@ module Appfuel
         entity_attrs
       end
 
+      def storage_hash(storage)
+        return storage if storage.is_a?(Hash)
+        fail "storage must implement to_h" unless storage.respond_to?(:to_h)
+        storage.to_h
+      end
       # Convert the domain into a hash of storage attributes that represent.
       # Each storage class has its own hash of mapped attributes. A domain
       # can have more than one storage class.
