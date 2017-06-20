@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.3.1]](https://github.com/rsb/appfuel/releases/tag/0.3.1) 2017-06-20
+### Fixed
+- `mapping_dsl` was missing `web_api`
 ## [[0.3.0]](https://github.com/rsb/appfuel/releases/tag/0.3.0) 2017-06-20
 ### Added
 - adding `web_api` storage to be used for WebApi repositories. The default

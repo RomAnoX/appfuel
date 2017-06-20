@@ -9,7 +9,7 @@ module Appfuel
       attr_reader :domain_name, :storage, :entries, :entry_class,
                   :container_name
 
-      STORAGE_TYPES = [:db, :file, :memory]
+      STORAGE_TYPES = [:db, :file, :memory, :web_api]
 
       # 1) mapping 'feature.domain', db: true, do
       #    ...
@@ -97,10 +97,7 @@ module Appfuel
 
         if all_storage_symbols?(*args)
           args.unshift(type)
-          args.each do |storage_type|
-            @storage[storage_type] = send("initialize_#{storage_type}_storage", true)
-          end
-
+          @storage = initialize_storage(storage: args)
           return self
         end
 
@@ -142,26 +139,33 @@ module Appfuel
         storage = {}
         if data.key?(:db)
           value = data[:db]
-          storage[:db] = initialize_db_storage(value, data)
+          storage[:db] = initialize_general_storage(:db, value, data)
         elsif data.key?(:file)
           value = data[:file]
-          storage[:file] = initialize_default_storage(value, :file)
+          storage[:file] = initialize_file_storage(value)
+        elsif data.key?(:web_api)
+          value = data[:web_api]
+          storage[:webapi] = initialize_general_storage(:web_api, value, data)
         elsif data.key?(:storage) && data[:storage].is_a?(Array)
           data[:storage].each do |type|
-            storage[type] = send("initialize_#{type}_storage", true)
+            storage[type] = if type.to_s.downcase == 'file'
+                              initialize_file_storage(true)
+                            else
+                              initialize_general_storage(type, true)
+                            end
           end
         end
         storage
       end
 
-      def initialize_db_storage(value, opts = {})
+      def initialize_general_storage(key, value, opts = {})
         case
         when value == true
-          translate_storage_key(:db, domain_name)
+          translate_storage_key(key, domain_name)
         when opts.is_a?(Hash) && opts[:key_translation] == false
           value
         else
-          translate_storage_key(:db, value)
+          translate_storage_key(key, value)
         end
       end
 
