@@ -145,7 +145,7 @@ module Appfuel
           storage[:file] = initialize_file_storage(value)
         elsif data.key?(:web_api)
           value = data[:web_api]
-          storage[:webapi] = initialize_general_storage(:web_api, value, data)
+          storage[:web_api] = initialize_general_storage(:web_api, value, data)
         elsif data.key?(:storage) && data[:storage].is_a?(Array)
           data[:storage].each do |type|
             storage[type] = if type.to_s.downcase == 'file'

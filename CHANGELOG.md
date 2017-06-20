@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.3.2]](https://github.com/rsb/appfuel/releases/tag/0.3.2) 2017-06-20
+### Fixed
+- `mapping_dsl` invalid storage key fixed to `web_api` from `webapi`
+
 ## [[0.3.1]](https://github.com/rsb/appfuel/releases/tag/0.3.1) 2017-06-20
 ### Fixed
 - `mapping_dsl` was missing `web_api`
