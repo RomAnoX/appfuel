@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.3.0]](https://github.com/rsb/appfuel/releases/tag/0.3.0) 2017-06-20
+### Added
+- adding `web_api` storage to be used for WebApi repositories. The default
+  http adapter will be `RestClient`
+
 ## [[0.2.11]](https://github.com/rsb/appfuel/releases/tag/0.2.9) 2017-06-15
 ### Changed
 - Adding error handling to dispatching. Errors are converted to responses
