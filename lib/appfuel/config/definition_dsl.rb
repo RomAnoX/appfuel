@@ -1,5 +1,5 @@
 module Appfuel
-  module Configuration
+  module Config
     # A configuration definition holds the methods that are exposed in
     # Config dsl. This definition allows you to define a given configuration
     # as it would exist in a hash. The dsl collects information like where
@@ -11,7 +11,7 @@ module Appfuel
     #
     # @example of dsl usage
     #
-    # Appfuel::Configuration.define :foo do
+    # Appfuel::Config.define :foo do
     #   file /etc/startplus/offers.yml
     #   defaults bar: 'bif',
     #            baz: 'biz'

@@ -1,4 +1,4 @@
-module Appfuel::Configuration
+module Appfuel::Config
   RSpec.describe DefinitionDsl do
     it 'is created using a key that identifies the config data' do
       definition = create_definition('foo')

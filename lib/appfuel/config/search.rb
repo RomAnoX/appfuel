@@ -1,5 +1,5 @@
 module Appfuel
-  module Configuration
+  module Config
     module Search
       # Allow you to access child definitions as if it were a hash.
       # If you add a space separated list of names this will traverse

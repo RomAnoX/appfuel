@@ -1,5 +1,5 @@
 module Appfuel
-  module Configuration
+  module Config
     module Populate
       # This converts a definition into a hash of configuation values. It does
       # this using the following steps

@@ -1,5 +1,5 @@
 module Appfuel
-  module Configuration
+  module Config
     # Handle loading files and parsing them correctly based on their type.
     # The file loader used for loading configuration data into a definition
     module FileLoader

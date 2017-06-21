@@ -1,4 +1,4 @@
-module Appfuel::Configuration
+module Appfuel::Config
   RSpec.describe FileLoader do
     context '#load_file' do
       it 'fails when file does not exist' do
