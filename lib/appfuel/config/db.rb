@@ -17,7 +17,7 @@ module Appfuel
     #
     # @return Defintion
     def self.db_definition
-      Appfuel::Configuration.define :db do
+      define :db do
         validator {
           required(:main).filled(:hash?)
           required(:path).filled(:str?)
