@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.3.3]](https://github.com/rsb/appfuel/releases/tag/0.3.2) 2017-06-20
+## [[0.3.4]](https://github.com/rsb/appfuel/releases/tag/0.3.4) 2017-06-20
+### Changed
+- `web api model` changed `url` to `uri`
+### Added
+- `web api model` added `url` method to create full endpoint with path
+- `web api model` added `get` and `post` to wrap rest-client interface
+
+## [[0.3.3]](https://github.com/rsb/appfuel/releases/tag/0.3.3) 2017-06-20
 ### Added
 - `storage_hash` method to general mapper
 

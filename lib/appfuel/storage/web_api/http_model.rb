@@ -43,17 +43,38 @@ module Appfuel
         end
       end
 
-      attr_reader :config, :url, :adapter
+      attr_reader :config, :uri, :adapter, :content_type
 
       def initialize
         @config = self.class.load_config
         unless @config.key?(:url)
           fail "[web_api initialize] config is missing :url"
         end
-        @url = URI(@config[:url])
+        @uri = URI(@config[:url])
         @adapter = self.class.load_http_adapter
       end
 
+      def url(path)
+        uri.to_s + "/#{path}"
+      end
+
+      def get(path, options = {})
+        add_content_type(options)
+        adapter.get(url(path), options)
+      end
+
+      def post(path, params = {}, options = {})
+        add_content_type(options)
+        adapter.post(url(path), params, options)
+      end
+
+      private
+
+      def add_content_type(options)
+        if content_type && !options.key?(:content_type)
+          options[:content_type] = content_type
+        end
+      end
     end
   end
 end

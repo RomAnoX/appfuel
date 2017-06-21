@@ -53,11 +53,11 @@ module Appfuel::WebApi
         model_class = setup('Global::WebApi::MyModel', container)
         model_class.config_key :fooish
         model = model_class.new
-        expected_url = URI(container[:config][:fooish][:url])
+        expected_uri = URI(container[:config][:fooish][:url])
 
         default_adapter = RestClient
         expect(model.config).to eq(container[:config][:fooish])
-        expect(model.url).to eq(expected_url)
+        expect(model.uri).to eq(expected_uri)
         expect(model.adapter).to eq(default_adapter)
       end
     end
