@@ -2,6 +2,7 @@ require_relative 'config/file_loader'
 require_relative 'config/search'
 require_relative 'config/populate'
 require_relative 'config/definition_dsl'
+require_relative 'config/db'
 
 module Appfuel
   module Config

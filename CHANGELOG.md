@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.4.2]](https://github.com/rsb/appfuel/releases/tag/0.4.2) 2017-06-21
+### Added
+- database configuration definition
+
 ## [[0.4.1]](https://github.com/rsb/appfuel/releases/tag/0.4.1) 2017-06-21
 ### Changed
 - renamed `Appfuel::Configuration` to `Appfuel::Config`
