@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.4.0]](https://github.com/rsb/appfuel/releases/tag/0.4.0) 2017-06-21
+### Added
+- logging, db and `web_api` initializers have been added
+- added log formatter
+
 ## [[0.3.4]](https://github.com/rsb/appfuel/releases/tag/0.3.4) 2017-06-20
 ### Changed
 - `web api model` changed `url` to `uri`

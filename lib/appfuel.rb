@@ -9,7 +9,7 @@ require "appfuel/version"
 require "appfuel/types"
 require "appfuel/errors"
 require "appfuel/run_error"
-
+require "appfuel/log_formatter"
 require "appfuel/configuration"
 require "appfuel/application"
 require "appfuel/initialize"
