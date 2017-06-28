@@ -1,4 +1,6 @@
 require 'uri'
+require 'json'
+require 'rest-client'
 
 module Appfuel
   module WebApi
@@ -58,21 +60,35 @@ module Appfuel
         uri.to_s + "/#{path}"
       end
 
-      def get(path, options = {})
+      def request(method, path, options = {})
         add_content_type(options)
-        adapter.get(url(path), options)
+        http_url = url(path)
+        begin
+          data = options.merge({method: method, url: http_url })
+          response = adapter::Request.execute(data)
+          parse_json = options.delete(:json)
+          if parse_json == true
+            response = json(response.body)
+          end
+        rescue => err
+          msg = "[#{http_url}] #{err.message}"
+          err.message = msg
+          raise err
+        end
+
+        response
       end
 
-      def post(path, params = {}, options = {})
-        add_content_type(options)
-        adapter.post(url(path), params, options)
+      def json(data)
+        JSON.parse(data)
       end
 
       private
 
       def add_content_type(options)
-        if content_type && !options.key?(:content_type)
-          options[:content_type] = content_type
+        options[:headers] ||= {}
+        if content_type && !options[:headers].key?(:content_type)
+          options[:headers][:content_type] = content_type
         end
       end
     end

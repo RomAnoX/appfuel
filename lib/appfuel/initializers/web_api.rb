@@ -1,4 +1,4 @@
-Appfuel::Initialize.define('global.http_adapter') do |config, container|
+Appfuel::Initialize.define('global.web_api') do |config, container|
   require 'rest-client'
   container.register('web_api.http_adapter', RestClient)
 end

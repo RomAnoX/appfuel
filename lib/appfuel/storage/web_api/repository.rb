@@ -22,6 +22,10 @@ module Appfuel
 =end
       end
 
+      def storage_class(domain_name, domain_attr)
+        mapper.storage_class(domain_name, domain_attr, :web_api)
+      end
+
       # when key has no . assume the feature of the repository
       #
       #

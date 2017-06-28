@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.4.4]] (https://github.com/rsb/appfuel/releases/tag/0.4.4) 2017-06-21
+### Changed
+- upgraded `active record to 5.1.1`
+
+### Fixed
+- invalid require statement for logging initializer
+- invalid container key for web_api initializer
+
 ## [[0.4.3]](https://github.com/rsb/appfuel/releases/tag/0.4.3) 2017-06-21
 ### Fixed
 - db config definition referenced invalid namespace
