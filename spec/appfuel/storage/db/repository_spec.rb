@@ -1,3 +1,5 @@
+require 'appfuel/storage/db'
+
 module Appfuel::Db
   RSpec.xdescribe Repository do
 

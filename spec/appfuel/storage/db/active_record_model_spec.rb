@@ -1,3 +1,5 @@
+require 'appfuel/storage/db'
+
 module Appfuel::Db
   RSpec.describe ActiveRecordModel do
     it 'is an abstract class' do

@@ -1,3 +1,5 @@
+require 'appfuel/storage/db'
+
 module Appfuel::Db
   RSpec.describe Mapper do
     context '#db_table_column' do

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.5.0]] (https://github.com/rsb/appfuel/releases/tag/0.5.0) 2017-06-29
+### Added
+- adding new repository type of aws dynamodb
+- adding initializers for aws dynamodb
+
 ## [[0.4.5]] (https://github.com/rsb/appfuel/releases/tag/0.4.5) 2017-06-29
 ### Fixed
 - fixed active record migrator, was not updating config properly

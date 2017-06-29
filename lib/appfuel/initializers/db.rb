@@ -4,6 +4,8 @@ Appfuel::Initialize.define('global.db') do |config, container|
 
   require 'pg'
   require 'active_record'
+  require 'appfuel/storage/db'
+
   config[:db][:main] = config[:db][:main].with_indifferent_access
 
   ActiveSupport.on_load(:active_record) do

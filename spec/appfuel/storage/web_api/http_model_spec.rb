@@ -1,3 +1,5 @@
+require 'appfuel/storage/web_api/http_model'
+
 module Appfuel::WebApi
   RSpec.describe HttpModel do
 
