@@ -5,11 +5,13 @@ module Appfuel
       include Rake::DSL
 
       def install_tasks
+        MigrationsInitializer.call
         load "active_record/railties/databases.rake"
 
         namespace :db do
           task :environment do
-            MigrationsInitializer.call
+            # We do all our initialization first this is just to make
+            # rails happy
           end
         end
       end

@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.4.5]] (https://github.com/rsb/appfuel/releases/tag/0.4.5) 2017-06-29
+### Fixed
+- fixed active record migrator, was not updating config properly
+
 ## [[0.4.4]] (https://github.com/rsb/appfuel/releases/tag/0.4.4) 2017-06-21
 ### Changed
 - upgraded `active record to 5.1.1`
