@@ -48,9 +48,9 @@ module Appfuel::Repository
         expect(dsl.container_name).to eq('other-container')
       end
 
-      it 'assigns MappingEntry as the default entry_class' do
+      it 'assigns StorageMap as the default map_class' do
         dsl = create_dsl('membership.member', to: :db, model: 'global.user')
-        expect(dsl.entry_class).to eq(MappingEntry)
+        expect(dsl.map_class).to eq(StorageMap)
       end
 
       it 'assigns an entry_class manually' do
@@ -58,9 +58,9 @@ module Appfuel::Repository
           'membership.member',
           to: :db,
           model: 'global.user',
-          entry_class: 'SomeClass'
+          map_class: 'SomeClass'
         )
-        expect(dsl.entry_class).to eq('SomeClass')
+        expect(dsl.map_class).to eq('SomeClass')
       end
 
       it 'ignores the context of the key' do
@@ -108,6 +108,15 @@ module Appfuel::Repository
         dsl.map 'bar_id', skip: true
         entry = {storage_attr: 'bar_id', domain_attr: 'bar_id', skip: true}
         expect(dsl.entries).to eq([entry])
+      end
+    end
+
+    context '#create_storage_map' do
+      it 'creates a storage map from the data it collects' do
+        dsl = create_dsl('foo.bar',to: :db, model: 'bar')
+        dsl.map 'id'
+        map = dsl.create_storage_map
+        ap map
       end
     end
 

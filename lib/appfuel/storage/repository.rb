@@ -2,8 +2,12 @@ require 'parslet'
 require 'parslet/convenience'
 
 require_relative 'repository/base'
+
 require_relative 'repository/mapping_entry'
+require_relative 'repository/storage_map'
 require_relative 'repository/mapping_dsl'
+require_relative 'repository/mapping_collection'
+
 require_relative 'repository/mapper'
 require_relative 'repository/initializer'
 require_relative 'repository/runner'
@@ -42,9 +46,10 @@ module Appfuel
       dsl = MappingDsl.new(domain_name, to: to, model: model, **opts)
       dsl.instance_eval(&block)
 
-      container = Appfuel.app_container(dsl.container_name)
-      mappings  = container['repository_mappings']
-      mappings.load(dsl)
+      container   = Appfuel.app_container(dsl.container_name)
+      mappings    = container['repository_mappings']
+      storage_map = dsl.create_storage_map
+      mappings.load(storage_map)
     end
 
     def self.entity_builder(domain_name, type, opts = {}, &block)

@@ -6,7 +6,7 @@ module Appfuel
     # and don't want any incorrect method_missing calls to be confused when
     # collecting mapped values vs when defining them.
     class MappingDsl
-      attr_reader :domain_name, :entries, :entry_class, :container_name,
+      attr_reader :domain_name, :entries, :map_class, :container_name,
                   :storage_key, :storage_type
 
       # 1) mapping 'feature.domain', to: :db, model: 'foo.db.bar', contextual_key: false do
@@ -23,8 +23,8 @@ module Appfuel
         opts          ||= {}
         @entries        = []
         @domain_name    = domain_name.to_s
-        @entry_class    = opts[:entry_class] || MappingEntry
-        @container_name = opts[:container]   || Appfuel.default_app_name
+        @map_class      = opts[:map_class] || StorageMap
+        @container_name = opts[:container] || Appfuel.default_app_name
 
         @contextual_key = true
         if opts.key?(:contextual_key) && opts[:contextual_key] == false
@@ -34,6 +34,17 @@ module Appfuel
         @storage_key  = translate_storage_key(to, model)
 
         fail "entity name can not be empty" if @domain_name.empty?
+      end
+
+      def create_storage_map
+        ap map_class
+        StorageMap.new(
+          domain_name:    domain_name,
+          container_name: container_name,
+          storage_type:   storage_type,
+          storage_key:    storage_key,
+          entries:        entries
+        )
       end
 
       def map(name, domain_attr = nil, opts = {})
