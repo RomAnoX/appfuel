@@ -16,10 +16,12 @@ module Appfuel
       # @param expr [SpCore::Domain::Expr]
       # @return [table_name, column] [Array]
       def db_table_column(expr, entry = nil)
-        entry ||= find(expr.domain_name, expr.domain_attr)
-        db  = storage_class_from_entry(entry, :db)
+        storage_map = storage_map(:db, expr.domain_name)
 
-        [db.table_name, entry.storage_attr]
+        db     = fetch_storage_class(storage_map.storage_key)
+        column = storage_map.storage_attr(expr.domain_attr)
+
+        [db.table_name, column]
       end
 
       # Converts an entity expression into a valid active record expresion

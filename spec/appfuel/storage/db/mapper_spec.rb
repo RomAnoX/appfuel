@@ -1,7 +1,7 @@
 require 'appfuel/storage/db'
 
 module Appfuel::Db
-  RSpec.describe Mapper do
+  RSpec.xdescribe Mapper do
     context '#db_table_column' do
       it 'finds the entry and returns the db table and column' do
         app_name   = 'foo'

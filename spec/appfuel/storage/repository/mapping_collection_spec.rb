@@ -7,17 +7,17 @@ module Appfuel::Repository
     context '#initialize' do
       it 'defaults to an empty has for the map' do
         collection = MappingCollection.new
-        expect(collection.map).to eq({})
+        expect(collection.collection).to eq({})
       end
 
       it 'assigns a map manually' do
         map = {'foo.bar' => 'somme mapper'}
         collection = create_collection(map)
-        expect(collection.map).to eq(map)
+        expect(collection.collection).to eq(map)
       end
 
       it 'fails when map is not a hash' do
-        msg = 'map must be a hash'
+        msg = 'collection must be a hash'
         expect {
           create_collection('this is not right')
         }.to raise_error(msg)

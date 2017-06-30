@@ -37,13 +37,12 @@ module Appfuel
       end
 
       def create_storage_map
-        ap map_class
-        StorageMap.new(
-          domain_name:    domain_name,
-          container_name: container_name,
-          storage_type:   storage_type,
-          storage_key:    storage_key,
-          entries:        entries
+        map_class.new(
+          domain_name:  domain_name,
+          container:    container_name,
+          storage_type: storage_type,
+          storage_key:  storage_key,
+          entries:      entries
         )
       end
 

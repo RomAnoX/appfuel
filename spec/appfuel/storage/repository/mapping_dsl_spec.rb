@@ -116,7 +116,12 @@ module Appfuel::Repository
         dsl = create_dsl('foo.bar',to: :db, model: 'bar')
         dsl.map 'id'
         map = dsl.create_storage_map
-        ap map
+        expect(map).to be_an_instance_of(StorageMap)
+        expect(map.entries).to eq(dsl.entries)
+        expect(map.domain_name).to eq(dsl.domain_name)
+        expect(map.storage_type).to eq(dsl.storage_type)
+        expect(map.storage_key).to eq(dsl.storage_key)
+        expect(map.container_name).to eq(dsl.container_name)
       end
     end
 

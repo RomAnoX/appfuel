@@ -2,16 +2,38 @@ module Appfuel
   module Repository
     class StorageMap
       attr_reader :domain_name, :container_name, :entries,
-                  :storage_type, :storage_key,
+                  :storage_type, :storage_key
 
       def initialize(data)
-        fail "Mapping data must be a hash" unless data.is_a(Hash)
+        fail "Mapping data must be a hash" unless data.is_a?(Hash)
 
         @container_name = data[:container]
-        @domain_name    = data.fetch(:domain_name) { domain_name_failure }.to_s
+        @domain_name    = data.fetch(:domain_name)  { domain_name_failure }.to_s
         @storage_type   = data.fetch(:storage_type) { storage_type_failure }
-        @storage_key    = data.fetch(:storage_key) { storage_key_failure }
-        @entries        = data.fetch(:mapping_entries) { entries_failure }
+        @storage_key    = data.fetch(:storage_key)  { storage_key_failure }
+        @entries        = data.fetch(:entries)      { entries_failure }
+      end
+
+      def storage_attr(domain_attr)
+        entries.each do |data|
+           return data[:storage_attr] if data[:domain_attr] == domain_attr
+        end
+
+        fail "[storage_map #{domain_name}] #{domain_attr} not registered"
+      end
+
+      def domain_attr(storage_attr)
+        entries.each do |data|
+           return data[:domain_attr] if data[:storage_attr] == storage_attr
+        end
+
+        fail "[storage_map #{domain_name}] #{storage_attr} not registered"
+      end
+
+      def each
+        entries.each do |data|
+          yield data[:domain_attr], data[:storage_attr], data[:skip]
+        end
       end
 
       private

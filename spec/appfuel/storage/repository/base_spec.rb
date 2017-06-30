@@ -22,7 +22,7 @@ module Appfuel::Repository
 
       it 'creates a repository mapper with a map' do
         repo = setup
-        map  = {'foo' => 'bar'}
+        map  = MappingCollection.new
         mapper = repo.create_mapper(map)
         expect(mapper.map).to eq(map)
       end

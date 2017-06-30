@@ -9,8 +9,8 @@ module Appfuel
 
       def initialize(app_name, map = nil)
         @container_root_name = app_name
-        if !map.nil? && !map.is_a?(Hash)
-          fail "repository mappings must be a hash"
+        if !map.nil? && !map.instance_of?(MappingCollection)
+          fail "repository mappings must be a MappingCollection"
         end
         @map = map
       end
@@ -39,7 +39,7 @@ module Appfuel
       # @param entity [String]
       # @return [Boolean]
       def entity?(entity_name)
-        map.key?(entity_name)
+        map.entity?(entity_name)
       end
 
       # Determine if an attribute is mapped for a given entity
@@ -47,53 +47,8 @@ module Appfuel
       # @param entity [String] name of the entity
       # @param attr [String] name of the attribute
       # @return [Boolean]
-      def entity_attr?(entity_name, entity_attr)
-        return false unless entity?(entity_name)
-
-        map[entity_name].key?(entity_attr)
-      end
-
-      # Returns a mapping entry for a given entity
-      #
-      # @raise [RuntimeError] when entity not found
-      # @raise [RuntimeError] when attr not found
-      #
-      # @param entity_name [String] qualified entity name "<feature>.<entity>"
-      # @param entity_attr [String] name of the attribute
-      # @return [Boolean]
-      def find(entity_name, entity_attr)
-        validate_domain(entity_name)
-
-        unless map[entity_name].key?(entity_attr)
-          fail "Entity (#{entity_name}) attr (#{entity_attr}) is not registered"
-        end
-        map[entity_name][entity_attr]
-      end
-
-      # Iterates over all entries for a given entity
-      #
-      # @yield [attr, entry] expose the entity attr name and entry
-      #
-      # @param entity_name [String] qualified entity name "<feature>.<entity>"
-      # @return [void]
-      def each_entity_attr(entity_name)
-        validate_domain(entity_name)
-        map[entity_name].each do |_attr, entry|
-          yield entry
-        end
-      end
-
-      # Determine if an column is mapped for a given entity
-      #
-      # @param entity_name [String] qualified entity name "<feature>.<entity>"
-      # @param storage_attr [String] name the persistence attr
-      # @return [Boolean]
-      def storage_attr_mapped?(entity_name, storage_attr)
-        each_entity_attr(entity_name) do |entry|
-          return true if storage_attr == entry.storage_attr
-        end
-
-        false
+      def entity_attr?(entity_name, entity_attr, type)
+        map.entity_attr?(type, entity_name, entity_attr)
       end
 
       # Returns a column name for an entity's attribute
@@ -104,8 +59,20 @@ module Appfuel
       # @param entity_name [String] qualified entity name "<feature>.<entity>"
       # @param entity_attr [String] name of the attribute
       # @return [String]
-      def storage_attr(entity_name, entity_attr)
-        find(entity_name, entity_attr).storage_attr
+      def storage_attr(entity_name, entity_attr, type)
+        map.storage_attr(type, entity_name, entity_attr)
+      end
+
+      def storage_key(entity_name, type)
+        map.storage_key(type, entity_name)
+      end
+
+      def entity_container_name(entity_name)
+        map.container_name(entity_name)
+      end
+
+      def storage_map(type, domain_name)
+        map.storage_map(type, domain_name)
       end
 
       # Returns the storage class based on type
@@ -118,34 +85,30 @@ module Appfuel
       # @param entity [String] name of the entity
       # @param attr [String] name of the attribute
       # @return [Object]
-      def storage_class(entity_name, entity_attr, type)
-        entry = find(entity_name, entity_attr)
-        storage_class_from_entry(entry, type)
+      def storage_class(entity_name, type)
+        key = storage_key(entity_name, type)
+        domain_container = entity_container_name(entity_name)
+        unless container_root_name == domain_container
+          fail "You can not access a mapping outside of this container " +
+            "(mapper: #{container_root_name}, entry: #{domain_container})"
+        end
+
+        fetch_storage_class(key)
       end
 
-      def storage_class_from_entry(entry, type)
-        unless entry.storage?(type)
-          fail "No (#{type}) storage has been mapped"
-        end
-
-        container_name = entry.container_name
-        unless container_root_name == container_name
-          fail "You can not access a mapping outside of this container " +
-            "(mapper: #{container_root_name}, entry: #{container_name})"
-        end
-        app_container = Appfuel.app_container(entry.container_name)
-        key = entry.storage(type)
+      def fetch_storage_class(key)
+        app_container = Appfuel.app_container(container_root_name)
         app_container[key]
       end
 
-      def to_entity_hash(domain_name,  storage)
+      def to_entity_hash(domain_name, type, storage)
         entity_attrs = {}
         storage_data = storage_hash(storage)
-        each_entity_attr(domain_name) do |entry|
-          attr_name   = entry.storage_attr
-          domain_attr = entry.domain_attr
-          next unless storage_data.key?(attr_name)
-          update_entity_hash(domain_attr, storage_data[attr_name], entity_attrs)
+
+        map.each_attr(domain_name, type) do |domain_attr, storage_attr, skip|
+          next unless storage_data.key?(storage_attr)
+          value = storage_data[storage_attr]
+          update_entity_hash(domain_attr, value, entity_attrs)
         end
 
         entity_attrs
@@ -156,6 +119,7 @@ module Appfuel
         fail "storage must implement to_h" unless storage.respond_to?(:to_h)
         storage.to_h
       end
+
       # Convert the domain into a hash of storage attributes that represent.
       # Each storage class has its own hash of mapped attributes. A domain
       # can have more than one storage class.
@@ -172,22 +136,30 @@ module Appfuel
           fail "Domain entity must implement :domain_name"
         end
 
-        excluded = opts[:exclude] || []
-        data     = {}
-        each_entity_attr(domain.domain_name) do |entry|
-          unless entry.storage?(type)
-            "storage type (#{type}) is not support for (#{domain.domain_name})"
-          end
-          storage_attr  = entry.storage_attr
-          storage_class = entry.storage(type)
-          next if excluded.include?(storage_attr) || entry.skip?
+        excluded     = opts[:exclude] || []
+        data         = {}
+        domain_name  = domain.domain_name
+        map.each_attr(domain_name, type) do |domain_attr, storage_attr, skip|
+          next if excluded.include?(storage_attr) || skip == true
 
-          data[storage_class] = {} unless data.key?(storage_class)
-          data[storage_class][storage_attr] = entity_value(domain, entry)
+          data[storage_attr] = entity_value(domain, entry)
         end
+
         data
       end
 
+      # user.role.id => user_role_id 99
+      #
+      # {
+      #   user: {
+      #     role: {
+      #       id: 99
+      #       }
+      #     }
+      #   }
+      #
+      #  id
+      #
       def update_entity_hash(domain_attr, value, hash)
         if domain_attr.include?('.')
           hash.deep_merge!(create_entity_hash(domain_attr, value))
@@ -207,6 +179,10 @@ module Appfuel
         value
       end
 
+      # user.role.id
+      #
+      # [id, role, user]
+      #
       def create_entity_hash(domain_attr, value)
         domain_attr.split('.').reverse.inject(value) do |result, nested_attr|
           {nested_attr => result}
