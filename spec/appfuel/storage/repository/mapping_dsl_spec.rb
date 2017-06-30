@@ -5,219 +5,109 @@ module Appfuel::Repository
     end
 
     context '#initialize' do
-      it 'fails when options are not a hash' do
-        msg = 'options must be a hash'
-        expect {
-          create_dsl('foo.bar', 'blah')
-        }.to raise_error(RuntimeError, msg)
-      end
-
       it 'creates an empty map' do
-        expect(create_dsl('foo').entries).to eq([])
+        dsl = create_dsl('global.foo', to: :db, model: 'bar')
+        expect(dsl.entries).to eq([])
       end
 
       it 'assigns the entity name as a string' do
-        expect(create_dsl('foo').domain_name).to eq 'foo'
+        dsl = create_dsl('membership.member', to: :db, model: 'bar')
+        expect(dsl.domain_name).to eq 'membership.member'
       end
 
-      it 'translate the db model using the global domain_name"' do
-        result = {
-          db: 'global.db.bar'
-        }
-        expect(create_dsl('global.bar', db: true).storage).to eq(result)
+      it 'assigns the storage type as :db' do
+        dsl = create_dsl('membership.member', to: :db, model: 'bar')
+        expect(dsl.storage_type).to eq(:db)
       end
 
-      it 'translate the db model using the feature domain_name"' do
-        result = {
-          db: 'features.foo.db.bar'
-        }
-        expect(create_dsl('foo.bar', db: true).storage).to eq(result)
+      it 'expands the db model key to a fully qualified container key' do
+        dsl = create_dsl('membership.member', to: :db, model: 'member')
+        expected_key = 'features.membership.db.member'
+        expect(dsl.storage_key).to eq(expected_key)
       end
-
 
       it 'translates the global db model using the given key' do
-        result = {
-          db: 'global.db.fiz'
-        }
-        expect(create_dsl('global.bar', db: 'global.fiz').storage).to eq(result)
+        dsl = create_dsl('membership.member', to: :db, model: 'global.user')
+        expected_key = 'global.db.user'
+        expect(dsl.storage_key).to eq(expected_key)
       end
 
-      it 'translates the feature db model using the given key' do
-        result = {
-          db: 'features.foo.db.bar'
-        }
-        expect(create_dsl('foo.fooish', db: 'foo.bar').storage).to eq(result)
+      it 'defaults the container name to the Appfuel.default_app_name' do
+        dsl = create_dsl('membership.member', to: :db, model: 'global.user')
+        # foo was assign in before block
+        expect(dsl.container_name).to eq('foo')
       end
 
-      it 'translates the db model using a manual key' do
-        key = 'fiz.biz.baz.bam'
-        result = {
-          db: key
-        }
-        options = { db: key, key_translation: false }
-        expect(create_dsl('foo.fooish', options).storage).to eq(result)
+      it 'assigns a container name' do
+        dsl = create_dsl(
+          'membership.member',
+          to: :db,
+          model: 'global.user',
+          container: 'other-container'
+        )
+        expect(dsl.container_name).to eq('other-container')
       end
 
-      it 'translates storage [:db, :file] using default feature keys' do
-        storage_path = '/some/path'
-        container = Appfuel.app_container('foo')
-        container.register(:root_path, '/my/root/path')
-        container.register(:storage_path, storage_path)
-
-        result = {
-          db: 'features.foo.db.fooish',
-          file: {
-            model: 'file.model',
-            path: "#{storage_path}/features/foo/file/fooish.yml"
-          }
-        }
-        dsl = create_dsl('foo.fooish', storage: [:db, :file])
-
-        expect(dsl.storage).to eq(result)
-      end
-    end
-
-    context '#storage' do
-      it 'returns the storage hash when type is nil' do
-        dsl = create_dsl('global.foo', db: 'global.bar')
-        result = { db: 'global.db.bar'}
-        expect(dsl.storage).to eq(result)
+      it 'assigns MappingEntry as the default entry_class' do
+        dsl = create_dsl('membership.member', to: :db, model: 'global.user')
+        expect(dsl.entry_class).to eq(MappingEntry)
       end
 
-      it 'fails when type is not a symbol' do
-        dsl = create_dsl('global.foo')
-        msg = 'Storage type must implement :to_sym'
+      it 'assigns an entry_class manually' do
+        dsl = create_dsl(
+          'membership.member',
+          to: :db,
+          model: 'global.user',
+          entry_class: 'SomeClass'
+        )
+        expect(dsl.entry_class).to eq('SomeClass')
+      end
+
+      it 'ignores the context of the key' do
+        dsl = create_dsl(
+          'membership.member',
+          to: :db,
+          model: 'foo.bar.baz.db.bob',
+          contextual_key: false
+        )
+        expected_key = 'foo.bar.baz.db.bob'
+        expect(dsl.storage_key).to eq(expected_key)
+      end
+
+      it 'fails when the domain name is empty' do
+        msg = 'entity name can not be empty'
         expect {
-          dsl.storage({foo: 'bar'})
-        }.to raise_error(RuntimeError, msg)
+          create_dsl('', to: :db, model: 'global.user')
+        }.to raise_error(msg)
       end
 
-      it 'translate the db model using the global domain_name"' do
-        result = {
-          db: 'global.db.bar'
-        }
-        dsl = create_dsl('global.bar')
-
-        expect(dsl.storage(:db, true).storage).to eq(result)
-      end
-
-
-      it 'translate the db model using the feature domain_name"' do
-        result = {
-          db: 'features.foo.db.bar'
-        }
-        dsl = create_dsl('foo.bar')
-        expect(dsl.storage(:db, true).storage).to eq(result)
-      end
-
-      it 'translates the global db model using the given key' do
-        result = {
-          db: 'global.db.fiz'
-        }
-        dsl = create_dsl('foo.bar')
-        expect(dsl.storage(:db,'global.fiz').storage).to eq(result)
-      end
-
-      it 'translates the feature db model using the given key' do
-        result = {
-          db: 'features.foo.db.bar'
-        }
-        dsl = create_dsl('foo.bar')
-        expect(dsl.storage(:db, 'foo.bar').storage).to eq(result)
-      end
-
-      it 'translates the db model using a manual key' do
-        key = 'fiz.biz.baz.bam'
-        result = {
-          db: key
-        }
-        dsl = create_dsl('foo.bar')
-        options = {key_translation: false }
-        expect(dsl.storage(:db, key, options).storage).to eq(result)
-      end
-
-      it 'translates storage [:db, :file] using default feature keys' do
-        storage_path = '/some/path/to/storage'
-        container = Appfuel.app_container('foo')
-        container.register(:root_path, '/my/root/path')
-        container.register(:storage_path, storage_path)
-
-        result = {
-          db: 'features.foo.db.fooish',
-          file: {
-            model: 'file.model',
-            path: "#{storage_path}/features/foo/file/fooish.yml"
-          }
-        }
-
-        dsl = create_dsl('foo.fooish')
-
-        expect(dsl.storage(:db, :file).storage).to eq(result)
-      end
-
-      it 'translates default db' do
-        result = {
-          db: 'features.foo.db.bar'
-        }
-        dsl = create_dsl('foo.bar')
-        expect(dsl.storage(:db, true).storage).to eq(result)
+      it 'fails when the model key is empty' do
+        expect {
+          create_dsl('foo.bar', to: :db, model: '')
+        }.to raise_error('db model key can not be empty')
       end
     end
 
     context '#map' do
       it 'maps storage attr to attributes as strings' do
-        dsl = create_dsl('foo', db: 'global.bar')
-        data = {
-          domain_name: 'foo',
-          domain_attr: 'id',
-          storage: {db: 'global.db.bar'},
-          storage_attr: 'bar_id',
-          container: "foo" # note setup assign default app name
-        }
-        expect_new_mapping_entry(data)
+        dsl = create_dsl('foo.bar',to: :db, model: 'bar')
         dsl.map 'bar_id', 'id'
+        entry = {storage_attr: 'bar_id', domain_attr: 'id'}
+        expect(dsl.entries).to eq([entry])
       end
 
-      it 'maps a computed property' do
-        value = -> {'foo'}
-        dsl = create_dsl('foo', db: 'bar.baz')
-        data = {
-          domain_name: 'foo',
-          domain_attr: 'created_at',
-          storage: {db: 'features.bar.db.baz'},
-          storage_attr: 'created_at',
-          computed_attr: value,
-          container: "foo" # note setup assign default app name
-        }
-        expect_new_mapping_entry(data)
-        dsl.map 'created_at', 'created_at', computed_attr: value
+      it 'maps creates the domain_attr as the storage_attr when missing' do
+        dsl = create_dsl('foo.bar',to: :db, model: 'bar')
+        dsl.map 'bar_id'
+        entry = {storage_attr: 'bar_id', domain_attr: 'bar_id'}
+        expect(dsl.entries).to eq([entry])
       end
 
-      it 'maps a column that will skip all' do
-        dsl = create_dsl('foo', db: 'global.bar')
-        data = {
-          domain_name: 'foo',
-          domain_attr: 'blah',
-          storage: {db: 'global.db.bar'},
-          storage_attr: 'bar_blah',
-          skip: true,
-          container: "foo" # note setup assign default app name
-        }
-        expect_new_mapping_entry(data)
-        dsl.map 'bar_blah', 'blah', skip: true
-      end
-
-      it 'assigns the container these maps belong to' do
-        dsl = create_dsl('foo', db: 'global.bar', container: 'fooish')
-        data = {
-          domain_name: 'foo',
-          domain_attr: 'blah',
-          storage: {db: 'global.db.bar'},
-          storage_attr: 'bar_blah',
-          container: 'fooish'
-        }
-        expect_new_mapping_entry(data)
-        dsl.map 'bar_blah', 'blah'
+      it 'maps a column that will be skip' do
+        dsl = create_dsl('foo.bar',to: :db, model: 'bar')
+        dsl.map 'bar_id', skip: true
+        entry = {storage_attr: 'bar_id', domain_attr: 'bar_id', skip: true}
+        expect(dsl.entries).to eq([entry])
       end
     end
 
@@ -225,10 +115,6 @@ module Appfuel::Repository
       container = build_container(data)
       Appfuel.framework_container.register(:default_app_name, app_name)
       Appfuel.framework_container.register(app_name, container)
-    end
-
-    def expect_new_mapping_entry(inputs)
-      expect(MappingEntry).to receive(:new).with(inputs)
     end
 
     def create_dsl(domain_name, options = {})

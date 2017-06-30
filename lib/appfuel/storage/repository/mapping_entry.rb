@@ -1,7 +1,7 @@
 module Appfuel
   module Repository
     class MappingEntry
-      attr_reader :domain_name, :domain_attr, :computed_attr, :storage_attr,
+      attr_reader :domain_name, :domain_attr, :storage_attr,
                   :container_name, :container_key
 
       def initialize(data)
