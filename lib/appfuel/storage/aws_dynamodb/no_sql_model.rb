@@ -1,8 +1,8 @@
 module Appfuel
-  module AwsDynamoDb
+  module AwsDynamodb
+    CLIENT_CONTAINER_KEY = 'aws.dynamodb.client'
     class NoSqlModel
       include Appfuel::Application::AppContainer
-      CLIENT_CONTAINER_KEY = 'aws.dynamo_db.client'
 
       class << self
         def container_class_type
@@ -17,7 +17,7 @@ module Appfuel
         def load_config
           config = app_container[:config]
           unless config.key?(config_key)
-            fail "[web_api] config key (#{config_key}) not found - #{self}"
+            fail "[aws_dynamodb] config key (#{config_key}) not found - #{self}"
           end
           config[config_key]
         end

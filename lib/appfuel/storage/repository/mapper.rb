@@ -63,12 +63,12 @@ module Appfuel
         map.storage_attr(type, entity_name, entity_attr)
       end
 
-      def storage_key(entity_name, type)
+      def storage_key(type, entity_name)
         map.storage_key(type, entity_name)
       end
 
-      def entity_container_name(entity_name)
-        map.container_name(entity_name)
+      def entity_container_name(type, entity_name)
+        map.container_name(type, entity_name)
       end
 
       def storage_map(type, domain_name)
@@ -85,9 +85,9 @@ module Appfuel
       # @param entity [String] name of the entity
       # @param attr [String] name of the attribute
       # @return [Object]
-      def storage_class(entity_name, type)
-        key = storage_key(entity_name, type)
-        domain_container = entity_container_name(entity_name)
+      def storage_class(type, entity_name)
+        key = storage_key(type, entity_name)
+        domain_container = entity_container_name(type, entity_name)
         unless container_root_name == domain_container
           fail "You can not access a mapping outside of this container " +
             "(mapper: #{container_root_name}, entry: #{domain_container})"
@@ -104,13 +104,11 @@ module Appfuel
       def to_entity_hash(domain_name, type, storage)
         entity_attrs = {}
         storage_data = storage_hash(storage)
-
-        map.each_attr(domain_name, type) do |domain_attr, storage_attr, skip|
+        map.each_attr(type, domain_name) do |domain_attr, storage_attr, skip|
           next unless storage_data.key?(storage_attr)
           value = storage_data[storage_attr]
           update_entity_hash(domain_attr, value, entity_attrs)
         end
-
         entity_attrs
       end
 

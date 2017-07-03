@@ -81,11 +81,16 @@ module Appfuel
       def run(params = {})
         app_name  = params.fetch(:app_name) { Appfuel.default_app_name }
         container = Appfuel.app_container(app_name)
+        if container.key?(:initialized) && container[:initialized] == true
+          return container
+        end
+
         handle_configuration(container, params)
         handle_repository_mapping(container, params)
 
         Appfuel.run_initializers('global', container, params[:exclude] || [])
 
+        container.register(:initialized, true)
         container
       end
     end

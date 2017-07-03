@@ -195,9 +195,9 @@ module Appfuel
         mapper.to_storage(entity, exclude)
       end
 
-      def to_entity(domain_name, storage)
+      def to_entity(domain_name, type, storage)
         key  = qualify_container_key(domain_name, "domains")
-        hash = mapper.to_entity_hash(domain_name, storage)
+        hash = mapper.to_entity_hash(domain_name, type, storage)
         app_container[key].new(hash)
       end
 

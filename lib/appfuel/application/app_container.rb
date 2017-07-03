@@ -203,7 +203,9 @@ module Appfuel
         # @param key [String] partial key to be built into fully qualified key
         # @param type_ns [String] namespace for key
         # @return [String] fully qualified namespaced key
-        def qualify_container_key(key, type_ns)
+        def qualify_container_key(key, type_ns, opts = {})
+          return key if opts[:no_context] == true
+
           parts     = key.to_s.split('.')
           namespace = "#{container_feature_key}."
           if parts[0].downcase == 'global'

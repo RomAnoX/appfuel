@@ -49,11 +49,11 @@ module Appfuel
           fail "#{domain_name} is not registered in map"
         end
 
-        unless map[domain_name].key?(type)
+        unless collection[domain_name].key?(type)
           fail "#{domain_name} storage #{type} is not registered in map"
         end
 
-        map[domain_name][type]
+        collection[domain_name][type]
       end
     end
   end

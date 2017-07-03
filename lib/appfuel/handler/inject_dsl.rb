@@ -57,7 +57,12 @@ module Appfuel
                 "container"
               end
 
-        namespaced_key = qualify_container_key(key, cat)
+        no_context = false
+        if opts.key?(:no_context)
+          no_context = !!opts.delete(:no_context)
+        end
+
+        namespaced_key = qualify_container_key(key, cat, no_context: no_context)
         injections[namespaced_key] = opts[:as]
         nil
       end

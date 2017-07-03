@@ -9,6 +9,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 ### Added
 - adding new repository type of aws dynamodb
 - adding initializers for aws dynamodb
+
+### Fixed
+- bootstrapping the app is not idempotent and does not throw any errors when
+  done twice
+
 ### Changed
 - storage mapping as simplified to a one-to-one between domain and storage model
 
