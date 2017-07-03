@@ -6,7 +6,7 @@ module Appfuel
 
       class << self
         def container_class_type
-          'aws.dynamo_db'
+          'aws.dynamodb'
         end
 
         def config_key(value = nil)
@@ -16,14 +16,30 @@ module Appfuel
 
         def load_config
           config = app_container[:config]
-          unless config.key?(config_key)
-            fail "[aws_dynamodb] config key (#{config_key}) not found - #{self}"
+          key = config_key.to_s
+          if key.contains?('.')
+            keys = config_key.split('.').map {|k| k.to_sym}
+          else
+            keys = [config_key]
           end
-          config[config_key]
+
+          keys.each.inject(config) do |c, k|
+            unless c.key?(k)
+              fail "[aws_dynamodb] config key (#{k}) not found - #{self}"
+            end
+            c[k]
+          end
         end
 
         def load_client
           app_container[CLIENT_CONTAINER_KEY]
+        end
+
+        def table_name(value = nil)
+          return @table_name if value.nil?
+
+          prefix = load_config[:table_prefix]
+          @table_name = "#{prefix}#{value}"
         end
 
         def inherited(klass)
