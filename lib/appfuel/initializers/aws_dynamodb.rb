@@ -3,10 +3,10 @@ Appfuel::Initialize.define('global.aws_dynamodb') do |config, container|
   require 'appfuel/storage/aws_dynamodb'
 
   env = config[:env]
-  if ['local', 'development'].include?(env.to_s)
+  endpoint = config[:aws][:dynamodb][:endpoint]
+  if ['local', 'development'].include?(env.to_s) && endpoint
     Aws.config.update({
-      region: config[:aws][:dynamodb][:region],
-      endpoint: config[:aws][:dynamodb][:endpoint]
+      endpoint: endpoint
     })
   end
   key = Appfuel::AwsDynamodb::CLIENT_CONTAINER_KEY
