@@ -15,10 +15,12 @@ module Appfuel
       end
 
       def ok_key?(data)
+        return false unless data.is_a?(Hash)
         data.key?(:ok) || data.key?("ok")
       end
 
       def error_key?(data)
+        return false unless data.is_a?(Hash)
         data.key?(:errors) || data.key?("errors")
       end
 
@@ -62,18 +64,16 @@ module Appfuel
     # @return [Response]
     def initialize(data = {})
       result = format_result_hash(data)
-
       # when no ok key and no errors key then assume
       # it is a successfull response
-      if !self.class.ok_key?(result) && !self.class.error_key?(result)
-        result = {ok: self.class.ok_data(result)}
-      end
-
-      @ok = result[:ok]
+      @ok = nil
       @errors = nil
-      if self.class.error_key?(result)
-        @ok = nil
+      if self.class.ok_key?(result)
+        @ok = self.class.ok_data(result)
+      elsif self.class.error_key?(result)
         @errors = Errors.new(self.class.error_data(result))
+      else
+        @ok = result
       end
     end
 
