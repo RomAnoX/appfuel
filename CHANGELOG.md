@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.5.2]] (https://github.com/rsb/appfuel/releases/tag/0.5.3) 2017-07-10
+### Fixed
+- response object not working when `ok` key is a string
+
 ## [[0.5.2]] (https://github.com/rsb/appfuel/releases/tag/0.5.2) 2017-07-03
 ### Fixed
 - aws initialization fails when no endpoint

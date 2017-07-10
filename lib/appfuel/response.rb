@@ -10,7 +10,24 @@ module Appfuel
       # @param  result Hash the successfull resultset
       # @reuturn Response
       def ok(result = nil)
+        result = ok_data(result) if ok_key?(result)
         self.new(ok: result)
+      end
+
+      def ok_key?(data)
+        data.key?(:ok) || data.key?("ok")
+      end
+
+      def error_key?(data)
+        data.key?(:errors) || data.key?("errors")
+      end
+
+      def ok_data(data)
+        data[:ok] || data['ok']
+      end
+
+      def error_data(data)
+        data[:errors] || data['errors']
       end
 
       # Convience method for creating an error response. It understands
@@ -46,17 +63,17 @@ module Appfuel
     def initialize(data = {})
       result = format_result_hash(data)
 
-      # when no ok key and no errors key the assume
+      # when no ok key and no errors key then assume
       # it is a successfull response
-      if !result.key?(:ok) && !result.key?(:errors)
-        result = {ok: result}
+      if !self.class.ok_key?(result) && !self.class.error_key?(result)
+        result = {ok: self.class.ok_data(result)}
       end
 
       @ok = result[:ok]
       @errors = nil
-      if result.key?(:errors)
+      if self.class.error_key?(result)
         @ok = nil
-        @errors = Errors.new(result[:errors])
+        @errors = Errors.new(self.class.error_data(result))
       end
     end
 

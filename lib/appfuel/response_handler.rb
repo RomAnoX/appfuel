@@ -7,8 +7,15 @@ module Appfuel
     end
 
     def create_response(data)
-      return data        if response?(data)
-      return error(data) if error_data?(data)
+      if response?(data)
+        return data
+      end
+
+      if error_data?(data)
+        return error(data)
+      end
+
+      # TODO normalize ok key symbol or string here
       ok(data)
     end
 
