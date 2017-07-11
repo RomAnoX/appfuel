@@ -33,7 +33,7 @@ module Appfuel
       when data.kind_of?(::StandardError) || data.is_a?(Errors)
         true
       when data.is_a?(Hash)
-        data.key?(:errors)
+        response_class.error_key?(data)
       else
         false
       end

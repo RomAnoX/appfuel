@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.5.2]] (https://github.com/rsb/appfuel/releases/tag/0.5.3) 2017-07-10
+## [[0.5.4]] (https://github.com/rsb/appfuel/releases/tag/0.5.4) 2017-07-11
+### Fixed
+- Fixed error key usage in response handler
+
+## [[0.5.3]] (https://github.com/rsb/appfuel/releases/tag/0.5.3) 2017-07-10
 ### Fixed
 - response object not working when `ok` key is a string
 
