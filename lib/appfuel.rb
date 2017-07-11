@@ -119,12 +119,15 @@ module Appfuel
 
     def setup_container_dependencies(namespace_key, container)
       container.namespace(namespace_key) do
-        register('initializers', ThreadSafe::Array.new)
-        register('validators', {})
-        register('repositories', {})
-        register('validator_pipes', {})
-        register('domain_builders', {})
-        register('presenters', {})
+        unless key?("initializers")
+          register('initializers', ThreadSafe::Array.new)
+        end
+
+        register('validators', {})      unless key?('validators')
+        register('repositories', {})    unless key?('repositories')
+        register('validator_pipes', {}) unless key?('validator_pipes')
+        register('domain_builders', {}) unless key?('domain_builders')
+        register('presenters', {})      unless key?('presenters')
       end
       container
     end

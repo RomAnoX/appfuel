@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.5.5]] (https://github.com/rsb/appfuel/releases/tag/0.5.5) 2017-07-11
+### Fixed
+- Fixed web_api error handling, re-raised exception incorrectly
+
 ## [[0.5.4]] (https://github.com/rsb/appfuel/releases/tag/0.5.4) 2017-07-11
 ### Fixed
 - Fixed error key usage in response handler

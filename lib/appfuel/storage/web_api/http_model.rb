@@ -71,9 +71,7 @@ module Appfuel
             response = json(response.body)
           end
         rescue => err
-          msg = "[#{http_url}] #{err.message}"
-          err.message = msg
-          raise err
+          raise err.exception("[#{http_url}] #{err.message}")
         end
 
         response
