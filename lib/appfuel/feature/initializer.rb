@@ -30,8 +30,9 @@ module Appfuel
         end
 
         container[:auto_register_classes].each do |klass|
-          next unless klass.register_class?
-          container.register(klass.container_class_path, klass)
+          key = klass.container_class_path
+          next if container.key?(key) || !klass.register_class?
+          container.register(key, klass)
         end
 
 
