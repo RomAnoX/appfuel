@@ -24,8 +24,10 @@ module Appfuel
           feature_path = "#{container[:features_path]}/#{name}"
           begin
             require feature_path
-          rescue LoadError => _e
-            raise "[#{feature_key} initialize] could not load #{feature_path}"
+          rescue LoadError => e
+            trace = e.backtrace.join("\n")
+            raise "[#{feature_key} initialize] could not load " +
+                  "#{feature_path}: #{e.message} #{trace}"
           end
         end
 

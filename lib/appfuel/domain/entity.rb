@@ -65,7 +65,7 @@ module Appfuel
       end
 
       def attr_typed!(name, value)
-        self.class.schema[name][value]
+        self.class.schema[name.to_sym][value]
       end
 
       def data_typed!(type_name, value)

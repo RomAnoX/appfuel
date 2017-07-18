@@ -134,7 +134,7 @@ module Appfuel::Repository
     end
 
     context '#entity_value' do
-      it 'resolves the entity value' do
+      xit 'resolves the entity value' do
         domain = double('some domain')
         domain_attr = 'foo.bar.baz.id'
         entry  = instance_double(MappingEntry)
@@ -148,7 +148,7 @@ module Appfuel::Repository
         expect(mapper.entity_value(domain, entry)).to eq(value)
       end
 
-      it 'resolves the entity value' do
+      xit 'resolves the entity value' do
         domain = double('some domain')
         domain_attr = 'foo.bar.baz.id'
         entry    = instance_double(MappingEntry)
@@ -221,8 +221,8 @@ module Appfuel::Repository
     end
 
 
-    xcontext '#to_storage' do
-      it 'converts domain into a storage hash' do
+    context '#to_storage' do
+      xit 'converts domain into a storage hash' do
         domain_name = 'foo.bar'
         db_key = 'global.db.user'
         mapping1 = {

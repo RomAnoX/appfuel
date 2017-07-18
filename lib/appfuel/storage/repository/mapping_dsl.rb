@@ -54,9 +54,12 @@ module Appfuel
 
         domain_attr = name if domain_attr.nil?
 
+        skip = opts[:skip] == true ? true : false
+
         data = opts.merge({
           domain_attr: domain_attr,
           storage_attr: name,
+          skip: skip
         })
 
         entries << data

@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.5.6]] (https://github.com/rsb/appfuel/releases/tag/0.5.5) 2017-07-11
+## [[0.5.7]] (https://github.com/rsb/appfuel/releases/tag/0.5.7) 2017-07-18
+### Changed
+- domain entity `attr_typed!` will always converts the type name to a symbol
+
+### Fixed
+- web_api http model handles exceptions
+- fixed `entity_value` in repo mapper it had an old interface
+- mapping_dsl was missing `skip` property
+
+## [[0.5.6]] (https://github.com/rsb/appfuel/releases/tag/0.5.6) 2017-07-11
 ### Fixed
 - Fixed registering classes in the feature initializer, it now skips when
   already registered

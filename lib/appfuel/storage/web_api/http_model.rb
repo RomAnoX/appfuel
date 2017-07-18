@@ -25,18 +25,6 @@ module Appfuel
         end
 
         def load_http_adapter
-          container = app_container
-          if container.key?('web_api.http_adapter')
-            container['web_api.http_adapter']
-          else
-            load_default_http_adapter
-          end
-        end
-
-        def load_default_http_adapter
-          unless Kernel.const_defined?(:RestClient)
-            require 'rest-client'
-          end
           RestClient
         end
 
@@ -63,18 +51,38 @@ module Appfuel
       def request(method, path, options = {})
         add_content_type(options)
         http_url = url(path)
+        if options[:relative_url] === false
+          http_url = path
+          options.delete(:relative_url)
+        end
+
         begin
           data = options.merge({method: method, url: http_url })
           response = adapter::Request.execute(data)
-          parse_json = options.delete(:json)
-          if parse_json == true
-            response = json(response.body)
-          end
-        rescue => err
-          raise err.exception("[#{http_url}] #{err.message}")
+          response = handle_response(response, options[:headers])
+        rescue RestClient::ExceptionWithResponse => err
+          data = handle_response(err.response, options[:headers])
+          handle_http_error(err.http_code, data, http_url, err.message)
         end
 
         response
+      end
+
+
+      def handle_http_error(code, body, url, msg)
+        if body.is_a?(Hash)
+          body = body.map{|k,v| "#{k}: #{v}"}.join('&')
+        end
+        str = "[#{url} #{code}] #{msg} #{body}"
+        raise str
+      end
+
+      def handle_response(response, headers = {})
+        if content_type == :json || headers[:content_type] == :json
+          return json(response.body)
+        end
+
+        response.body
       end
 
       def json(data)

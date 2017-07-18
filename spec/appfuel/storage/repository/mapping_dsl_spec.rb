@@ -92,14 +92,14 @@ module Appfuel::Repository
       it 'maps storage attr to attributes as strings' do
         dsl = create_dsl('foo.bar',to: :db, model: 'bar')
         dsl.map 'bar_id', 'id'
-        entry = {storage_attr: 'bar_id', domain_attr: 'id'}
+        entry = {storage_attr: 'bar_id', domain_attr: 'id', skip: false}
         expect(dsl.entries).to eq([entry])
       end
 
       it 'maps creates the domain_attr as the storage_attr when missing' do
         dsl = create_dsl('foo.bar',to: :db, model: 'bar')
         dsl.map 'bar_id'
-        entry = {storage_attr: 'bar_id', domain_attr: 'bar_id'}
+        entry = {storage_attr: 'bar_id', domain_attr: 'bar_id', skip: false}
         expect(dsl.entries).to eq([entry])
       end
 

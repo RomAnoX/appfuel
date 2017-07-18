@@ -137,10 +137,10 @@ module Appfuel
         excluded     = opts[:exclude] || []
         data         = {}
         domain_name  = domain.domain_name
-        map.each_attr(domain_name, type) do |domain_attr, storage_attr, skip|
+        map.each_attr(type, domain_name) do |domain_attr, storage_attr, skip|
           next if excluded.include?(storage_attr) || skip == true
 
-          data[storage_attr] = entity_value(domain, entry)
+          data[storage_attr] = entity_value(domain, domain_attr)
         end
 
         data
@@ -166,12 +166,8 @@ module Appfuel
         end
       end
 
-      def entity_value(domain, map_entry)
-        value = resolve_entity_value(domain, map_entry.domain_attr)
-        if map_entry.computed_attr?
-          value = map_entry.computed_attr(value, domain)
-        end
-
+      def entity_value(domain, domain_attr)
+        value = resolve_entity_value(domain, domain_attr)
         value = nil if undefined?(value)
 
         value
@@ -191,8 +187,8 @@ module Appfuel
         value == Types::Undefined
       end
 
-      def resolve_entity_value(domain, entity_attr)
-        chain  = entity_attr.split('.')
+      def resolve_entity_value(domain, domain_attr)
+        chain  = domain_attr.split('.')
         target = domain
         chain.each do |attr_method|
           return nil unless target.respond_to?(attr_method)
