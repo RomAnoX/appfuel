@@ -79,7 +79,9 @@ module Appfuel
 
       def handle_response(response, headers = {})
         if content_type == :json || headers[:content_type] == :json
-          return json(response.body)
+          data = response.body
+
+          return data.empty? ? {} : json(response.body)
         end
 
         response.body

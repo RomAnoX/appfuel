@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.5.7]] (https://github.com/rsb/appfuel/releases/tag/0.5.7) 2017-07-18
+
+## [[0.5.8]](https://github.com/rsb/appfuel/releases/tag/0.5.8) 2017-07-20
+### Fixed
+- aws dynamodb initializer region was not being set
+- dynamodb repo did not have to_entity or storage_class
+
+## [[0.5.7]](https://github.com/rsb/appfuel/releases/tag/0.5.7) 2017-07-18
 ### Changed
 - domain entity `attr_typed!` will always converts the type name to a symbol
 

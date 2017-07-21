@@ -4,14 +4,15 @@ Appfuel::Initialize.define('global.aws_dynamodb') do |config, container|
 
   env = config[:env]
   endpoint = config[:aws][:dynamodb][:endpoint]
+  region   = config[:aws][:region] || 'us-east-1'
+  aws_config = { region: region }
+
   if ['local', 'development'].include?(env.to_s) && endpoint
-    Aws.config.update({
-      endpoint: endpoint
-    })
+    aws_config[:endpoint] = endpoint
   end
-  key = Appfuel::AwsDynamodb::CLIENT_CONTAINER_KEY
+  Aws.config.update(aws_config)
+
 
   client = Aws::DynamoDB::Client.new
-
-  container.register(key, client)
+  container.register(Appfuel::AwsDynamodb::CLIENT_CONTAINER_KEY, client)
 end
