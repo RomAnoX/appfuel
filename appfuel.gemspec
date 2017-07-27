@@ -25,9 +25,9 @@ Gem::Specification.new do |spec|
   # or the way I am using it.
   spec.add_dependency "activerecord",     "~> 5.1.1"
   spec.add_dependency "pg",               "~> 0.20"
-  spec.add_dependency "dry-types",        "0.9.2"
+  spec.add_dependency "dry-types",        "0.11"
   spec.add_dependency "dry-container",    "~> 0.6"
-  spec.add_dependency "dry-validation",   "~> 0.10.5"
+  spec.add_dependency "dry-validation",   "~> 0.11"
   spec.add_dependency "dry-monads",       "~> 0.2"
   spec.add_dependency "dry-configurable", "~> 0.6"
   spec.add_dependency "parslet",          "~> 1.8.0"

@@ -191,8 +191,8 @@ module Appfuel
         mapper.exists?(expr)
       end
 
-      def to_storage(entity, exclude = [])
-        mapper.to_storage(entity, exclude)
+      def to_storage(entity, type, opts = {})
+        mapper.to_storage(entity, type, opts)
       end
 
       def to_entity(domain_name, type, storage)

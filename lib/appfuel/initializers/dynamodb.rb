@@ -1,6 +1,6 @@
-Appfuel::Initialize.define('global.aws_dynamodb') do |config, container|
+Appfuel::Initialize.define('global.dynamodb') do |config, container|
   require 'aws-sdk'
-  require 'appfuel/storage/aws_dynamodb'
+  require 'appfuel/storage/dynamodb'
 
   env = config[:env]
   endpoint = config[:aws][:dynamodb][:endpoint]
@@ -14,5 +14,5 @@ Appfuel::Initialize.define('global.aws_dynamodb') do |config, container|
 
 
   client = Aws::DynamoDB::Client.new
-  container.register(Appfuel::AwsDynamodb::CLIENT_CONTAINER_KEY, client)
+  container.register(Appfuel::Dynamodb::CLIENT_CONTAINER_KEY, client)
 end

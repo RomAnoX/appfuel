@@ -41,6 +41,13 @@ module Appfuel
           result
         end
 
+        def run!(inputs = {}, container = Dry::Container.new)
+          result = run(inputs, container)
+          fail_handler!(result) if result.failure?
+
+          result.ok
+        end
+
         def error(*args)
           response_handler.error(*args)
         end
@@ -57,6 +64,14 @@ module Appfuel
           response_handler.create_response(data)
         end
 
+        def fail_handler!(response)
+          raise create_handler_failure(response)
+        end
+
+        def create_handler_failure(response)
+          title = "#{container_class_path} Failed:"
+          HandlerFailure.new(title, response)
+        end
       end
 
       attr_reader :data

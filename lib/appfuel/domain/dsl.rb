@@ -85,11 +85,8 @@ module Appfuel
       def build_type(type_str, **options)
         base = type_str.split('.').last
         type = Types[type_str]
-        type = apply_defaults(type, options)
         type = apply_optional(type, options)
-
         nil_is_allowed = allow_nil?(options)
-
         type = case base
                when 'hash'  then handle_hash(type, options)
                when 'array' then handle_array(type, options)
@@ -97,6 +94,7 @@ module Appfuel
                  type
                end
 
+        type = apply_defaults(type, options)
         type = apply_constraints(type, options)
 
         # You have to apply all the contraints before summing nil
@@ -208,23 +206,20 @@ module Appfuel
       end
 
       def handle_array(type, options)
-        if options.key?(:member)
-          member = options.delete(:member)
-          member = member.is_a?(String) ? Types[member] : member
-          type = type.member(member)
-        end
-        type
+        return type unless options.key?(:member)
+        member = options.delete(:member)
+        member = member.is_a?(String) ? Types[member] : member
+        type.member(member)
       end
 
       def apply_defaults(type, options)
         return type unless options.key?(:default)
-
-        type.default(options.delete(:default))
+        default_value = options.delete(:default)
+        type.default(default_value)
       end
 
       def apply_optional(type, options)
         return type unless options.key?(:optional)
-
         options.delete(:optional)
         type.optional
       end

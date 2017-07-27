@@ -189,10 +189,9 @@ module Appfuel
       end
 
       def initialize_value(key, type, input)
-        if input == Types::Undefined && type.default?
+        if (input == Types::Undefined || input == nil) && type.default?
           input = type[nil]
         end
-
         # manual overrides have to manually type check themselves
         setter = "#{key}="
         return send(setter, input) if respond_to?(setter)

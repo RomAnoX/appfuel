@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.5.9]](https://github.com/rsb/appfuel/releases/tag/0.5.8) 2017-07-27
+### Added
+- Adding a `run!` to handler which deals with failures
+- Adding a HandlerFailure has for when the handler fails
+- New interfaces for the aws dynamo db adapter
+
+### Fixed
+- Domain dsl attribute with  array member and default is now working
+- Updating dry-validations & dry-types
 
 ## [[0.5.8]](https://github.com/rsb/appfuel/releases/tag/0.5.8) 2017-07-20
 ### Fixed

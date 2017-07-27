@@ -58,7 +58,7 @@ module Appfuel::Domain
       it 'uses default and optional with type string' do
         entity   = setup
         type_str = 'strict.string'
-        type     = Types[type_str].default('abc').optional
+        type     = Types[type_str].optional.default('abc')
 
         entity.attribute :foo, type_str, default: 'abc', optional: true
         expect(entity.schema[:foo]).to eq type
