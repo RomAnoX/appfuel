@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.5.9]](https://github.com/rsb/appfuel/releases/tag/0.5.8) 2017-07-27
+## [[0.5.10]](https://github.com/rsb/appfuel/releases/tag/0.5.10) 2017-07-28
+### Added
+- Primary key object for dynamodb
+- new adapter interfaces for get, put, and delete
+
+## [[0.5.9]](https://github.com/rsb/appfuel/releases/tag/0.5.9) 2017-07-27
 ### Added
 - Adding a `run!` to handler which deals with failures
 - Adding a HandlerFailure has for when the handler fails
