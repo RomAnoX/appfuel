@@ -1,6 +1,7 @@
 module Appfuel
   module Dynamodb
-    CLIENT_CONTAINER_KEY = 'aws.dynamodb.client'
+    DEFAULT_CONFIG_KEY   = 'aws.dynamodb'
+    CLIENT_CONTAINER_KEY = "#{DEFAULT_CONFIG_KEY}.client"
 
     class NoSqlModel
       include Appfuel::Application::AppContainer
@@ -11,7 +12,9 @@ module Appfuel
         end
 
         def config_key(value = nil)
-          return @config_key if value.nil?
+          if value.nil?
+            return @config_key ||= DEFAULT_CONFIG_KEY
+          end
           @config_key = value.to_s
         end
 
@@ -61,12 +64,8 @@ module Appfuel
           stage_class_for_registration(klass)
         end
 
-        def primary_key(hash_key, hash_type, range_key = nil, range_type = nil)
-          @primary_key = [ {hash_key => hash_type.to_s.downcase} ]
-          unless range_key.nil?
-            fail "range type is required" if range_type.nil?
-            @primary_key << { range_key => range_type }
-          end
+        def primary_key(hash, hash_type, range = nil, range_type = nil)
+          @primary_key = PrimaryKey.new(hash, hash_type, range, range_type)
         end
       end
 
@@ -91,18 +90,19 @@ module Appfuel
         self.class.indexes[key]
       end
 
-      def put_params(data)
-        {
-          table_name: table_name,
-          item: data
-        }
+      def primary_key
+        fail "No primary key assigned" if self.class.primary_key.nil?
+        self.class.primary_key
       end
 
-      def table_params(keys ={})
-        {
-          table_name: table_name,
-          key: keys
-        }
+
+      def put_params(data)
+        create_table_hash(item: data)
+      end
+
+      def table_params(hash_key_value, range_key_value = nil)
+        params = primary_key.params(hash_key_value, range_key_value)
+        create_table_hash(key: params)
       end
 
       def query_select_map(type)
@@ -115,13 +115,12 @@ module Appfuel
       end
 
       def select_index_params(key, attrs_returned, key_expr, values = {})
-        {
-          table_name: table_name,
+        create_table_hash(
           index_name: index_name(key),
-          select:      query_select_map(attrs_returned),
+          select:     query_select_map(attrs_returned),
           key_condition_expression: key_expr,
           expression_attribute_values: values
-        }
+        )
       end
 
       def select_index(key, select, key_expr, values = {})
@@ -129,11 +128,36 @@ module Appfuel
         client.query(params)
       end
 
-      def index_query_params(key, opts = {})
-        if opts.key?(:select)
-          params[:select] = query_select_map(opts[:select])
-        end
+      def put(data)
+        params = put_params(data)
+        ap params
+        client.put_item(params)
+      end
 
+      def get(hash_value, range_value = nil)
+        result = get_item(hash_value, range_value)
+        return false if result.item.nil?
+
+        result.item
+      end
+
+      def get_item(hash_value, range_value = nil)
+        params = table_params(hash_value, range_value)
+        client.get_item(params)
+      end
+
+      def delete(hash_value, range_value = nil)
+        delete_item(hash_value, range_value)
+      end
+
+      def delete_item(hash_value, range_value = nil)
+        params = table_params(hash_value, range_value)
+        client.delete_item(params)
+      end
+
+      private
+      def create_table_hash(data = {})
+        data.merge!(table_name: table_name)
       end
     end
   end

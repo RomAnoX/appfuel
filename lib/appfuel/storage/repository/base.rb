@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Appfuel
   module Repository
     # The generic repository behavior. This represents repo behavior that is
@@ -235,6 +237,10 @@ module Appfuel
         hash = mapper.to_entity_hash(domain_name, storage_attrs)
         key  = qualify_container_key(domain_name, "domains")
         app_container[key].new(hash)
+      end
+
+      def generate_uuid
+        SecureRandom.uuid
       end
 
       private
