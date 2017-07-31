@@ -57,7 +57,11 @@ module Appfuel
         end
 
         def index(index_key, index_name)
-          indexes[index_key.to_sym] = "#{table_prefix}#{index_name}"
+          unless index_name.start_with?(table_prefix)
+            index_name = "#{table_prefix}#{index_name}"
+          end
+
+          indexes[index_key.to_sym] = index_name
         end
 
         def inherited(klass)
