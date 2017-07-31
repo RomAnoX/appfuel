@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.5.11]](https://github.com/rsb/appfuel/releases/tag/0.5.11) 2017-07-31
+### Fixed
+- `dynamodb adapter` primary_key dsl suppose to be a getter and a setter
+
 ## [[0.5.10]](https://github.com/rsb/appfuel/releases/tag/0.5.10) 2017-07-28
 ### Added
 - Primary key object for dynamodb

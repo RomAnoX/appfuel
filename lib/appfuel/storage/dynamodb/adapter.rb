@@ -64,7 +64,9 @@ module Appfuel
           stage_class_for_registration(klass)
         end
 
-        def primary_key(hash, hash_type, range = nil, range_type = nil)
+        def primary_key(hash = nil, hash_type = nil, range = nil, range_type = nil)
+          return @primary_key if hash.nil?
+
           @primary_key = PrimaryKey.new(hash, hash_type, range, range_type)
         end
       end
@@ -130,7 +132,6 @@ module Appfuel
 
       def put(data)
         params = put_params(data)
-        ap params
         client.put_item(params)
       end
 
