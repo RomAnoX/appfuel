@@ -189,23 +189,42 @@ module Appfuel
       end
 
       def initialize_value(key, type, input)
-        if (input == Types::Undefined || input == nil) && type.default?
-          input = type[nil]
-        end
-        # manual overrides have to manually type check themselves
-        setter = "#{key}="
-        return send(setter, input) if respond_to?(setter)
-
-        if input != Types::Undefined && input != nil
-          input = type[input]
+        input = handle_default_value(input, type)
+        if respond_to?("#{key}=")
+          return handle_defined_setter(key, input)
         end
 
+        input = type_check_value(type, input)
         instance_variable_set("@#{key}", input)
       rescue => e
         msg   = "#{domain_name} could not assign :#{key} #{e.message}"
         error = RuntimeError.new(msg)
         error.set_backtrace(e.backtrace)
         raise error
+      end
+
+      def handle_defined_setter(key, input)
+        return if undefined?(input)
+        send("#{key}=", input)
+      end
+
+      def handle_default_value(input, type)
+        return input unless type.default?
+        if undefined?(input) || input.nil?
+          return type[nil]
+        end
+        input
+      end
+
+      def type_check_value(type, input)
+        if !undefined?(input) && !input.nil?
+          input = type[input]
+        end
+        input
+      end
+
+      def setter_defined?(key)
+        respond_to?("#{key}=")
       end
 
       def define_getter(key)
@@ -231,6 +250,10 @@ module Appfuel
         instance_variable_get("@#{key}").freeze
       end
 
+
+      def undefined?(value)
+        Types::Undefined
+      end
 
       def is_entity?(value, type)
         value.respond_to?(:domain_name) && value.domain_name == type.domain_name
