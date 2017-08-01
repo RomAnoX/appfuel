@@ -252,7 +252,7 @@ module Appfuel
 
 
       def undefined?(value)
-        Types::Undefined
+        value == Types::Undefined
       end
 
       def is_entity?(value, type)

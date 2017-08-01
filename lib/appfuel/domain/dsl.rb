@@ -196,7 +196,6 @@ module Appfuel
           fail ":hash params that are empty don't make sense you probably " +
             "want to exclude the params and use the constructor alone"
         end
-
         hash = options.delete(:hash)
         params = {}
         hash.each do |key, value|

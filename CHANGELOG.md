@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.5.12]](https://github.com/rsb/appfuel/releases/tag/0.5.13) 2017-08-01
+## [[0.5.14]](https://github.com/rsb/appfuel/releases/tag/0.5.14) 2017-08-01
+### Fixed
+- fixed incorrect undefined check inside entity
+
+## [[0.5.13]](https://github.com/rsb/appfuel/releases/tag/0.5.13) 2017-08-01
 ### Fixed
 - when you override an entity attribute it fails to initialize when value is
   undefined
