@@ -243,6 +243,11 @@ module Appfuel
         SecureRandom.uuid
       end
 
+      def url_token(nbr = 32)
+        nbr = Integer(nbr)
+        SecureRandom.urlsafe_base64(nbr)
+      end
+
       private
       def method_not_implemented_error
         fail "must be implemented by a storage specific repository"
