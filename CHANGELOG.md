@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.5.15]](https://github.com/rsb/appfuel/releases/tag/0.5.15) 2017-08-08
+### Added
+- added url_token to base repo
+
 ## [[0.5.14]](https://github.com/rsb/appfuel/releases/tag/0.5.14) 2017-08-01
 ### Fixed
 - fixed incorrect undefined check inside entity
