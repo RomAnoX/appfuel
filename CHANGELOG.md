@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.5.16]](https://github.com/rsb/appfuel/releases/tag/0.5.16) 2017-08-08
+### Fixed
+- response handler no longer has double error keys
+
 ## [[0.5.15]](https://github.com/rsb/appfuel/releases/tag/0.5.15) 2017-08-08
 ### Added
 - added url_token to base repo
