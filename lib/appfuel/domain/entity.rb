@@ -15,7 +15,7 @@ module Appfuel
 
       def initialize(inputs = {})
         setup_attributes(inputs)
-        enable_undefined
+        hide_undefined
         @is_global = domain_name.count('.') == 0
 
       rescue Dry::Types::ConstraintError => e

@@ -12,10 +12,12 @@ module Appfuel
       end
 
       if error_data?(data)
+        if data.is_a?(Hash)
+          data.symbolize_keys!
+        end
         return error(data)
       end
 
-      # TODO normalize ok key symbol or string here
       ok(data)
     end
 
