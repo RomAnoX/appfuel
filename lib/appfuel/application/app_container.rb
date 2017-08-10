@@ -7,6 +7,7 @@ module Appfuel
       def self.included(base)
         base.extend(ClassMethods)
         base.extend(ContainerClassRegistration)
+        base.extend(FeatureHelper)
       end
 
       module ClassMethods
@@ -230,7 +231,6 @@ module Appfuel
         def app_container
           Appfuel.app_container(container_root_name)
         end
-
       end
 
       # Instance methods
@@ -240,6 +240,10 @@ module Appfuel
 
       def app_container
         self.class.app_container
+      end
+
+      def feature_name
+        self.class.feature_name
       end
 
     end

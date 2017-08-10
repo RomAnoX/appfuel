@@ -3,7 +3,9 @@ require_relative 'validation/validator_pipe'
 
 module Appfuel
   module Validation
+    extend Appfuel::Application::FeatureHelper
     class << self
+
       # Dsl used create and register validators in the app container. The key
       # needs to be the fully qualified feature or global.
       #
@@ -28,6 +30,20 @@ module Appfuel
         container     = Appfuel.app_container
         validator     = build_validator(basename, opts, &block)
         container.register(key, validator)
+      end
+
+      def load_schema(key)
+        feature   = extract_feature_name(key)
+        container = Appfuel.app_container
+        key, _basename = build_validator_key(key)
+        unless feature_initialized?(feature)
+          initialize_feature(feature)
+        end
+
+        unless container.key?(key)
+          fail "Could not load validator key #{key}"
+        end
+        container[key]
       end
 
       # Turns the block of code given into a Dry::Validation schema or formi

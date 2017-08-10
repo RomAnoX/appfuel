@@ -74,6 +74,7 @@ module Appfuel
         end
       end
 
+      # Instance methods
       attr_reader :data
 
       def initialize(container = Dry::Container.new)
@@ -116,6 +117,12 @@ module Appfuel
         end
 
         container[key].call(data, inputs)
+      end
+
+      private
+
+      def fail_handler!(response)
+        self.class.fail_handler!(response)
       end
     end
   end

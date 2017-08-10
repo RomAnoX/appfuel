@@ -14,7 +14,11 @@ module Appfuel
       def call(name, container)
         name = name.to_s.underscore
         feature_key  = "features.#{name}"
-        return false if initialized?(container, feature_key)
+        finished_key = "#{feature_key}.initialized"
+
+        if container.key?(finished_key) && container[finished_key] == true
+          return false
+        end
 
         unless container.key?(feature_key)
           Appfuel.setup_container_dependencies(feature_key, container)
@@ -39,6 +43,7 @@ module Appfuel
 
 
         Appfuel.run_initializers(feature_key, container)
+        container.register(finished_key, true)
         true
       end
 
@@ -46,11 +51,6 @@ module Appfuel
       def require_feature_disabled?(container, feature_key)
         disable_key = "#{feature_key}.disable_require"
         container.key?(disable_key) && container[disable_key] == true
-      end
-
-      def initialized?(container, feature_key)
-        init_key = "#{feature_key}.initialized"
-        container.key?(init_key) && container[init_key] == true
       end
     end
   end

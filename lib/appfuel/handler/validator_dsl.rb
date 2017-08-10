@@ -68,12 +68,16 @@ module Appfuel
     #   call: run the lamda
     module ValidatorDsl
 
+      def validator_keys
+        @validator_keys ||= []
+      end
+
       def validators(*args)
         @validators ||= []
         return @validators if args.empty?
 
         args.each do |arg|
-          @validators << load_validator(arg)
+          validator_keys << convert_to_container_key(arg)
         end
       end
 
@@ -94,33 +98,18 @@ module Appfuel
       # @return [Nil]
       def validator(key = nil, opts = {}, &block)
         key  = default_validator_name if key.nil?
-        validators << build_validator(key, opts, &block)
-        nil
-      end
-
-      # load a validator with the given key from the app container.
-      #
-      # @note the key is encode and will be decoded first
-      #       @see ValidatorDsl#convert_to_container_key for details
-      #
-      # @param key [String]
-      # @param opts [Hash]
-      # @return Appfuel::Validation::Validator
-      def load_validator(key, opts = {})
-        fail "validator must have a key" if key.nil?
-
-        container_key = convert_to_container_key(key)
-        container = Appfuel.app_container
-        unless container.key?(container_key)
-          fail "Could not locate validator with (#{container_key})"
+        unless block_given?
+          validator_keys << convert_to_container_key(key)
+          return
         end
 
-        container[container_key]
+        validators << Appfuel::Validation.build_validator(key, opts, &block)
+        nil
       end
 
       # return [Bool]
       def validators?
-        !validators.empty?
+        !(validators.empty? && validator_keys.empty?)
       end
 
       # Used when resolving inputs to determine if we should apply any
@@ -139,6 +128,15 @@ module Appfuel
         @skip_validation = true
       end
 
+      def load_validators
+        list = validators
+        return list unless list.empty?
+        validator_keys.each do |key|
+          @validators << load_validator(key, no_context: true)
+        end
+        validators
+      end
+
       # Validate all inputs using the list of validators that were assigned
       # using the dsl methods.
       #
@@ -150,7 +148,7 @@ module Appfuel
 
         response = nil
         has_failed = false
-        validators.each do |validator|
+        load_validators.each do |validator|
           if validator.pipe?
             result = handle_validator_pipe(validator, inputs)
             inputs = result unless result == false
@@ -173,6 +171,23 @@ module Appfuel
         response
       end
 
+      def load_validator(key, opts = {})
+        unless opts[:no_context] == true
+          key = convert_to_container_key(key)
+        end
+
+        container = app_container
+        feature_name = extract_feature_name(key)
+        unless feature_initialized?(feature_name)
+          initialize_feature(feature_name)
+        end
+
+        unless container.key?(key)
+          fail "Could not locate validator with (#{key})"
+        end
+        container[key]
+      end
+
       private
 
       # Decodes the given key into a dependency injection namespace that is
@@ -182,35 +197,28 @@ module Appfuel
       # @param key [String]
       # #return [String]
       def convert_to_container_key(key)
+        # normalize the key to the current feature when no feature
+        # is specified
+        unless key.include?('.')
+          key = "#{container_feature_name}.#{key}"
+        end
         parts = key.to_s.split('.')
         last  = parts.last
         first = parts.first
+        prefix = container_feature_key
+        if first != 'global' && first != container_feature_name
+          prefix = "#{container_features_root_name}.#{first}"
+        end
+
         case first
-          when 'global'
-            "global.validators.#{last}"
-          when 'global-pipe'
-            "global.validator-pipes.#{last}"
-          when 'pipe'
-            "#{container_feature_key}.validator-pipes.#{last}"
+          when 'global'      then "global.validators.#{last}"
+          when 'global-pipe' then "global.validator-pipes.#{last}"
+          when 'pipe'        then "#{prefix}.validator-pipes.#{last}"
           else
-            "#{container_feature_key}.validators.#{first}"
+            "#{prefix}.validators.#{last}"
         end
       end
 
-      # Create a validator for the handler or load it from the container
-      # depending on if a block is given
-      #
-      # @param key [String] key used to identify the item
-      # @param opts [Hash]
-      # @return [
-      #   Appfuel::Validation::Validator,
-      #   Appfuel::Validation::ValidatorPipe
-      #   ]
-      def build_validator(key, opts = {}, &block)
-        return load_validator(key, opts)  unless block_given?
-
-        Appfuel::Validation.build_validator(key, opts, &block)
-      end
 
       # Creates a response the first time otherwise it merges the results
       # from the last validator into the response

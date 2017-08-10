@@ -15,6 +15,22 @@ module Appfuel
           "actions.#{super}"
         end
       end
+
+      def dispatch(route, payload = {})
+        route = route.to_s
+        fail "route can not be empty" if route.empty?
+
+        route = "#{feature_name}/#{route}" unless route.include?('/')
+        root  = app_container[:root]
+        root.call(route, payload)
+      end
+
+      def dispatch!(route, payload = {})
+        response = dispatch(route, payload)
+        fail_handler!(response) if response.failure?
+
+        response.ok
+      end
     end
   end
 end
