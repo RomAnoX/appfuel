@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.0]](https://github.com/rsb/appfuel/releases/tag/0.6.0) 2017-08-10
+### Added
+- Validation to handlers
+- Dispatching actions to other actions added to the handler
+- New mixin `Application::FeatureHelper` to aid in feature initialization
+
 ## [[0.5.16]](https://github.com/rsb/appfuel/releases/tag/0.5.16) 2017-08-08
 ### Fixed
 - response handler no longer has double error keys
