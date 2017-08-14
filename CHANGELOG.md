@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.3]](https://github.com/rsb/appfuel/releases/tag/0.6.3) 2017-08-14
+### Fixed
+- invalid method is web_api/http_model when checking url
+
 ## [[0.6.2]](https://github.com/rsb/appfuel/releases/tag/0.6.2) 2017-08-14
 ### Fixed
 - storage/repository/web_api/http_model missing check for url '/' when

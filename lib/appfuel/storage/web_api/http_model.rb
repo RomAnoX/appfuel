@@ -38,7 +38,7 @@ module Appfuel
       end
 
       def url(path)
-        if path.begins_with?("/")
+        if path.start_with?("/")
           path.slice!(0)
         end
 
@@ -104,7 +104,7 @@ module Appfuel
 
       def create_uri(api_url)
         unless api_url.end_with?("/")
-          api_url << "/"
+          api_url = "#{api_url}/"
         end
 
          URI(api_url)
