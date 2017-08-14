@@ -24,10 +24,6 @@ module Appfuel
           config[config_key]
         end
 
-        def load_http_adapter
-          RestClient
-        end
-
         def inherited(klass)
           stage_class_for_registration(klass)
         end
@@ -35,17 +31,18 @@ module Appfuel
 
       attr_reader :config, :uri, :adapter, :content_type
 
-      def initialize
-        @config = self.class.load_config
-        unless @config.key?(:url)
-          fail "[web_api initialize] config is missing :url"
-        end
-        @uri = URI(@config[:url])
-        @adapter = self.class.load_http_adapter
+      def initialize(adapter = RestClient, config = self.class.load_config)
+        @config = validate_config(config)
+        @uri = create_uri(@config[:url])
+        @adapter = adapter
       end
 
       def url(path)
-        uri.to_s + "/#{path}"
+        if path.begins_with?("/")
+          path.slice!(0)
+        end
+
+        uri.to_s + "#{path}"
       end
 
       def request(method, path, options = {})
@@ -92,6 +89,26 @@ module Appfuel
       end
 
       private
+
+      def validate_config(data)
+        unless data.respond_to?(:to_h)
+          fail "[web_api adapter] config must implement :to_h"
+        end
+
+        data = data.to_h
+        unless data.key?(:url)
+          fail "[web_api adapter] config is missing :url"
+        end
+        data
+      end
+
+      def create_uri(api_url)
+        unless api_url.end_with?("/")
+          api_url << "/"
+        end
+
+         URI(api_url)
+      end
 
       def add_content_type(options)
         options[:headers] ||= {}

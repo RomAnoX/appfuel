@@ -146,6 +146,11 @@ module Appfuel
         result.item
       end
 
+      def scan(params = {})
+        params[:table_name] = table_name
+        client.scan(params)
+      end
+
       def get_item(hash_value, range_value = nil)
         params = table_params(hash_value, range_value)
         client.get_item(params)

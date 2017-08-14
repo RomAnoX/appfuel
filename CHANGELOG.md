@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.2]](https://github.com/rsb/appfuel/releases/tag/0.6.2) 2017-08-14
+### Fixed
+- storage/repository/web_api/http_model missing check for url '/' when
+  appending relative paths
+
 ## [[0.6.0]](https://github.com/rsb/appfuel/releases/tag/0.6.0) 2017-08-10
 ### Added
 - Validation to handlers
