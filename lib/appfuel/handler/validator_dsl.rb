@@ -146,6 +146,7 @@ module Appfuel
         return ok(inputs) if skip_validation?
         return ok({}) unless validators?
 
+        inputs.deep_symbolize_keys!
         response = nil
         has_failed = false
         load_validators.each do |validator|

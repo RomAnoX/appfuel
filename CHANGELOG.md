@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.4]](https://github.com/rsb/appfuel/releases/tag/0.6.4) 2017-08-18
+### Fixed
+- invalid reference to `feature_name` in action's `dispatch`
+
+### Changed
+- `handlers` will now always deep symbolize their input keys
+
+### Added
+- `repository` now has a `timestamp` which gives `Time.now.utc.iso8601`
+
 ## [[0.6.3]](https://github.com/rsb/appfuel/releases/tag/0.6.3) 2017-08-14
 ### Fixed
 - invalid method is web_api/http_model when checking url

@@ -20,7 +20,9 @@ module Appfuel
         route = route.to_s
         fail "route can not be empty" if route.empty?
 
-        route = "#{feature_name}/#{route}" unless route.include?('/')
+        unless route.include?('/')
+          route = "#{self.class.container_feature_name}/#{route}"
+        end
         root  = app_container[:root]
         root.call(route, payload)
       end

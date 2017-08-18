@@ -248,6 +248,10 @@ module Appfuel
         SecureRandom.urlsafe_base64(nbr)
       end
 
+      def timestamp
+        Time.now.utc.iso8601
+      end
+
       private
       def method_not_implemented_error
         fail "must be implemented by a storage specific repository"
