@@ -131,12 +131,42 @@ module Appfuel
 
       def select_index(key, select, key_expr, values = {})
         params = select_index_params(key, select, key_expr, values)
+        manual_query(params)
+      end
+
+      def basic_table_query_params(attrs_returned, key_expr, values = {})
+        create_table_hash(
+          table_name: table_name,
+          select: query_select_map(attrs_returned),
+          key_condition_expression: key_expr,
+          expression_attribute_values: values
+        )
+      end
+
+      def basic_table_query(attrs_returned, key_expr, values = {})
+        params = basic_table_query_params(attrs_returned, key_expr, values)
+        manual_query(params)
+      end
+
+      def manual_query(params)
         client.query(params)
       end
 
       def put(data)
         params = put_params(data)
         client.put_item(params)
+      end
+
+      def batch_put(list)
+        cards = list.map do |card|
+          { put_request: { item: card } }
+        end
+
+        payload = {
+          request_items: { table_name => cards }
+        }
+
+        client.batch_write_item(payload)
       end
 
       def get(hash_value, range_value = nil)

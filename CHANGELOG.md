@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.5]](https://github.com/rsb/appfuel/releases/tag/0.6.5) 2017-08-21
+### Added
+- basic table query interface for dynamodb nosql adapter
+
 ## [[0.6.4]](https://github.com/rsb/appfuel/releases/tag/0.6.4) 2017-08-18
 ### Fixed
 - invalid reference to `feature_name` in action's `dispatch`
