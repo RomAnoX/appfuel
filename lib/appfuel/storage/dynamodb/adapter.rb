@@ -101,7 +101,6 @@ module Appfuel
         self.class.primary_key
       end
 
-
       def put_params(data)
         create_table_hash(item: data)
       end
@@ -150,6 +149,49 @@ module Appfuel
 
       def manual_query(params)
         client.query(params)
+      end
+
+      def batch_keys(ids)
+        fail "ids must response to :map" unless ids.respond_to?(:map)
+        key = primary_key
+        ids.map do |id|
+          hash_value, range_value = id.is_a?(Array)? id : [id, nil]
+          key.params(hash_value, range_value)
+        end
+      end
+
+      # build batch keys
+      #  when inputs is an array of one item
+      #  when the inputs is an array of two items
+      #
+      # requested_items: {
+      #   "TableName" => {
+      #     keys: [
+      #
+      #     ]
+      #   }
+      #  }
+      #
+      #
+      def batch_get(ids, &block)
+        table_key = table_name
+        result = client.batch_get_item(
+          request_items: {
+            table_key => { keys: batch_keys(ids) }
+          }
+        )
+
+
+        unless result.responses.key?(table_key)
+          fail "db table name #{table_key} is not correct"
+        end
+
+        list = result.responses[table_key]
+        return list if block_given?
+
+        list.each do |item|
+          yield item
+        end
       end
 
       def put(data)
