@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.8]](https://github.com/rsb/appfuel/releases/tag/0.6.7) 2017-08-24
+### Fixed
+- `batch_get` typo fixed in dynamodb params requested_items to request_items
+
 ## [[0.6.7]](https://github.com/rsb/appfuel/releases/tag/0.6.7) 2017-08-24
 ### Fixed
 - `batch_get` should not return when a block is given

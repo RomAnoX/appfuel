@@ -162,7 +162,7 @@ module Appfuel
 
       def batch_get_params(ids, opts = {})
         {
-          requested_items: {
+          request_items: {
             table_name => {keys: batch_keys(ids)}
           }
         }
