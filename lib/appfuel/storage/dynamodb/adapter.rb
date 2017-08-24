@@ -160,26 +160,18 @@ module Appfuel
         end
       end
 
-      # build batch keys
-      #  when inputs is an array of one item
-      #  when the inputs is an array of two items
-      #
-      # requested_items: {
-      #   "TableName" => {
-      #     keys: [
-      #
-      #     ]
-      #   }
-      #  }
-      #
-      #
+      def batch_get_params(ids, opts = {})
+        {
+          requested_items: {
+            table_name => {keys: batch_keys(ids)}
+          }
+        }
+      end
+
       def batch_get(ids, &block)
         table_key = table_name
-        result = client.batch_get_item(
-          request_items: {
-            table_key => { keys: batch_keys(ids) }
-          }
-        )
+        params = batch_get_params(ids)
+        result = client.batch_get_item(params)
 
 
         unless result.responses.key?(table_key)
@@ -187,7 +179,7 @@ module Appfuel
         end
 
         list = result.responses[table_key]
-        return list if block_given?
+        return list unless block_given?
 
         list.each do |item|
           yield item
