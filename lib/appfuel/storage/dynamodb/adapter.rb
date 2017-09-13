@@ -173,7 +173,6 @@ module Appfuel
         params = batch_get_params(ids)
         result = client.batch_get_item(params)
 
-
         unless result.responses.key?(table_key)
           fail "db table name #{table_key} is not correct"
         end
