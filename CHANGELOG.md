@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.6.9]](https://github.com/rsb/appfuel/releases/tag/0.6.7) 2017-09-12
+## [[0.6.9]](https://github.com/rsb/appfuel/releases/tag/0.6.10) 2017-09-21
+### Added
+- adding error handling lambda that can be injected into the container and used
+  in the two different rescue blocks of the dispatcher
+
+## [[0.6.9]](https://github.com/rsb/appfuel/releases/tag/0.6.9) 2017-09-12
+### Fixed
 - `web_api` fix content_type check for json
 
-## [[0.6.8]](https://github.com/rsb/appfuel/releases/tag/0.6.7) 2017-08-24
+## [[0.6.8]](https://github.com/rsb/appfuel/releases/tag/0.6.8) 2017-08-24
 ### Fixed
 - `batch_get` typo fixed in dynamodb params requested_items to request_items
 
