@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.6.9]](https://github.com/rsb/appfuel/releases/tag/0.6.10) 2017-09-21
+## [[0.6.11]](https://github.com/rsb/appfuel/releases/tag/0.6.11) 2017-09-26
+### Removed
+- removed dependency on pg gem
+
+## [[0.6.10]](https://github.com/rsb/appfuel/releases/tag/0.6.10) 2017-09-21
 ### Added
 - adding error handling lambda that can be injected into the container and used
   in the two different rescue blocks of the dispatcher

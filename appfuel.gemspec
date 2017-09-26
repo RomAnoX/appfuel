@@ -24,7 +24,6 @@ Gem::Specification.new do |spec|
   # when dynamically creating form validators. Not sure if it is the library
   # or the way I am using it.
   spec.add_dependency "activerecord",     "~> 5.1.1"
-  spec.add_dependency "pg",               "~> 0.20"
   spec.add_dependency "dry-types",        "0.11"
   spec.add_dependency "dry-container",    "~> 0.6"
   spec.add_dependency "dry-validation",   "~> 0.11"
