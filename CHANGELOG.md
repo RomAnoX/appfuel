@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
-## [[0.6.11]](https://github.com/rsb/appfuel/releases/tag/0.6.11) 2017-09-26
-### Removed
-- removed dependency on pg gem
+## [[0.6.12]](https://github.com/rsb/appfuel/releases/tag/0.6.12) 2017-09-27
+### Added
+- appfuel/testing_spec/appfuel_spec_helper adding rspec helpers for other
+  libraries to use.
 
 ## [[0.6.10]](https://github.com/rsb/appfuel/releases/tag/0.6.10) 2017-09-21
 ### Added

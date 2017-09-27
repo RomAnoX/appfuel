@@ -13,8 +13,7 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 end
 
-require_relative 'support/appfuel_helpers'
+require 'awesome_print'
+require 'appfuel/testing_spec/appfuel_spec_helper'
 require_relative 'support/database_cleaner'
 require_relative 'support/factory_girl'
-require_relative 'support/appfuel'
-

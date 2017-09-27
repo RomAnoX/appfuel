@@ -1,5 +1,5 @@
-require 'awesome_print'
 require 'appfuel'
+require_relative 'helpers'
 
 
 RSpec.configure do |config|
@@ -14,6 +14,5 @@ RSpec.configure do |config|
     Types.send(:instance_variable_set, :@container, @types)
   end
 
-  config.include AppfuelHelpers
+  config.include Appfuel::TestingSpec::Helpers
 end
-
