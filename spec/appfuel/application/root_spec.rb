@@ -114,36 +114,6 @@ module Appfuel::Application
         result = init.build_app_container(params)
         expect(result[:config_definition]).to eq(config)
       end
-
-      it 'adds an empty hash in the namespace global.validators' do
-        init   = setup
-        params = {
-          root: mock_root,
-          root_path: 'some/path',
-        }
-        result = init.build_app_container(params)
-        expect(result['global.validators']).to be_an_instance_of(Hash)
-      end
-
-      it 'adds an empty hash in the namespace global.entity_builders' do
-        init   = setup
-        params = {
-          root: mock_root,
-          root_path: 'some/path',
-        }
-        result = init.build_app_container(params)
-        expect(result['global.domain_builders']).to be_an_instance_of(Hash)
-      end
-
-      it 'adds an empty hash in the namespace global.presenters' do
-        init   = setup
-        params = {
-          root: mock_root,
-          root_path: 'some/path',
-        }
-        result = init.build_app_container(params)
-        expect(result['global.presenters']).to be_an_instance_of(Hash)
-      end
     end
 
     context '#setup_appfuel' do
