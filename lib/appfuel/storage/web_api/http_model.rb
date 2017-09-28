@@ -58,8 +58,7 @@ module Appfuel
           response = adapter::Request.execute(data)
           response = handle_response(response, options[:headers])
         rescue RestClient::ExceptionWithResponse => err
-          data = handle_response(err.response, options[:headers])
-          handle_http_error(err.http_code, data, http_url, err.message)
+          handle_http_error(err.http_code, err.http_body, http_url, err.message)
         end
 
         response
