@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.13]](https://github.com/rsb/appfuel/releases/tag/0.6.13) 2017-09-27
+### Fixed
+- appfuel app_container was not properly being reset during tests
+
 ## [[0.6.12]](https://github.com/rsb/appfuel/releases/tag/0.6.12) 2017-09-27
 ### Added
 - appfuel/testing_spec/appfuel_spec_helper adding rspec helpers for other
