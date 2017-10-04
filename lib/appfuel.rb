@@ -98,7 +98,6 @@ module Appfuel
       di.resolve(key)
     end
 
-
     # Register an item in the application container
     #
     # @raises RuntimeError when container does not implement :register
@@ -126,6 +125,14 @@ module Appfuel
       end
 
       container
+    end
+
+    # This will tell you if the application container has been setup and ready
+    # for bootstrapping
+    #
+    # @return [Boolean]
+    def setup?
+      framework_container.key?(:setup) && framework_container[:setup] ==  true
     end
 
     # Run all initializers registered in the app container

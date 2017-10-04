@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. (Pending ap
 
 
 # Releases
+## [[0.6.16]](https://github.com/rsb/appfuel/releases/tag/0.6.16) 2017-10-02
+### Fixed
+- bootstrapping allow testing to disable initializers, swap out config data
+  and pass in params to Initialize.run directly from the root module
+
 ## [[0.6.15]](https://github.com/rsb/appfuel/releases/tag/0.6.15) 2017-09-28
 ### Fixed
 - initializer failing when key exists in the feature

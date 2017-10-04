@@ -31,6 +31,7 @@ module Appfuel
           handle_after_setup(params[:on_after_setup], app_container)
         end
 
+        framework_container.register(:setup, true)
         app_container
       end
 
@@ -131,8 +132,8 @@ module Appfuel
         container
       end
 
-      def bootstrap(overrides: {}, env: ENV)
-        Initialize.run(overrides: overrides, env: env)
+      def bootstrap(params = {})
+        Initialize.run(params)
       end
 
       def call(route, inputs = {})

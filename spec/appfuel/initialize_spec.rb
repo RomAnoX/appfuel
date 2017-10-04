@@ -190,6 +190,7 @@ module Appfuel
         app_name  = 'foo'
         params    = {foo: 'bar'}
         container = build_container(repository_initializer: ->(c) {})
+        allow(Appfuel).to receive(:setup?) { true }
         allow(Appfuel).to receive(:default_app_name) { app_name }
         allow(Appfuel).to receive(:app_container).with(app_name) { container }
 
@@ -200,6 +201,7 @@ module Appfuel
         expect(Appfuel).to(
           receive(:run_initializers).with('global', container, [])
         ) { container }
+
 
         result = Initialize.run(params)
         expect(result).to eq(container)

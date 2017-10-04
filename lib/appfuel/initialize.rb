@@ -52,12 +52,22 @@ module Appfuel
       # @option env [ENV] used to collect environment variables
       # @return [Dry::Container] that was passed in
       def handle_configuration(container, params = {})
-        overrides    = params[:overrides]  || {}
-        env          = params[:env]        || ENV
-        definition   = container['config_definition']
 
-        config = definition.populate(env: env, overrides: overrides)
-        env = config.fetch(:env) { fail "key (:env) is missing from config" }
+        config = if params.key?(:config)
+                    params[:config]
+                 else
+                    definition = container['config_definition']
+                    system_env = params[:env] || ENV
+                    overrides  = params[:overrides]  || {}
+                    definition.populate(env: system_env, overrides: overrides)
+                 end
+
+
+        env = if params.key?(:app_env)
+                params[:app_env]
+              else
+                config.fetch(:env) { fail "key (:env) is missing from config" }
+              end
 
         container.register(:config, config)
         container.register(:env, env)
@@ -79,6 +89,12 @@ module Appfuel
       # @option app_name [String] name of the app to initialize, (optional)
       # @return [Dry::Container]
       def run(params = {})
+        unless Appfuel.setup?
+          fail "Appfuel can not be initialized unit it is setup. " +
+            "Please use setup_appfuel(params) dsl in your root " +
+            "before  bootstrapping"
+        end
+
         app_name  = params.fetch(:app_name) { Appfuel.default_app_name }
         container = Appfuel.app_container(app_name)
         if container.key?(:initialized) && container[:initialized] == true
